@@ -124,16 +124,24 @@ class UserBot:
         return collected_tracks
 
     async def forward_tracks_to_backup(self, tracks: List[Dict]):
-        # Bu funksiya o'zgarishsiz qoladi...
         if not self.app or not self.app.is_connected or not tracks: return
         logger.info(f"{len(tracks)} ta ortiqcha trekni zaxira kanalga yuborish boshlandi...")
         try:
-            message_ids = [track['message_id'] for track in tracks]
-            from_chat_id = tracks[0]['chat_id']
-            await self.app.forward_messages(
-                chat_id=config.BACKUP_CHANNEL_ID,
-                from_chat_id=from_chat_id,
-                message_ids=message_ids)
+            # Treklarni chat_id bo'yicha guruhlash
+            tracks_by_chat = {}
+            for track in tracks:
+                chat_id = track['chat_id']
+                if chat_id not in tracks_by_chat:
+                    tracks_by_chat[chat_id] = []
+                tracks_by_chat[chat_id].append(track['message_id'])
+            
+            # Har bir chat uchun alohida forward qilish
+            for from_chat_id, message_ids in tracks_by_chat.items():
+                await self.app.forward_messages(
+                    chat_id=config.BACKUP_CHANNEL_ID,
+                    from_chat_id=from_chat_id,
+                    message_ids=message_ids)
+                await asyncio.sleep(1)
             logger.success(f"{len(tracks)} ta trek zaxira kanalga muvaffaqiyatli saqlandi.")
         except Exception as e:
             logger.error(f"Trekni zaxiraga yuborishda xatolik: {e}")

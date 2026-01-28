@@ -1,0 +1,13 @@
+{
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}",
+        "c:\\Users\\HP\\Desktop\\My projct\\musiqabot"
+    ],
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}",
+        "c:\\Users\\HP\\Desktop\\My projct\\musiqabot"
+    ],
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "none"
+    }
+}

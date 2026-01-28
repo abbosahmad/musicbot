@@ -34,3 +34,12 @@ MAIN_CHANNEL_LINK = "https://t.me/trend_musiqaUZ"
 # ⬇️⬇️⬇️ DIQQAT! "POSTS_PER_DAY" QATORI OLIB TASHLANDI ⬇️⬇️⬇️
 
 DEMO_DURATION_SECONDS = 30
+
+# Configuration file for musiqabot
+
+USERBOT_API_ID = 0  # Replace with your API ID
+USERBOT_API_HASH = ""  # Replace with your API hash
+USERBOT_SESSION_STRING = ""  # Replace with your session string
+
+SOURCE_CHANNELS = []  # List of channel IDs to monitor
+BACKUP_CHANNEL_ID = 0  # Backup channel ID

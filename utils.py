@@ -14,7 +14,9 @@ CLEANUP_KEYWORDS = [
     
     # Boshqa keng tarqalgan reklama so'zlari
     "rizanova", "nevo music", "nevomusic", "uzbek music", "xclusive",
-    "mp3", "official", "telegram", "t.me", "original", "soundtrack", "live","top music", "xit", "x IT", "rek", "uzbekistan", "official video", "music video"
+    "mp3", "official", "telegram", "t.me", "original", "soundtrack", "live",
+    "top music", "xit", "xIT", "x IT", "rek", "uzbekistan", "official video", "music video",
+    "remix", "cover", "version", "remastered"
 ]
 
 def _clean_single_string(text: str) -> str:
