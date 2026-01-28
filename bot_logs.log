@@ -1,0 +1,917 @@
+2026-01-25 21:35:20.223 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 2 ta trek ID si yuklandi.
+2026-01-25 21:35:22.478 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 21:35:22.757 | INFO     | userbot:_join_source_channels:47 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 21:35:25.263 | INFO     | userbot:_join_source_channels:47 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 21:35:27.526 | INFO     | userbot:_join_source_channels:47 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 21:35:29.772 | INFO     | userbot:_join_source_channels:47 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 21:35:31.779 | WARNING  | userbot:_join_source_channels:52 - '-1002485166570' kanaliga qo'shilishda xatolik: Peer id invalid: -1002485166570
+2026-01-25 21:41:17.998 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 2 ta trek ID si yuklandi.
+2026-01-25 21:41:22.517 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 21:41:22.927 | INFO     | userbot:_join_source_channels:47 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 21:41:25.347 | INFO     | userbot:_join_source_channels:47 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 21:41:27.739 | INFO     | userbot:_join_source_channels:47 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 21:41:30.157 | INFO     | userbot:_join_source_channels:47 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 21:41:32.157 | WARNING  | userbot:_join_source_channels:52 - '-1002485166570' kanaliga qo'shilishda xatolik: Peer id invalid: -1002485166570
+2026-01-25 21:41:32.318 | ERROR    | __main__:log_to_channel:35 - Log kanaliga xabar yuborishda xatolik: Telegram server says - Bad Request: chat not found
+2026-01-25 21:44:42.011 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 2 ta trek ID si yuklandi.
+2026-01-25 21:44:44.662 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 21:44:44.910 | INFO     | userbot:_join_source_channels:47 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 21:44:47.135 | INFO     | userbot:_join_source_channels:47 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 21:44:49.384 | INFO     | userbot:_join_source_channels:47 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 21:44:51.599 | INFO     | userbot:_join_source_channels:47 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 21:44:53.614 | WARNING  | userbot:_join_source_channels:52 - '-1002755451371' kanaliga qo'shilishda xatolik: Peer id invalid: -1002755451371
+2026-01-25 21:44:53.835 | ERROR    | __main__:log_to_channel:35 - Log kanaliga xabar yuborishda xatolik: Telegram server says - Bad Request: chat not found
+2026-01-25 21:53:28.576 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 2 ta trek ID si yuklandi.
+2026-01-25 21:53:31.986 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 21:53:32.374 | INFO     | userbot:_join_source_channels:47 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 21:53:34.776 | INFO     | userbot:_join_source_channels:47 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 21:53:37.164 | INFO     | userbot:_join_source_channels:47 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 21:53:39.583 | INFO     | userbot:_join_source_channels:47 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 21:53:41.589 | WARNING  | userbot:_join_source_channels:52 - '-1002485166570' kanaliga qo'shilishda xatolik: Peer id invalid: -1002485166570
+2026-01-25 21:53:41.719 | ERROR    | __main__:log_to_channel:35 - Log kanaliga xabar yuborishda xatolik: Telegram server says - Bad Request: chat not found
+2026-01-25 22:04:28.939 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 2 ta trek ID si yuklandi.
+2026-01-25 22:04:32.033 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 22:04:32.256 | INFO     | userbot:_join_source_channels:49 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 22:04:34.480 | INFO     | userbot:_join_source_channels:49 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 22:04:36.727 | INFO     | userbot:_join_source_channels:49 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 22:04:38.961 | INFO     | userbot:_join_source_channels:49 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 22:07:19.093 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 2 ta trek ID si yuklandi.
+2026-01-25 22:07:21.997 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 22:07:22.221 | INFO     | userbot:_join_source_channels:49 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 22:07:24.465 | INFO     | userbot:_join_source_channels:49 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 22:07:27.733 | INFO     | userbot:_join_source_channels:49 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 22:07:30.055 | INFO     | userbot:_join_source_channels:49 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 22:10:08.334 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:10:11.055 | INFO     | __main__:post_music:64 - Yangi trek: Telegram @Surxon_Muz - Четыре тридцать
+2026-01-25 22:10:11.055 | INFO     | userbot:download_music:157 - Fayl ruxsatnomasini yangilash uchun xabar (-1001060510203:6207) qayta so'ralmoqda...
+2026-01-25 22:10:40.727 | INFO     | utils:download_best_match_from_youtube:87 - YouTube qidiruv: Violetta Sokolova - Четыре тридцать Official Audio
+2026-01-25 22:10:45.808 | ERROR    | utils:download_best_match_from_youtube:143 - YouTube download error: [0;31mERROR:[0m [youtube] nPBT9D5yY4o: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+2026-01-25 22:10:48.354 | ERROR    | utils:get_clean_details_with_ai:56 - DeepSeek AI xatoligi: Error code: 401 - {'error': {'message': 'Authentication Fails, Your api key: ****c8b6 is invalid', 'type': 'authentication_error', 'param': None, 'code': 'invalid_request_error'}}
+2026-01-25 22:10:48.374 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADpWEAAiwh2Es | Violetta Sokolova - Четыре тридцать
+2026-01-25 22:11:47.210 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 3 ta trek ID si yuklandi.
+2026-01-25 22:11:49.965 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 22:11:50.206 | INFO     | userbot:_join_source_channels:49 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 22:11:52.452 | INFO     | userbot:_join_source_channels:49 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 22:11:55.050 | INFO     | userbot:_join_source_channels:49 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 22:11:57.804 | INFO     | userbot:_join_source_channels:49 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 22:14:00.340 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 3 ta trek ID si yuklandi.
+2026-01-25 22:14:03.360 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 22:14:03.581 | INFO     | userbot:_join_source_channels:49 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 22:14:05.815 | INFO     | userbot:_join_source_channels:49 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 22:14:08.136 | INFO     | userbot:_join_source_channels:49 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 22:14:10.379 | INFO     | userbot:_join_source_channels:49 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 22:14:14.679 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:14:14.707 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:14:16.651 | INFO     | __main__:post_music:64 - Yangi trek: Telegram @Surxon_Muz - Kel Kel
+2026-01-25 22:14:16.653 | INFO     | userbot:download_music:157 - Fayl ruxsatnomasini yangilash uchun xabar (-1001060510203:6195) qayta so'ralmoqda...
+2026-01-25 22:15:06.781 | INFO     | utils:download_best_match_from_youtube:87 - YouTube qidiruv: Jaloliddin Ahmadaliyev - Kel Official Audio
+2026-01-25 22:15:12.907 | ERROR    | utils:download_best_match_from_youtube:143 - YouTube download error: [0;31mERROR:[0m [youtube] c23inpfpSxc: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+2026-01-25 22:15:14.460 | ERROR    | utils:get_clean_details_with_ai:56 - DeepSeek AI xatoligi: Error code: 401 - {'error': {'message': 'Authentication Fails, Your api key: ****c8b6 is invalid', 'type': 'authentication_error', 'param': None, 'code': 'invalid_request_error'}}
+2026-01-25 22:15:14.472 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADiG8AAnuoYEg | Jaloliddin Ahmadaliyev - Kel
+2026-01-25 22:15:20.166 | INFO     | __main__:post_music:64 - Yangi trek: Telegram @Surxon_Muz - Kel Kel
+2026-01-25 22:15:20.167 | INFO     | userbot:download_music:157 - Fayl ruxsatnomasini yangilash uchun xabar (-1001060510203:6195) qayta so'ralmoqda...
+2026-01-25 22:16:44.764 | INFO     | utils:download_best_match_from_youtube:87 - YouTube qidiruv: Jaloliddin Ahmadaliyev - Kel Official Audio
+2026-01-25 22:16:49.102 | ERROR    | utils:download_best_match_from_youtube:143 - YouTube download error: [0;31mERROR:[0m [youtube] c23inpfpSxc: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+2026-01-25 22:16:49.946 | ERROR    | utils:get_clean_details_with_ai:56 - DeepSeek AI xatoligi: Error code: 401 - {'error': {'message': 'Authentication Fails, Your api key: ****c8b6 is invalid', 'type': 'authentication_error', 'param': None, 'code': 'invalid_request_error'}}
+2026-01-25 22:21:21.115 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 4 ta trek ID si yuklandi.
+2026-01-25 22:21:23.520 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 22:21:23.778 | INFO     | userbot:_join_source_channels:49 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 22:21:26.105 | INFO     | userbot:_join_source_channels:49 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 22:21:28.527 | INFO     | userbot:_join_source_channels:49 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 22:21:30.761 | INFO     | userbot:_join_source_channels:49 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 22:22:16.207 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:22:18.698 | INFO     | __main__:post_music:64 - Yangi trek: Dilnavo Music - Omer Bukulmezoglu - Cry 
+2026-01-25 22:22:18.698 | INFO     | userbot:download_music:157 - Fayl ruxsatnomasini yangilash uchun xabar (-1001887648234:3647) qayta so'ralmoqda...
+2026-01-25 22:23:00.745 | INFO     | utils:download_best_match_from_youtube:87 - YouTube qidiruv: Ömer Bükülmezoğlu - Cry Official Audio
+2026-01-25 22:23:14.435 | ERROR    | utils:download_best_match_from_youtube:147 - YouTube download error: 'NoneType' object has no attribute 'get'
+2026-01-25 22:23:17.347 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgAD25EAAtN0qUs | Ömer Bükülmezoğlu - Cry
+2026-01-25 22:25:14.826 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 5 ta trek ID si yuklandi.
+2026-01-25 22:25:17.257 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 22:25:17.537 | INFO     | userbot:_join_source_channels:49 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 22:25:19.821 | INFO     | userbot:_join_source_channels:49 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 22:25:22.124 | INFO     | userbot:_join_source_channels:49 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 22:25:24.375 | INFO     | userbot:_join_source_channels:49 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 22:25:36.120 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:25:41.335 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:27:09.855 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 5 ta trek ID si yuklandi.
+2026-01-25 22:27:12.141 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 22:27:12.373 | INFO     | userbot:_join_source_channels:49 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 22:27:14.611 | INFO     | userbot:_join_source_channels:49 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 22:27:16.878 | INFO     | userbot:_join_source_channels:49 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 22:27:19.662 | INFO     | userbot:_join_source_channels:49 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 22:27:23.253 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:27:25.286 | INFO     | __main__:post_music:64 - Yangi trek: Dilnavo Music - Çetin İçten - Toruslu Yollar 
+2026-01-25 22:27:25.287 | INFO     | userbot:download_music:161 - Fayl ruxsatnomasini yangilash uchun xabar (-1001887648234:3611) qayta so'ralmoqda...
+2026-01-25 22:28:56.173 | INFO     | utils:download_best_match_from_youtube:78 - YouTube qidiruv: Çetin İçten & Pikapta Raks - Toroslu Yollar Official Audio
+2026-01-25 22:28:57.455 | ERROR    | utils:download_best_match_from_youtube:99 - YouTube qidiruvida xato (Skip): failed to load cookies
+2026-01-25 22:29:00.455 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADvJgAAh75cEs | Çetin İçten & Pikapta Raks - Toroslu Yollar
+2026-01-25 22:37:19.662 | INFO     | __main__:<module>:228 - Bot o'chirildi.
+2026-01-25 22:37:36.442 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 6 ta trek ID si yuklandi.
+2026-01-25 22:37:38.600 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 22:37:38.956 | INFO     | userbot:_join_source_channels:49 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 22:37:41.206 | INFO     | userbot:_join_source_channels:49 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 22:37:43.462 | INFO     | userbot:_join_source_channels:49 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 22:37:45.706 | INFO     | userbot:_join_source_channels:49 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 22:38:03.487 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:38:05.555 | INFO     | __main__:post_music:64 - Yangi trek: Dilnavo Music - BLOK3 - Napiyosun Mesela (Slowed) 
+2026-01-25 22:38:05.556 | INFO     | userbot:download_music:161 - Fayl ruxsatnomasini yangilash uchun xabar (-1001887648234:3617) qayta so'ralmoqda...
+2026-01-25 22:38:49.346 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADbI0AAh75eEs | BLOK3 - Napiyosun Mesela (Slowed)
+2026-01-25 22:39:22.914 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:42:50.115 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 7 ta trek ID si yuklandi.
+2026-01-25 22:42:53.422 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 22:42:53.812 | INFO     | userbot:_join_source_channels:49 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 22:42:56.205 | INFO     | userbot:_join_source_channels:49 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 22:42:58.603 | INFO     | userbot:_join_source_channels:49 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 22:43:01.006 | INFO     | userbot:_join_source_channels:49 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 22:43:09.498 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:43:28.074 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:43:30.814 | INFO     | __main__:post_music:64 - Yangi trek: Dilnavo Music - Toiraxmed - 5 kunlik davronime 
+2026-01-25 22:43:30.814 | INFO     | userbot:download_music:161 - Fayl ruxsatnomasini yangilash uchun xabar (-1001887648234:3638) qayta so'ralmoqda...
+2026-01-25 22:44:02.186 | INFO     | __main__:post_music:72 - Shazam orqali aniqlanmoqda...
+2026-01-25 22:44:03.943 | WARNING  | __main__:post_music:96 - ❌ SHAZAM TANIMADI. Original fayl ishlatiladi.
+2026-01-25 22:44:07.024 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADDpoAAj4hoEs | Toiraxmed - 5 Kunlik Davronime
+2026-01-25 22:44:07.024 | ERROR    | __main__:post_music:119 - Demo xato: 'NoneType' object has no attribute 'replace'
+2026-01-25 22:44:07.314 | ERROR    | __main__:post_music:132 - Post xatolik: expected str, bytes or os.PathLike object, not NoneType
+2026-01-25 22:46:00.143 | INFO     | __main__:<module>:238 - Bot o'chirildi.
+2026-01-25 22:46:16.441 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 8 ta trek ID si yuklandi.
+2026-01-25 22:46:18.664 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 22:46:18.889 | INFO     | userbot:_join_source_channels:49 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 22:46:21.124 | INFO     | userbot:_join_source_channels:49 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 22:46:23.367 | INFO     | userbot:_join_source_channels:49 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 22:46:25.604 | INFO     | userbot:_join_source_channels:49 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 22:46:46.555 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:46:48.464 | INFO     | __main__:post_music:64 - Yangi trek: Doston Ergashev - Oshiq yigit I Telegram @AliMuzTv
+2026-01-25 22:46:48.464 | INFO     | userbot:download_music:161 - Fayl ruxsatnomasini yangilash uchun xabar (-1001356589862:31611) qayta so'ralmoqda...
+2026-01-25 22:47:59.051 | INFO     | __main__:post_music:72 - Shazam orqali aniqlanmoqda...
+2026-01-25 22:48:00.785 | WARNING  | __main__:post_music:96 - ❌ SHAZAM TANIMADI. Original fayl ishlatiladi.
+2026-01-25 22:48:03.705 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADfLAAApmmgUs | Doston Ergashev - Oshiq Yigit
+2026-01-25 22:50:35.956 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:50:38.508 | INFO     | __main__:post_music:64 - Yangi trek: Dilnavo Music - Uzeyir Mehdizade - Elvida Kecmisim 
+2026-01-25 22:50:38.510 | INFO     | userbot:download_music:161 - Fayl ruxsatnomasini yangilash uchun xabar (-1001887648234:3619) qayta so'ralmoqda...
+2026-01-25 22:51:50.845 | INFO     | __main__:post_music:72 - Shazam orqali aniqlanmoqda...
+2026-01-25 22:51:51.935 | SUCCESS  | __main__:post_music:80 - ✅ SHAZAM TOPDI: Uzeyir Mehdizade - Elvida Kecmisim
+2026-01-25 22:51:51.943 | INFO     | __main__:post_music:83 - YouTube'dan qidirilmoqda...
+2026-01-25 22:51:51.943 | INFO     | utils:download_best_match_from_youtube:78 - YouTube qidiruv: Uzeyir Mehdizade - Elvida Kecmisim Official Audio
+2026-01-25 22:52:07.254 | WARNING  | __main__:post_music:93 - ❌ YOUTUBE'DAN TOPILMADI (Cookies yoki qidiruv xatosi).
+2026-01-25 22:52:09.974 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADeJAAAmsCgUs | Uzeyir Mehdizade - Elvida Kecmisim
+2026-01-25 22:54:21.833 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 10 ta trek ID si yuklandi.
+2026-01-25 22:54:25.025 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 22:54:25.576 | INFO     | userbot:_join_source_channels:49 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 22:54:28.080 | INFO     | userbot:_join_source_channels:49 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 22:54:30.534 | INFO     | userbot:_join_source_channels:49 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 22:54:32.994 | INFO     | userbot:_join_source_channels:49 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 22:54:53.211 | INFO     | userbot:get_new_music_from_channels:74 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 22:54:58.777 | INFO     | __main__:post_music:64 - Yangi trek: Dior - Zamon I  Telegram @AliMuzTv
+2026-01-25 22:54:58.777 | INFO     | userbot:download_music:161 - Fayl ruxsatnomasini yangilash uchun xabar (-1001356589862:31613) qayta so'ralmoqda...
+2026-01-25 22:55:47.550 | INFO     | __main__:post_music:72 - Shazam orqali aniqlanmoqda...
+2026-01-25 22:55:49.429 | WARNING  | __main__:post_music:96 - ❌ SHAZAM TANIMADI. Original fayl ishlatiladi.
+2026-01-25 22:55:52.083 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgAD_4wAAhDemUs | Dior - Zamon I
+2026-01-25 23:07:56.874 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 11 ta trek ID si yuklandi.
+2026-01-25 23:07:59.936 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:08:00.355 | INFO     | userbot:_join_source_channels:47 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:08:02.795 | INFO     | userbot:_join_source_channels:47 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:08:05.244 | INFO     | userbot:_join_source_channels:47 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:08:08.206 | INFO     | userbot:_join_source_channels:47 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:08:14.636 | INFO     | userbot:get_new_music_from_channels:100 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 23:08:18.071 | INFO     | __main__:post_music:64 - Yangi trek: Xurshid Rasulov - Kelmading I  Telegram @AliMuzTv
+2026-01-25 23:08:18.071 | INFO     | userbot:download_music:141 - Fayl ruxsatnomasini yangilash uchun xabar (-1001356589862:31612) qayta so'ralmoqda...
+2026-01-25 23:11:16.202 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 11 ta trek ID si yuklandi.
+2026-01-25 23:11:18.442 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:11:18.843 | INFO     | userbot:_join_source_channels:47 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:11:21.094 | INFO     | userbot:_join_source_channels:47 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:11:23.425 | INFO     | userbot:_join_source_channels:47 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:11:25.804 | INFO     | userbot:_join_source_channels:47 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:12:12.775 | INFO     | userbot:get_new_music_from_channels:100 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 23:12:14.674 | INFO     | __main__:post_music:64 - Yangi trek: Telegram @Surxon_Muz - Qimmat Dunyo 
+2026-01-25 23:12:14.674 | INFO     | userbot:download_music:141 - Fayl ruxsatnomasini yangilash uchun xabar (-1001060510203:6150) qayta so'ralmoqda...
+2026-01-25 23:13:15.295 | INFO     | __main__:post_music:72 - Shazam orqali aniqlanmoqda...
+2026-01-25 23:13:16.344 | SUCCESS  | __main__:post_music:80 - ✅ SHAZAM TOPDI: AbroBey - Qimmat Dunyo
+2026-01-25 23:13:16.344 | INFO     | __main__:post_music:83 - YouTube'dan qidirilmoqda...
+2026-01-25 23:13:16.344 | INFO     | utils:download_best_match_from_youtube:78 - YouTube qidiruv: AbroBey - Qimmat Dunyo Official Audio
+2026-01-25 23:13:34.966 | WARNING  | __main__:post_music:93 - ❌ YOUTUBE'DAN TOPILMADI (Cookies yoki qidiruv xatosi).
+2026-01-25 23:13:38.768 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADOGoAAksRIEg | Surxon Muz - Qimmat Dunyo
+2026-01-25 23:13:43.972 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 12 ta trek ID si yuklandi.
+2026-01-25 23:13:46.175 | SUCCESS  | userbot:start:33 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:13:46.740 | INFO     | userbot:_join_source_channels:47 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:13:48.978 | INFO     | userbot:_join_source_channels:47 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:13:51.346 | INFO     | userbot:_join_source_channels:47 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:13:53.726 | INFO     | userbot:_join_source_channels:47 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:14:41.060 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 12 ta trek ID si yuklandi.
+2026-01-25 23:14:41.062 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-25 23:14:43.373 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:14:43.488 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-25 23:14:43.735 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:14:45.964 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:14:48.490 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:14:50.757 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:14:53.154 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 12 ta trek ID si yuklandi.
+2026-01-25 23:14:53.157 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-25 23:14:55.856 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:14:55.996 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-25 23:14:56.355 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:14:59.565 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:15:01.935 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:15:04.164 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:16:20.073 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 12 ta trek ID si yuklandi.
+2026-01-25 23:16:20.074 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-25 23:16:22.700 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:16:22.943 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-25 23:16:23.311 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:16:25.562 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:16:27.953 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:16:30.687 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:19:01.849 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 12 ta trek ID si yuklandi.
+2026-01-25 23:19:01.849 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-25 23:19:04.056 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:19:04.176 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-25 23:19:04.421 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:19:06.654 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:19:09.155 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:19:11.400 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:19:45.062 | INFO     | userbot:get_new_music_from_channels:100 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 23:19:47.210 | INFO     | __main__:post_music:64 - Yangi trek: Dilnavo Music - Kuy Navo - toiraxmed qalam qalam qosh edm 
+2026-01-25 23:19:47.210 | INFO     | userbot:download_music:141 - Fayl ruxsatnomasini yangilash uchun xabar (-1001887648234:3609) qayta so'ralmoqda...
+2026-01-25 23:20:11.042 | INFO     | __main__:post_music:72 - Shazam orqali aniqlanmoqda...
+2026-01-25 23:20:12.335 | WARNING  | __main__:post_music:96 - ❌ SHAZAM TANIMADI. Original fayl ishlatiladi.
+2026-01-25 23:20:15.675 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgAD-5MAAmsCcUs | Kuy Navo - Toiraxmed Qalam Qalam Qosh
+2026-01-25 23:21:48.623 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 13 ta trek ID si yuklandi.
+2026-01-25 23:21:48.623 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-25 23:21:51.463 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:21:51.783 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-25 23:21:52.410 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:21:54.866 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:21:57.627 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:22:00.097 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:22:02.104 | INFO     | __main__:setup_scheduler:399 - Scheduler ishga tushirildi
+2026-01-25 23:22:35.013 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 13 ta trek ID si yuklandi.
+2026-01-25 23:22:35.014 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-25 23:22:38.140 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:22:38.404 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-25 23:22:39.005 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:22:41.584 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:22:44.342 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:22:47.094 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:22:49.116 | INFO     | __main__:setup_scheduler:401 - Scheduler ishga tushirildi
+2026-01-25 23:22:49.206 | INFO     | __main__:setup_scheduler:408 - Dastlabki reja yaratilmoqda...
+2026-01-25 23:22:49.923 | INFO     | userbot:get_new_music_from_channels:130 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 23:22:49.923 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @QUSHIQLAR_UZBEKCHA_QO_SHIQLAR
+2026-01-25 23:22:50.970 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:22:50.970 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:22:50.970 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:22:50.971 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:22:50.971 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:22:50.972 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:22:50.972 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:22:50.972 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:22:50.973 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:22:50.973 | INFO     | userbot:get_new_music_from_channels:145 - '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanalidan 0 ta musiqa topildi
+2026-01-25 23:22:50.973 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @UZBEKCHA_MUZIKA_MP3LAR_XIT_2025
+2026-01-25 23:22:51.382 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:22:51.382 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:22:51.383 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:22:51.383 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:22:51.384 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:22:51.384 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:22:51.384 | INFO     | userbot:get_new_music_from_channels:145 - '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanalidan 0 ta musiqa topildi
+2026-01-25 23:22:51.385 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @dilnavo_music
+2026-01-25 23:22:51.829 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Toton Caribo - Senggol Dong
+2026-01-25 23:22:51.830 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music -  LVBEL C5 - Aşkim cook pardon 
+2026-01-25 23:22:51.830 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Onam kelin topdi (speed up) 
+2026-01-25 23:22:51.831 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Oy toʻlin bolgan kecha 
+2026-01-25 23:22:51.831 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - BENZOCOUNTGANG - OP 
+2026-01-25 23:22:51.831 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Mirjalol Nematov - Soʻzim yoʻq 
+2026-01-25 23:22:51.832 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Shoxrux - Yor yor 8D 
+2026-01-25 23:22:51.832 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Shohimardon soylari & Bodomlar 
+2026-01-25 23:22:51.832 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Miyagi & Даена & Hloy - DAO 
+2026-01-25 23:22:51.833 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - LKN & Rami - Ты моя Пленница 
+2026-01-25 23:22:51.833 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Omar - Vachacha 
+2026-01-25 23:22:51.833 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Aga - Sori Soch qizla 
+2026-01-25 23:22:51.834 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Soul - Заплаканная 
+2026-01-25 23:22:51.834 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-25 23:22:51.834 | INFO     | userbot:get_new_music_from_channels:145 - '@dilnavo_music' kanalidan 14 ta musiqa topildi
+2026-01-25 23:22:51.834 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @abbostech
+2026-01-25 23:22:52.055 | INFO     | userbot:get_new_music_from_channels:145 - '@abbostech' kanalidan 14 ta musiqa topildi
+2026-01-25 23:27:52.063 | INFO     | __main__:post_music:66 - Yangi trek: Dilnavo Music - Onam kelin topdi (speed up) 
+2026-01-25 23:27:52.064 | INFO     | userbot:download_music:175 - Fayl ruxsatnomasini yangilash uchun xabar (-1001887648234:3645) qayta so'ralmoqda...
+2026-01-25 23:28:13.191 | INFO     | __main__:post_music:74 - Shazam orqali aniqlanmoqda...
+2026-01-25 23:28:14.282 | WARNING  | __main__:post_music:104 - ❌ SHAZAM TANIMADI. Original fayl ishlatiladi.
+2026-01-25 23:28:17.570 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADwYsAAtN0qUs | Dilnavo Music - Onam Kelin Topdi
+2026-01-25 23:41:44.247 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 14 ta trek ID si yuklandi.
+2026-01-25 23:41:44.250 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-25 23:41:49.182 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:41:49.971 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-25 23:41:50.414 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:41:52.870 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:41:55.679 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:41:58.147 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:42:00.164 | INFO     | __main__:setup_scheduler:401 - Scheduler ishga tushirildi
+2026-01-25 23:42:00.393 | INFO     | __main__:setup_scheduler:408 - Dastlabki reja yaratilmoqda...
+2026-01-25 23:42:01.180 | INFO     | userbot:get_new_music_from_channels:130 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 23:42:01.180 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @QUSHIQLAR_UZBEKCHA_QO_SHIQLAR
+2026-01-25 23:42:02.560 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:02.561 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:02.561 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:02.561 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:02.561 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:02.561 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:02.561 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:02.561 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:02.561 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:02.561 | INFO     | userbot:get_new_music_from_channels:145 - '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanalidan 0 ta musiqa topildi
+2026-01-25 23:42:02.561 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @UZBEKCHA_MUZIKA_MP3LAR_XIT_2025
+2026-01-25 23:42:03.012 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:42:03.012 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:42:03.012 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:42:03.012 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:42:03.012 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:42:03.012 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:42:03.020 | INFO     | userbot:get_new_music_from_channels:145 - '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanalidan 0 ta musiqa topildi
+2026-01-25 23:42:03.020 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @dilnavo_music
+2026-01-25 23:42:04.038 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Toton Caribo - Senggol Dong
+2026-01-25 23:42:04.043 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music -  LVBEL C5 - Aşkim cook pardon 
+2026-01-25 23:42:04.043 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Oy toʻlin bolgan kecha 
+2026-01-25 23:42:04.043 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - BENZOCOUNTGANG - OP 
+2026-01-25 23:42:04.043 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Mirjalol Nematov - Soʻzim yoʻq 
+2026-01-25 23:42:04.047 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Shoxrux - Yor yor 8D 
+2026-01-25 23:42:04.047 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Shohimardon soylari & Bodomlar 
+2026-01-25 23:42:04.047 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Miyagi & Даена & Hloy - DAO 
+2026-01-25 23:42:04.047 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - LKN & Rami - Ты моя Пленница 
+2026-01-25 23:42:04.047 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Omar - Vachacha 
+2026-01-25 23:42:04.053 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Aga - Sori Soch qizla 
+2026-01-25 23:42:04.053 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Soul - Заплаканная 
+2026-01-25 23:42:04.055 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-25 23:42:04.057 | INFO     | userbot:get_new_music_from_channels:145 - '@dilnavo_music' kanalidan 13 ta musiqa topildi
+2026-01-25 23:42:04.061 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @abbostech
+2026-01-25 23:42:04.293 | INFO     | userbot:get_new_music_from_channels:145 - '@abbostech' kanalidan 13 ta musiqa topildi
+2026-01-25 23:42:19.088 | INFO     | userbot:get_new_music_from_channels:130 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 23:42:19.089 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @QUSHIQLAR_UZBEKCHA_QO_SHIQLAR
+2026-01-25 23:42:19.857 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:19.857 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:19.860 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:19.860 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:19.860 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:19.860 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:19.860 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:19.860 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:19.860 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @AliMuzTv
+2026-01-25 23:42:19.860 | INFO     | userbot:get_new_music_from_channels:145 - '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanalidan 0 ta musiqa topildi
+2026-01-25 23:42:19.860 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @UZBEKCHA_MUZIKA_MP3LAR_XIT_2025
+2026-01-25 23:42:20.295 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:42:20.295 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:42:20.295 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:42:20.295 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:42:20.295 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:42:20.303 | INFO     | userbot:_process_message:84 - Qora ro'yxatdagi so'z topildi: @Surxon_Muz
+2026-01-25 23:42:20.304 | INFO     | userbot:get_new_music_from_channels:145 - '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanalidan 0 ta musiqa topildi
+2026-01-25 23:42:20.304 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @dilnavo_music
+2026-01-25 23:42:21.126 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Toton Caribo - Senggol Dong
+2026-01-25 23:42:21.126 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music -  LVBEL C5 - Aşkim cook pardon 
+2026-01-25 23:42:21.126 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Oy toʻlin bolgan kecha 
+2026-01-25 23:42:21.126 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - BENZOCOUNTGANG - OP 
+2026-01-25 23:42:21.126 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Mirjalol Nematov - Soʻzim yoʻq 
+2026-01-25 23:42:21.126 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Shoxrux - Yor yor 8D 
+2026-01-25 23:42:21.126 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Shohimardon soylari & Bodomlar 
+2026-01-25 23:42:21.134 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Miyagi & Даена & Hloy - DAO 
+2026-01-25 23:42:21.134 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - LKN & Rami - Ты моя Пленница 
+2026-01-25 23:42:21.137 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Omar - Vachacha 
+2026-01-25 23:42:21.139 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Aga - Sori Soch qizla 
+2026-01-25 23:42:21.141 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Soul - Заплаканная 
+2026-01-25 23:42:21.142 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-25 23:42:21.142 | INFO     | userbot:get_new_music_from_channels:145 - '@dilnavo_music' kanalidan 13 ta musiqa topildi
+2026-01-25 23:42:21.144 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @abbostech
+2026-01-25 23:42:21.403 | INFO     | userbot:get_new_music_from_channels:145 - '@abbostech' kanalidan 13 ta musiqa topildi
+2026-01-25 23:42:21.623 | INFO     | __main__:post_music:66 - Yangi trek: Dilnavo Music - Shoxrux - Yor yor 8D 
+2026-01-25 23:42:21.623 | INFO     | userbot:download_music:175 - Fayl ruxsatnomasini yangilash uchun xabar (-1001887648234:3633) qayta so'ralmoqda...
+2026-01-25 23:43:23.556 | INFO     | __main__:post_music:74 - Shazam orqali aniqlanmoqda...
+2026-01-25 23:43:25.802 | SUCCESS  | __main__:post_music:82 - ✅ SHAZAM TOPDI: Shoxrux - Yor Yor
+2026-01-25 23:43:25.802 | INFO     | __main__:post_music:85 - YouTube'dan qidirilmoqda...
+2026-01-25 23:43:25.802 | INFO     | utils:download_best_match_from_youtube:78 - YouTube qidiruv: Shoxrux - Yor Yor Official Audio
+2026-01-25 23:43:26.090 | INFO     | utils:download_best_match_from_youtube:113 - YouTube'da qidirilmoqda...
+2026-01-25 23:43:37.015 | WARNING  | utils:download_best_match_from_youtube:188 - YouTube'da mos variant topilmadi
+2026-01-25 23:43:37.019 | WARNING  | __main__:post_music:98 - ❌ YOUTUBE'DAN TOPILMADI (Cookies yoki qidiruv xatosi).
+2026-01-25 23:43:42.447 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADUIcAAnFomUs | Shoxrux - Yor Yor
+2026-01-25 23:46:00.252 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 15 ta trek ID si yuklandi.
+2026-01-25 23:46:00.252 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-25 23:46:05.160 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:46:05.323 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-25 23:46:05.569 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:46:07.841 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:46:10.275 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:46:12.524 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:46:14.541 | INFO     | __main__:setup_scheduler:462 - Scheduler ishga tushirildi
+2026-01-25 23:46:14.869 | INFO     | __main__:setup_scheduler:469 - Dastlabki reja yaratilmoqda...
+2026-01-25 23:46:15.752 | INFO     | userbot:get_new_music_from_channels:130 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 23:46:15.752 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @QUSHIQLAR_UZBEKCHA_QO_SHIQLAR
+2026-01-25 23:46:16.685 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Maxmud Xamidov - Jannatim Onam I  Telegram @AliMuzTv
+2026-01-25 23:46:16.685 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Uzmir, Mira - Sekinroq baqir | Telegram @AliMuzTv
+2026-01-25 23:46:16.685 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Mirjalol Nematov - So'zim yo'q I  Telegram @AliMuzTv
+2026-01-25 23:46:16.685 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Xurshid Rasulov - Kelmading I  Telegram @AliMuzTv
+2026-01-25 23:46:16.685 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Xamdam Sobirov - Nilufar I Telegram @AliMuzTv
+2026-01-25 23:46:16.685 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Alfa - Xalovatim yo'q | Telegram @AliMuzTv
+2026-01-25 23:46:16.693 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Yulduz Usmonova - Layli | Telegram @AliMuzTv
+2026-01-25 23:46:16.693 | INFO     | userbot:get_new_music_from_channels:145 - '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanalidan 7 ta musiqa topildi
+2026-01-25 23:46:16.693 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @UZBEKCHA_MUZIKA_MP3LAR_XIT_2025
+2026-01-25 23:46:17.084 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - Это Мой мир 
+2026-01-25 23:46:17.086 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - Как je (feat. Kiliana)
+2026-01-25 23:46:17.086 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - QARA QOSHU KO'ZINGDAN
+2026-01-25 23:46:17.086 | INFO     | userbot:get_new_music_from_channels:145 - '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanalidan 10 ta musiqa topildi
+2026-01-25 23:46:17.086 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @dilnavo_music
+2026-01-25 23:46:17.903 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Toton Caribo - Senggol Dong
+2026-01-25 23:46:17.903 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music -  LVBEL C5 - Aşkim cook pardon 
+2026-01-25 23:46:17.907 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Oy toʻlin bolgan kecha 
+2026-01-25 23:46:17.907 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - BENZOCOUNTGANG - OP 
+2026-01-25 23:46:17.907 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Mirjalol Nematov - Soʻzim yoʻq 
+2026-01-25 23:46:17.907 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Shohimardon soylari & Bodomlar 
+2026-01-25 23:46:17.907 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Miyagi & Даена & Hloy - DAO 
+2026-01-25 23:46:17.907 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - LKN & Rami - Ты моя Пленница 
+2026-01-25 23:46:17.907 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Omar - Vachacha 
+2026-01-25 23:46:17.911 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Aga - Sori Soch qizla 
+2026-01-25 23:46:17.914 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Soul - Заплаканная 
+2026-01-25 23:46:17.916 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-25 23:46:17.919 | INFO     | userbot:get_new_music_from_channels:145 - '@dilnavo_music' kanalidan 22 ta musiqa topildi
+2026-01-25 23:46:17.921 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @abbostech
+2026-01-25 23:46:18.115 | INFO     | userbot:get_new_music_from_channels:145 - '@abbostech' kanalidan 22 ta musiqa topildi
+2026-01-25 23:47:04.316 | INFO     | __main__:post_music:66 - Yangi trek: Dilnavo Music - Toton Caribo - Senggol Dong
+2026-01-25 23:47:04.318 | INFO     | userbot:download_music:175 - Fayl ruxsatnomasini yangilash uchun xabar (-1001887648234:3651) qayta so'ralmoqda...
+2026-01-25 23:47:29.060 | INFO     | __main__:post_music:74 - Shazam orqali aniqlanmoqda...
+2026-01-25 23:47:30.779 | SUCCESS  | __main__:post_music:82 - ✅ SHAZAM TOPDI: Toton Caribo - Senggol Dong.
+2026-01-25 23:47:30.779 | INFO     | __main__:post_music:85 - YouTube'dan qidirilmoqda...
+2026-01-25 23:47:30.779 | INFO     | utils:download_best_match_from_youtube:78 - YouTube qidiruv: Toton Caribo - Senggol Dong. Official Audio
+2026-01-25 23:47:30.878 | INFO     | utils:download_best_match_from_youtube:113 - YouTube'da qidirilmoqda...
+2026-01-25 23:47:40.323 | WARNING  | utils:download_best_match_from_youtube:188 - YouTube'da mos variant topilmadi
+2026-01-25 23:47:40.323 | WARNING  | __main__:post_music:98 - ❌ YOUTUBE'DAN TOPILMADI (Cookies yoki qidiruv xatosi).
+2026-01-25 23:47:43.124 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADYiEAAikwuVM | Toton Caribo - Senggol Dong
+2026-01-25 23:49:26.089 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 16 ta trek ID si yuklandi.
+2026-01-25 23:49:26.095 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-25 23:49:30.455 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:49:30.589 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-25 23:49:30.905 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:49:33.126 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:49:35.532 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:49:37.854 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:49:39.883 | INFO     | __main__:setup_scheduler:525 - Scheduler ishga tushirildi
+2026-01-25 23:49:40.159 | INFO     | __main__:setup_scheduler:532 - Dastlabki reja yaratilmoqda...
+2026-01-25 23:49:40.678 | INFO     | userbot:get_new_music_from_channels:130 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 23:49:40.678 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @QUSHIQLAR_UZBEKCHA_QO_SHIQLAR
+2026-01-25 23:49:41.595 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Maxmud Xamidov - Jannatim Onam I  Telegram @AliMuzTv
+2026-01-25 23:49:41.595 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Uzmir, Mira - Sekinroq baqir | Telegram @AliMuzTv
+2026-01-25 23:49:41.595 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Mirjalol Nematov - So'zim yo'q I  Telegram @AliMuzTv
+2026-01-25 23:49:41.595 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Xurshid Rasulov - Kelmading I  Telegram @AliMuzTv
+2026-01-25 23:49:41.595 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Xamdam Sobirov - Nilufar I Telegram @AliMuzTv
+2026-01-25 23:49:41.595 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Alfa - Xalovatim yo'q | Telegram @AliMuzTv
+2026-01-25 23:49:41.595 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Yulduz Usmonova - Layli | Telegram @AliMuzTv
+2026-01-25 23:49:41.595 | INFO     | userbot:get_new_music_from_channels:145 - '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanalidan 7 ta musiqa topildi
+2026-01-25 23:49:41.595 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @UZBEKCHA_MUZIKA_MP3LAR_XIT_2025
+2026-01-25 23:49:42.064 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - Это Мой мир 
+2026-01-25 23:49:42.064 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - Как je (feat. Kiliana)
+2026-01-25 23:49:42.066 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - QARA QOSHU KO'ZINGDAN
+2026-01-25 23:49:42.067 | INFO     | userbot:get_new_music_from_channels:145 - '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanalidan 10 ta musiqa topildi
+2026-01-25 23:49:42.067 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @dilnavo_music
+2026-01-25 23:49:42.836 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music -  LVBEL C5 - Aşkim cook pardon 
+2026-01-25 23:49:42.836 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Oy toʻlin bolgan kecha 
+2026-01-25 23:49:42.836 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - BENZOCOUNTGANG - OP 
+2026-01-25 23:49:42.836 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Mirjalol Nematov - Soʻzim yoʻq 
+2026-01-25 23:49:42.836 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Shohimardon soylari & Bodomlar 
+2026-01-25 23:49:42.836 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Miyagi & Даена & Hloy - DAO 
+2026-01-25 23:49:42.846 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - LKN & Rami - Ты моя Пленница 
+2026-01-25 23:49:42.846 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Omar - Vachacha 
+2026-01-25 23:49:42.846 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Aga - Sori Soch qizla 
+2026-01-25 23:49:42.846 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Soul - Заплаканная 
+2026-01-25 23:49:42.846 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-25 23:49:42.846 | INFO     | userbot:get_new_music_from_channels:145 - '@dilnavo_music' kanalidan 21 ta musiqa topildi
+2026-01-25 23:49:42.850 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @abbostech
+2026-01-25 23:49:42.984 | INFO     | userbot:get_new_music_from_channels:145 - '@abbostech' kanalidan 21 ta musiqa topildi
+2026-01-25 23:50:57.905 | INFO     | userbot:get_new_music_from_channels:130 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 23:50:57.905 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @QUSHIQLAR_UZBEKCHA_QO_SHIQLAR
+2026-01-25 23:50:58.717 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Maxmud Xamidov - Jannatim Onam I  Telegram @AliMuzTv
+2026-01-25 23:50:58.717 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Uzmir, Mira - Sekinroq baqir | Telegram @AliMuzTv
+2026-01-25 23:50:58.717 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Mirjalol Nematov - So'zim yo'q I  Telegram @AliMuzTv
+2026-01-25 23:50:58.717 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Xurshid Rasulov - Kelmading I  Telegram @AliMuzTv
+2026-01-25 23:50:58.717 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Xamdam Sobirov - Nilufar I Telegram @AliMuzTv
+2026-01-25 23:50:58.717 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Alfa - Xalovatim yo'q | Telegram @AliMuzTv
+2026-01-25 23:50:58.717 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Yulduz Usmonova - Layli | Telegram @AliMuzTv
+2026-01-25 23:50:58.717 | INFO     | userbot:get_new_music_from_channels:145 - '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanalidan 7 ta musiqa topildi
+2026-01-25 23:50:58.717 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @UZBEKCHA_MUZIKA_MP3LAR_XIT_2025
+2026-01-25 23:50:59.053 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - Это Мой мир 
+2026-01-25 23:50:59.053 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - Как je (feat. Kiliana)
+2026-01-25 23:50:59.061 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - QARA QOSHU KO'ZINGDAN
+2026-01-25 23:50:59.061 | INFO     | userbot:get_new_music_from_channels:145 - '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanalidan 10 ta musiqa topildi
+2026-01-25 23:50:59.061 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @dilnavo_music
+2026-01-25 23:50:59.734 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music -  LVBEL C5 - Aşkim cook pardon 
+2026-01-25 23:50:59.734 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Oy toʻlin bolgan kecha 
+2026-01-25 23:50:59.734 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - BENZOCOUNTGANG - OP 
+2026-01-25 23:50:59.736 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Mirjalol Nematov - Soʻzim yoʻq 
+2026-01-25 23:50:59.736 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Shohimardon soylari & Bodomlar 
+2026-01-25 23:50:59.736 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Miyagi & Даена & Hloy - DAO 
+2026-01-25 23:50:59.736 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - LKN & Rami - Ты моя Пленница 
+2026-01-25 23:50:59.736 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Omar - Vachacha 
+2026-01-25 23:50:59.738 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Aga - Sori Soch qizla 
+2026-01-25 23:50:59.738 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Soul - Заплаканная 
+2026-01-25 23:50:59.738 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-25 23:50:59.738 | INFO     | userbot:get_new_music_from_channels:145 - '@dilnavo_music' kanalidan 21 ta musiqa topildi
+2026-01-25 23:50:59.740 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @abbostech
+2026-01-25 23:50:59.884 | INFO     | userbot:get_new_music_from_channels:145 - '@abbostech' kanalidan 21 ta musiqa topildi
+2026-01-25 23:51:00.044 | INFO     | __main__:post_music:66 - Yangi trek: Telegram @Surxon_Muz - Как je (feat. Kiliana)
+2026-01-25 23:51:00.044 | INFO     | userbot:download_music:175 - Fayl ruxsatnomasini yangilash uchun xabar (-1001060510203:6171) qayta so'ralmoqda...
+2026-01-25 23:51:47.689 | INFO     | __main__:post_music:74 - Shazam orqali aniqlanmoqda...
+2026-01-25 23:51:49.193 | SUCCESS  | __main__:post_music:82 - ✅ SHAZAM TOPDI: MACAN - Как же (feat. Kiliana)
+2026-01-25 23:51:49.193 | INFO     | __main__:post_music:85 - YouTube'dan qidirilmoqda (MAJBURIY)...
+2026-01-25 23:51:49.193 | INFO     | utils:download_best_match_from_youtube:78 - YouTube qidiruv: MACAN - Как же (feat. Kiliana) Official Audio
+2026-01-25 23:51:49.418 | INFO     | utils:download_best_match_from_youtube:113 - YouTube'da qidirilmoqda...
+2026-01-25 23:52:00.296 | WARNING  | utils:download_best_match_from_youtube:188 - YouTube'da mos variant topilmadi
+2026-01-25 23:52:00.309 | WARNING  | __main__:post_music:98 - ❌ YOUTUBE'DAN YUKLANMADI - Bu musiqa skip qilinadi
+2026-01-25 23:52:00.310 | WARNING  | __main__:post_music:124 - ❌ SKIP: YouTube'dan yuklanmadi
+2026-01-25 23:54:26.392 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 16 ta trek ID si yuklandi.
+2026-01-25 23:54:26.395 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-25 23:54:32.018 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-25 23:54:32.302 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-25 23:54:32.926 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-25 23:54:35.412 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-25 23:54:38.114 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-25 23:54:40.569 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-25 23:54:42.595 | INFO     | __main__:setup_scheduler:553 - Scheduler ishga tushirildi
+2026-01-25 23:54:42.842 | INFO     | __main__:setup_scheduler:560 - Dastlabki reja yaratilmoqda...
+2026-01-25 23:54:43.343 | INFO     | userbot:get_new_music_from_channels:130 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-25 23:54:43.343 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @QUSHIQLAR_UZBEKCHA_QO_SHIQLAR
+2026-01-25 23:54:44.560 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Maxmud Xamidov - Jannatim Onam I  Telegram @AliMuzTv
+2026-01-25 23:54:44.560 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Uzmir, Mira - Sekinroq baqir | Telegram @AliMuzTv
+2026-01-25 23:54:44.560 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Mirjalol Nematov - So'zim yo'q I  Telegram @AliMuzTv
+2026-01-25 23:54:44.560 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Xurshid Rasulov - Kelmading I  Telegram @AliMuzTv
+2026-01-25 23:54:44.560 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Xamdam Sobirov - Nilufar I Telegram @AliMuzTv
+2026-01-25 23:54:44.560 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Alfa - Xalovatim yo'q | Telegram @AliMuzTv
+2026-01-25 23:54:44.560 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Yulduz Usmonova - Layli | Telegram @AliMuzTv
+2026-01-25 23:54:44.560 | INFO     | userbot:get_new_music_from_channels:145 - '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanalidan 7 ta musiqa topildi
+2026-01-25 23:54:44.560 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @UZBEKCHA_MUZIKA_MP3LAR_XIT_2025
+2026-01-25 23:54:45.073 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - Это Мой мир 
+2026-01-25 23:54:45.073 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - Как je (feat. Kiliana)
+2026-01-25 23:54:45.073 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - QARA QOSHU KO'ZINGDAN
+2026-01-25 23:54:45.075 | INFO     | userbot:get_new_music_from_channels:145 - '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanalidan 10 ta musiqa topildi
+2026-01-25 23:54:45.075 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @dilnavo_music
+2026-01-25 23:54:45.916 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music -  LVBEL C5 - Aşkim cook pardon 
+2026-01-25 23:54:45.916 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Oy toʻlin bolgan kecha 
+2026-01-25 23:54:45.916 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - BENZOCOUNTGANG - OP 
+2026-01-25 23:54:45.916 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Mirjalol Nematov - Soʻzim yoʻq 
+2026-01-25 23:54:45.916 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Shohimardon soylari & Bodomlar 
+2026-01-25 23:54:45.916 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Miyagi & Даена & Hloy - DAO 
+2026-01-25 23:54:45.922 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - LKN & Rami - Ты моя Пленница 
+2026-01-25 23:54:45.923 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Omar - Vachacha 
+2026-01-25 23:54:45.923 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Aga - Sori Soch qizla 
+2026-01-25 23:54:45.923 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Soul - Заплаканная 
+2026-01-25 23:54:45.926 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-25 23:54:45.926 | INFO     | userbot:get_new_music_from_channels:145 - '@dilnavo_music' kanalidan 21 ta musiqa topildi
+2026-01-25 23:54:45.926 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @abbostech
+2026-01-25 23:54:46.365 | INFO     | userbot:get_new_music_from_channels:145 - '@abbostech' kanalidan 21 ta musiqa topildi
+2026-01-25 23:59:46.373 | INFO     | __main__:post_music:66 - Yangi trek: Dilnavo Music - Mirjalol Nematov - Soʻzim yoʻq 
+2026-01-25 23:59:46.373 | INFO     | userbot:download_music:175 - Fayl ruxsatnomasini yangilash uchun xabar (-1001887648234:3635) qayta so'ralmoqda...
+2026-01-26 00:00:41.510 | INFO     | __main__:post_music:74 - Shazam orqali aniqlanmoqda...
+2026-01-26 00:00:43.781 | SUCCESS  | __main__:post_music:82 - ✅ SHAZAM TOPDI: Mirjalol Nematov - So'zim yo'q
+2026-01-26 00:00:43.781 | INFO     | __main__:post_music:85 - YouTube'dan qidirilmoqda (ixtiyoriy)...
+2026-01-26 00:00:43.781 | INFO     | utils:download_best_match_from_youtube:78 - YouTube qidiruv: Mirjalol Nematov - So'zim yo'q Official Audio
+2026-01-26 00:00:44.091 | INFO     | utils:download_best_match_from_youtube:113 - YouTube'da qidirilmoqda...
+2026-01-26 00:00:55.227 | WARNING  | utils:download_best_match_from_youtube:188 - YouTube'da mos variant topilmadi
+2026-01-26 00:00:55.235 | WARNING  | __main__:post_music:96 - ⚠️ YouTube'dan yuklanmadi (cookies muammosi) - Shazam metadata bilan davom etamiz
+2026-01-26 00:00:55.235 | SUCCESS  | __main__:post_music:125 - ✅ YAXSHI MUSIQA (Faqat Shazam): Mirjalol Nematov - So'zim yo'q
+2026-01-26 00:00:59.675 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADPZEAAj4hoEs | Mirjalol Nematov - So'zim Yo'q
+2026-01-26 00:28:33.136 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 17 ta trek ID si yuklandi.
+2026-01-26 00:28:33.140 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 00:28:37.668 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 00:28:37.840 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 00:28:38.123 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-26 00:28:40.464 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-26 00:28:42.695 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-26 00:28:45.031 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-26 00:28:47.058 | INFO     | __main__:setup_scheduler:552 - Scheduler ishga tushirildi
+2026-01-26 00:30:18.994 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 17 ta trek ID si yuklandi.
+2026-01-26 00:30:18.994 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 00:30:24.067 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 00:30:24.279 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 00:30:24.897 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-26 00:30:27.371 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-26 00:30:30.161 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-26 00:30:32.715 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-26 00:30:34.743 | INFO     | __main__:setup_scheduler:596 - Scheduler ishga tushirildi
+2026-01-26 00:46:22.938 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 17 ta trek ID si yuklandi.
+2026-01-26 00:46:22.938 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 00:46:28.194 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 00:46:28.541 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 00:46:29.059 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-26 00:46:31.524 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-26 00:46:34.254 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-26 00:46:36.807 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-26 00:46:38.834 | INFO     | __main__:setup_scheduler:596 - Scheduler ishga tushirildi
+2026-01-26 00:48:04.878 | INFO     | userbot:get_new_music_from_channels:130 - 4 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-26 00:48:04.878 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @QUSHIQLAR_UZBEKCHA_QO_SHIQLAR
+2026-01-26 00:48:06.163 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Maxmud Xamidov - Jannatim Onam I  Telegram @AliMuzTv
+2026-01-26 00:48:06.165 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Uzmir, Mira - Sekinroq baqir | Telegram @AliMuzTv
+2026-01-26 00:48:06.165 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Mirjalol Nematov - So'zim yo'q I  Telegram @AliMuzTv
+2026-01-26 00:48:06.165 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Xurshid Rasulov - Kelmading I  Telegram @AliMuzTv
+2026-01-26 00:48:06.167 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Xamdam Sobirov - Nilufar I Telegram @AliMuzTv
+2026-01-26 00:48:06.167 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Alfa - Xalovatim yo'q | Telegram @AliMuzTv
+2026-01-26 00:48:06.167 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Yulduz Usmonova - Layli | Telegram @AliMuzTv
+2026-01-26 00:48:06.167 | INFO     | userbot:get_new_music_from_channels:145 - '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanalidan 7 ta musiqa topildi
+2026-01-26 00:48:06.169 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @UZBEKCHA_MUZIKA_MP3LAR_XIT_2025
+2026-01-26 00:48:06.725 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - Это Мой мир 
+2026-01-26 00:48:06.725 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - Как je (feat. Kiliana)
+2026-01-26 00:48:06.727 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Telegram @Surxon_Muz - QARA QOSHU KO'ZINGDAN
+2026-01-26 00:48:06.727 | INFO     | userbot:get_new_music_from_channels:145 - '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanalidan 10 ta musiqa topildi
+2026-01-26 00:48:06.727 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @dilnavo_music
+2026-01-26 00:48:08.011 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music -  LVBEL C5 - Aşkim cook pardon 
+2026-01-26 00:48:08.011 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Oy toʻlin bolgan kecha 
+2026-01-26 00:48:08.011 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - BENZOCOUNTGANG - OP 
+2026-01-26 00:48:08.011 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Shohimardon soylari & Bodomlar 
+2026-01-26 00:48:08.011 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Miyagi & Даена & Hloy - DAO 
+2026-01-26 00:48:08.011 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - LKN & Rami - Ты моя Пленница 
+2026-01-26 00:48:08.011 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Omar - Vachacha 
+2026-01-26 00:48:08.021 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Aga - Sori Soch qizla 
+2026-01-26 00:48:08.021 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Soul - Заплаканная 
+2026-01-26 00:48:08.021 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Dilnavo Music - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-26 00:48:08.024 | INFO     | userbot:get_new_music_from_channels:145 - '@dilnavo_music' kanalidan 20 ta musiqa topildi
+2026-01-26 00:48:08.024 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @abbostech
+2026-01-26 00:48:08.373 | INFO     | userbot:get_new_music_from_channels:145 - '@abbostech' kanalidan 20 ta musiqa topildi
+2026-01-26 00:48:08.504 | INFO     | __main__:post_music:66 - Yangi trek: Dilnavo Music - LKN & Rami - Ты моя Пленница 
+2026-01-26 00:48:08.506 | INFO     | userbot:download_music:175 - Fayl ruxsatnomasini yangilash uchun xabar (-1001887648234:3625) qayta so'ralmoqda...
+2026-01-26 00:49:10.668 | INFO     | __main__:post_music:74 - Shazam orqali aniqlanmoqda...
+2026-01-26 00:49:12.803 | SUCCESS  | __main__:post_music:82 - ✅ SHAZAM TOPDI: LKN & Ramil' - Моя пленница
+2026-01-26 00:49:12.803 | INFO     | __main__:post_music:85 - YouTube API orqali qidirilmoqda...
+2026-01-26 00:49:13.579 | INFO     | utils:search_youtube_with_api:92 - YouTube topildi: LKN &amp; Ramil’ - Пленница моя - Ramil'
+2026-01-26 00:49:13.581 | INFO     | utils:download_youtube_with_api_url:116 - YouTube'dan yuklanmoqda: https://www.youtube.com/watch?v=CEzQM4F2Sj8
+2026-01-26 00:49:18.379 | ERROR    | utils:download_youtube_with_api_url:144 - YouTube yuklashda xato: [0;31mERROR:[0m [youtube] CEzQM4F2Sj8: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+2026-01-26 00:49:18.384 | WARNING  | __main__:post_music:95 - ⚠️ YouTube API'dan yuklanmadi - Shazam metadata bilan davom etamiz
+2026-01-26 00:49:18.384 | SUCCESS  | __main__:post_music:124 - ✅ YAXSHI MUSIQA (Faqat Shazam): LKN & Ramil' - Моя пленница
+2026-01-26 00:49:22.913 | INFO     | database:add_track_to_db:53 - Yangi trek bazaga qo'shildi: AgADCZIAAtz6iEs | LKN & Ramil - Моя Пленница
+2026-01-26 00:49:24.941 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 18 ta trek ID si yuklandi.
+2026-01-26 00:49:24.941 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 00:49:29.656 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 00:49:29.781 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 00:49:30.018 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-26 00:49:32.413 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-26 00:49:35.010 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-26 00:49:37.243 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-26 00:49:39.257 | INFO     | __main__:setup_scheduler:595 - Scheduler ishga tushirildi
+2026-01-26 01:03:26.284 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 18 ta trek ID si yuklandi.
+2026-01-26 01:03:26.287 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 01:03:31.700 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 01:03:31.943 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 01:03:32.412 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-26 01:03:34.885 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-26 01:03:37.429 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-26 01:03:39.972 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-26 01:03:41.983 | INFO     | __main__:setup_scheduler:620 - Scheduler ishga tushirildi
+2026-01-26 01:04:35.364 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 18 ta trek ID si yuklandi.
+2026-01-26 01:04:35.364 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 01:04:39.742 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 01:04:39.900 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 01:04:40.356 | INFO     | userbot:_join_source_channels:58 - Userbot '@QUSHIQLAR_UZBEKCHA_QO_SHIQLAR' kanaliga a'zo bo'ldi.
+2026-01-26 01:04:42.817 | INFO     | userbot:_join_source_channels:58 - Userbot '@UZBEKCHA_MUZIKA_MP3LAR_XIT_2025' kanaliga a'zo bo'ldi.
+2026-01-26 01:04:45.341 | INFO     | userbot:_join_source_channels:58 - Userbot '@dilnavo_music' kanaliga a'zo bo'ldi.
+2026-01-26 01:04:47.728 | INFO     | userbot:_join_source_channels:58 - Userbot '@abbostech' kanaliga a'zo bo'ldi.
+2026-01-26 01:04:49.766 | INFO     | __main__:setup_scheduler:620 - Scheduler ishga tushirildi
+2026-01-26 01:07:28.685 | INFO     | __main__:<module>:638 - Bot o'chirildi.
+2026-01-26 01:07:55.007 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 18 ta trek ID si yuklandi.
+2026-01-26 01:07:55.007 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 01:07:59.891 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 01:08:00.074 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 01:08:00.481 | INFO     | userbot:_join_source_channels:58 - Userbot '@Muzikalar_UzMuz' kanaliga a'zo bo'ldi.
+2026-01-26 01:08:02.506 | INFO     | __main__:setup_scheduler:620 - Scheduler ishga tushirildi
+2026-01-26 01:08:04.605 | INFO     | userbot:get_new_music_from_channels:130 - 1 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-26 01:08:04.605 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @Muzikalar_UzMuz
+2026-01-26 01:08:05.498 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Shokir - Formula 1 
+2026-01-26 01:08:05.498 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Asadbek Rahmatullayev - Onam kelin topdi (Speed up) 
+2026-01-26 01:08:05.498 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Oy toʻlin boʻlgan kecha 
+2026-01-26 01:08:05.498 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Mirjalol Nematov - Bu dunyo koʻrmaydi 
+2026-01-26 01:08:05.498 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Abdulla Qurbonov - Go’zal yorim (DJ Tab remix) 
+2026-01-26 01:08:05.498 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Rauf & Faik - Вечера 
+2026-01-26 01:08:05.506 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Toiraxmed - 5 kunlik davronime 
+2026-01-26 01:08:05.506 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Shoxrux - Yor Yor 2017 (Music version) 
+2026-01-26 01:08:05.506 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Jaloliddin Ahmadaliyev & Saida Saidbekova - Bu dunyoda siz kam,…
+2026-01-26 01:08:05.506 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Xurshid Rasulov - Kelmading
+2026-01-26 01:08:05.509 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Sevil Sevinc - Ammä yanadën (Azeri Mashup)
+2026-01-26 01:08:05.509 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Omar - Vachacha 
+2026-01-26 01:08:05.509 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Aga - Sori soch qizla (DJ Tab remix) RKT Perreo 
+2026-01-26 01:08:05.509 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Çetin İçten - Toruslu Yollar 
+2026-01-26 01:08:05.509 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - BLOK3 - Napiyosun Mesela (Slowed) 
+2026-01-26 01:08:05.511 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Mirzabek Xolmedov - Bomba Bomba 
+2026-01-26 01:08:05.511 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-26 01:08:05.511 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Muhammad Chavosh - Oʻtdi besh kunlik davronim 
+2026-01-26 01:08:05.513 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Kusub Getdi (Sad oriental) 
+2026-01-26 01:08:05.513 | INFO     | userbot:get_new_music_from_channels:145 - '@Muzikalar_UzMuz' kanalidan 19 ta musiqa topildi
+2026-01-26 01:08:05.639 | INFO     | __main__:post_music:66 - Yangi trek: Muzikalar UzMuz - Mirjalol Nematov - Bu dunyo koʻrmaydi 
+2026-01-26 01:08:05.641 | INFO     | userbot:download_music:175 - Fayl ruxsatnomasini yangilash uchun xabar (-1001317971375:9062) qayta so'ralmoqda...
+2026-01-26 01:08:59.412 | INFO     | __main__:post_music:74 - Shazam orqali aniqlanmoqda...
+2026-01-26 01:09:01.349 | WARNING  | __main__:post_music:78 - ❌ SKIP: Shazam tanimadi
+2026-01-26 01:14:52.561 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 18 ta trek ID si yuklandi.
+2026-01-26 01:14:52.561 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 01:14:57.189 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 01:14:57.394 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 01:14:57.773 | INFO     | userbot:_join_source_channels:58 - Userbot '@Muzikalar_UzMuz' kanaliga a'zo bo'ldi.
+2026-01-26 01:14:59.794 | INFO     | __main__:setup_scheduler:698 - Scheduler ishga tushirildi
+2026-01-26 01:18:37.154 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 18 ta trek ID si yuklandi.
+2026-01-26 01:18:37.154 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 01:18:42.340 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 01:18:42.573 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 01:18:43.165 | INFO     | userbot:_join_source_channels:58 - Userbot '@Muzikalar_UzMuz' kanaliga a'zo bo'ldi.
+2026-01-26 01:18:45.184 | INFO     | __main__:setup_scheduler:698 - Scheduler ishga tushirildi
+2026-01-26 01:20:02.918 | INFO     | userbot:get_new_music_from_channels:130 - 1 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-26 01:20:02.918 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @Muzikalar_UzMuz
+2026-01-26 01:20:04.940 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Shokir - Formula 1 
+2026-01-26 01:20:04.940 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Asadbek Rahmatullayev - Onam kelin topdi (Speed up) 
+2026-01-26 01:20:04.940 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Oy toʻlin boʻlgan kecha 
+2026-01-26 01:20:04.943 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Mirjalol Nematov - Bu dunyo koʻrmaydi 
+2026-01-26 01:20:04.944 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Abdulla Qurbonov - Go’zal yorim (DJ Tab remix) 
+2026-01-26 01:20:04.944 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Rauf & Faik - Вечера 
+2026-01-26 01:20:04.944 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Toiraxmed - 5 kunlik davronime 
+2026-01-26 01:20:04.944 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Shoxrux - Yor Yor 2017 (Music version) 
+2026-01-26 01:20:04.944 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Jaloliddin Ahmadaliyev & Saida Saidbekova - Bu dunyoda siz kam,…
+2026-01-26 01:20:04.948 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Xurshid Rasulov - Kelmading
+2026-01-26 01:20:04.948 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Sevil Sevinc - Ammä yanadën (Azeri Mashup)
+2026-01-26 01:20:04.948 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Omar - Vachacha 
+2026-01-26 01:20:04.948 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Aga - Sori soch qizla (DJ Tab remix) RKT Perreo 
+2026-01-26 01:20:04.948 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Çetin İçten - Toruslu Yollar 
+2026-01-26 01:20:04.948 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - BLOK3 - Napiyosun Mesela (Slowed) 
+2026-01-26 01:20:04.948 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Mirzabek Xolmedov - Bomba Bomba 
+2026-01-26 01:20:04.948 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-26 01:20:04.948 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Muhammad Chavosh - Oʻtdi besh kunlik davronim 
+2026-01-26 01:20:04.948 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Kusub Getdi (Sad oriental) 
+2026-01-26 01:20:04.956 | INFO     | userbot:get_new_music_from_channels:145 - '@Muzikalar_UzMuz' kanalidan 19 ta musiqa topildi
+2026-01-26 01:20:05.174 | INFO     | __main__:post_music:66 - Yangi trek: Muzikalar UzMuz - Omar - Vachacha 
+2026-01-26 01:20:05.175 | INFO     | userbot:download_music:175 - Fayl ruxsatnomasini yangilash uchun xabar (-1001317971375:9042) qayta so'ralmoqda...
+2026-01-26 01:20:35.216 | INFO     | __main__:post_music:74 - Shazam orqali aniqlanmoqda...
+2026-01-26 01:20:36.575 | SUCCESS  | __main__:post_music:131 - ✅ SHAZAM TOPDI: Omar - Vachacha
+2026-01-26 01:20:36.575 | INFO     | __main__:post_music:134 - Nom va Shazam natijasini taqqoslash...
+2026-01-26 01:20:40.701 | SUCCESS  | __main__:post_music:184 - ✅ NOMLAR MOS KELDI: Omar - Vachacha
+2026-01-26 01:20:40.701 | INFO     | __main__:post_music:187 - YouTube API orqali qidirilmoqda...
+2026-01-26 01:20:41.345 | INFO     | utils:search_youtube_with_api:92 - YouTube topildi: Omar - Vachacha (Audio Version) - August Records
+2026-01-26 01:20:41.345 | INFO     | utils:download_youtube_with_api_url:116 - YouTube'dan yuklanmoqda: https://www.youtube.com/watch?v=6RaFAo3UEzA
+2026-01-26 01:20:45.451 | ERROR    | utils:download_youtube_with_api_url:144 - YouTube yuklashda xato: [0;31mERROR:[0m [youtube] 6RaFAo3UEzA: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+2026-01-26 01:20:45.454 | WARNING  | __main__:post_music:195 - ⚠️ 1-usul ishlamadi. 2-usulga o'tamiz
+2026-01-26 01:20:46.035 | INFO     | utils:search_youtube_with_api:92 - YouTube topildi: Omar - Vachacha (Audio Version) - August Records
+2026-01-26 01:20:46.041 | INFO     | utils:download_youtube_with_api_url:116 - YouTube'dan yuklanmoqda: https://www.youtube.com/watch?v=6RaFAo3UEzA
+2026-01-26 01:20:48.814 | ERROR    | utils:download_youtube_with_api_url:144 - YouTube yuklashda xato: [0;31mERROR:[0m [youtube] 6RaFAo3UEzA: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+2026-01-26 01:20:48.814 | WARNING  | __main__:post_music:203 - ❌ SKIP: Hech qaysi usul ishlamadi
+2026-01-26 01:22:07.912 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 18 ta trek ID si yuklandi.
+2026-01-26 01:22:07.918 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 01:22:12.402 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 01:22:12.528 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 01:22:12.839 | INFO     | userbot:_join_source_channels:58 - Userbot '@Muzikalar_UzMuz' kanaliga a'zo bo'ldi.
+2026-01-26 01:22:14.859 | INFO     | __main__:setup_scheduler:698 - Scheduler ishga tushirildi
+2026-01-26 01:25:32.882 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 18 ta trek ID si yuklandi.
+2026-01-26 01:25:32.882 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 01:25:38.199 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 01:25:38.454 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 01:25:39.023 | INFO     | userbot:_join_source_channels:58 - Userbot '@Muzikalar_UzMuz' kanaliga a'zo bo'ldi.
+2026-01-26 01:25:41.045 | INFO     | __main__:setup_scheduler:699 - Scheduler ishga tushirildi
+2026-01-26 01:25:54.930 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 18 ta trek ID si yuklandi.
+2026-01-26 01:25:54.930 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 01:26:00.257 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 01:26:00.504 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 01:26:01.192 | INFO     | userbot:_join_source_channels:58 - Userbot '@Muzikalar_UzMuz' kanaliga a'zo bo'ldi.
+2026-01-26 01:26:03.218 | INFO     | __main__:setup_scheduler:699 - Scheduler ishga tushirildi
+2026-01-26 01:27:06.606 | INFO     | userbot:get_new_music_from_channels:130 - 1 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-26 01:27:06.606 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @Muzikalar_UzMuz
+2026-01-26 01:27:07.802 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Shokir - Formula 1 
+2026-01-26 01:27:07.802 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Asadbek Rahmatullayev - Onam kelin topdi (Speed up) 
+2026-01-26 01:27:07.802 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Oy toʻlin boʻlgan kecha 
+2026-01-26 01:27:07.802 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Mirjalol Nematov - Bu dunyo koʻrmaydi 
+2026-01-26 01:27:07.802 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Abdulla Qurbonov - Go’zal yorim (DJ Tab remix) 
+2026-01-26 01:27:07.802 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Rauf & Faik - Вечера 
+2026-01-26 01:27:07.802 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Toiraxmed - 5 kunlik davronime 
+2026-01-26 01:27:07.802 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Shoxrux - Yor Yor 2017 (Music version) 
+2026-01-26 01:27:07.802 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Jaloliddin Ahmadaliyev & Saida Saidbekova - Bu dunyoda siz kam,…
+2026-01-26 01:27:07.802 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Xurshid Rasulov - Kelmading
+2026-01-26 01:27:07.802 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Sevil Sevinc - Ammä yanadën (Azeri Mashup)
+2026-01-26 01:27:07.802 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Omar - Vachacha 
+2026-01-26 01:27:07.810 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Aga - Sori soch qizla (DJ Tab remix) RKT Perreo 
+2026-01-26 01:27:07.810 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Çetin İçten - Toruslu Yollar 
+2026-01-26 01:27:07.812 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - BLOK3 - Napiyosun Mesela (Slowed) 
+2026-01-26 01:27:07.812 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Mirzabek Xolmedov - Bomba Bomba 
+2026-01-26 01:27:07.812 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-26 01:27:07.812 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Muhammad Chavosh - Oʻtdi besh kunlik davronim 
+2026-01-26 01:27:07.812 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Kusub Getdi (Sad oriental) 
+2026-01-26 01:27:07.812 | INFO     | userbot:get_new_music_from_channels:145 - '@Muzikalar_UzMuz' kanalidan 19 ta musiqa topildi
+2026-01-26 01:27:08.053 | INFO     | __main__:post_music:66 - Yangi trek: Muzikalar UzMuz - Oy toʻlin boʻlgan kecha 
+2026-01-26 01:27:08.053 | INFO     | userbot:download_music:175 - Fayl ruxsatnomasini yangilash uchun xabar (-1001317971375:9065) qayta so'ralmoqda...
+2026-01-26 01:27:42.176 | INFO     | __main__:post_music:74 - Shazam orqali aniqlanmoqda...
+2026-01-26 01:27:43.698 | SUCCESS  | __main__:post_music:131 - ✅ SHAZAM TOPDI: Erkin Hudoyqulov - Oy Tulin Bulgan Kecha
+2026-01-26 01:27:43.701 | INFO     | __main__:post_music:134 - Nom va Shazam natijasini taqqoslash...
+2026-01-26 01:27:48.075 | WARNING  | __main__:post_music:150 - ⚠️ Nomlar mos kelmadi. 2-usulga o'tamiz
+2026-01-26 01:27:48.076 | INFO     | __main__:post_music:151 - Telegram: muzikalar uzmuz - oy toʻlin boʻlgan kecha
+2026-01-26 01:27:48.076 | INFO     | __main__:post_music:152 - Shazam: erkin hudoyqulov - oy tulin bulgan kecha
+2026-01-26 01:27:48.076 | INFO     | __main__:post_music:155 - YouTube'dan nom bo'yicha qidirilmoqda...
+2026-01-26 01:27:48.651 | WARNING  | utils:search_youtube_with_api:101 - YouTube API hech narsa topmadi
+2026-01-26 01:27:48.651 | WARNING  | __main__:post_music:163 - ❌ SKIP: YouTube'dan ham topilmadi
+2026-01-26 01:28:33.240 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 18 ta trek ID si yuklandi.
+2026-01-26 01:28:33.243 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 01:28:38.324 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 01:28:38.568 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 01:28:39.034 | INFO     | userbot:_join_source_channels:58 - Userbot '@Muzikalar_UzMuz' kanaliga a'zo bo'ldi.
+2026-01-26 01:28:41.056 | INFO     | __main__:setup_scheduler:699 - Scheduler ishga tushirildi
+2026-01-26 01:28:48.780 | INFO     | userbot:get_new_music_from_channels:130 - 1 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-26 01:28:48.790 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @Muzikalar_UzMuz
+2026-01-26 01:28:50.054 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Shokir - Formula 1 
+2026-01-26 01:28:50.054 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Asadbek Rahmatullayev - Onam kelin topdi (Speed up) 
+2026-01-26 01:28:50.054 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Oy toʻlin boʻlgan kecha 
+2026-01-26 01:28:50.054 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Mirjalol Nematov - Bu dunyo koʻrmaydi 
+2026-01-26 01:28:50.054 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Abdulla Qurbonov - Go’zal yorim (DJ Tab remix) 
+2026-01-26 01:28:50.054 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Rauf & Faik - Вечера 
+2026-01-26 01:28:50.054 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Toiraxmed - 5 kunlik davronime 
+2026-01-26 01:28:50.054 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Shoxrux - Yor Yor 2017 (Music version) 
+2026-01-26 01:28:50.054 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Jaloliddin Ahmadaliyev & Saida Saidbekova - Bu dunyoda siz kam,…
+2026-01-26 01:28:50.054 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Xurshid Rasulov - Kelmading
+2026-01-26 01:28:50.054 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Sevil Sevinc - Ammä yanadën (Azeri Mashup)
+2026-01-26 01:28:50.061 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Omar - Vachacha 
+2026-01-26 01:28:50.061 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Aga - Sori soch qizla (DJ Tab remix) RKT Perreo 
+2026-01-26 01:28:50.061 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Çetin İçten - Toruslu Yollar 
+2026-01-26 01:28:50.061 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - BLOK3 - Napiyosun Mesela (Slowed) 
+2026-01-26 01:28:50.061 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Mirzabek Xolmedov - Bomba Bomba 
+2026-01-26 01:28:50.061 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-26 01:28:50.061 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Muhammad Chavosh - Oʻtdi besh kunlik davronim 
+2026-01-26 01:28:50.061 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Kusub Getdi (Sad oriental) 
+2026-01-26 01:28:50.061 | INFO     | userbot:get_new_music_from_channels:145 - '@Muzikalar_UzMuz' kanalidan 19 ta musiqa topildi
+2026-01-26 01:28:50.298 | INFO     | __main__:post_music:66 - Yangi trek: Muzikalar UzMuz - Abdulla Qurbonov - Go’zal yorim (DJ Tab remix) 
+2026-01-26 01:28:50.298 | INFO     | userbot:download_music:175 - Fayl ruxsatnomasini yangilash uchun xabar (-1001317971375:9059) qayta so'ralmoqda...
+2026-01-26 01:29:43.603 | INFO     | __main__:post_music:74 - Shazam orqali aniqlanmoqda...
+2026-01-26 01:29:45.609 | WARNING  | __main__:post_music:78 - ⚠️ Shazam tanimadi. 2-usulga o'tamiz (faqat nom bo'yicha)
+2026-01-26 01:29:45.609 | INFO     | __main__:post_music:81 - AI bilan nomni tozalash...
+2026-01-26 01:29:50.337 | INFO     | __main__:post_music:86 - Tozalangan nom: Abdulla Qurbonov - Go'zal Yorim (DJ Tab Remix)
+2026-01-26 01:29:50.337 | INFO     | __main__:post_music:89 - YouTube'dan nom bo'yicha qidirilmoqda...
+2026-01-26 01:29:51.284 | INFO     | utils:search_youtube_with_api:92 - YouTube topildi: Abdulla Qurbonov - Go&#39;zal yorim | Абдулла Курбонов - Гузал ёрим - RizaNovaUZ
+2026-01-26 01:29:51.284 | INFO     | utils:download_youtube_with_api_url:116 - YouTube'dan yuklanmoqda: https://www.youtube.com/watch?v=qZDXLrXQK_I
+2026-01-26 01:29:55.495 | ERROR    | utils:download_youtube_with_api_url:144 - YouTube yuklashda xato: [0;31mERROR:[0m [youtube] qZDXLrXQK_I: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+2026-01-26 01:29:55.495 | WARNING  | __main__:post_music:97 - ❌ SKIP: YouTube'dan ham topilmadi
+2026-01-26 01:37:01.599 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 18 ta trek ID si yuklandi.
+2026-01-26 01:37:01.599 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 01:37:06.511 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 01:37:06.754 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 01:37:07.003 | INFO     | userbot:_join_source_channels:58 - Userbot '@Muzikalar_UzMuz' kanaliga a'zo bo'ldi.
+2026-01-26 01:37:09.027 | INFO     | __main__:setup_scheduler:699 - Scheduler ishga tushirildi
+2026-01-26 01:38:07.730 | SUCCESS  | database:setup_database:33 - Ma'lumotlar bazasi sozlandi. Xotiraga 18 ta trek ID si yuklandi.
+2026-01-26 01:38:07.730 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 01:38:12.342 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 01:38:12.524 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 01:38:12.877 | INFO     | userbot:_join_source_channels:58 - Userbot '@Muzikalar_UzMuz' kanaliga a'zo bo'ldi.
+2026-01-26 01:38:14.900 | INFO     | __main__:setup_scheduler:699 - Scheduler ishga tushirildi
+2026-01-26 01:38:22.258 | INFO     | userbot:get_new_music_from_channels:130 - 1 ta manba kanaldan yangi musiqa qidirilmoqda...
+2026-01-26 01:38:22.258 | INFO     | userbot:get_new_music_from_channels:135 - Kanal tekshirilmoqda: @Muzikalar_UzMuz
+2026-01-26 01:38:23.308 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Shokir - Formula 1 
+2026-01-26 01:38:23.308 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Asadbek Rahmatullayev - Onam kelin topdi (Speed up) 
+2026-01-26 01:38:23.308 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Oy toʻlin boʻlgan kecha 
+2026-01-26 01:38:23.308 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Mirjalol Nematov - Bu dunyo koʻrmaydi 
+2026-01-26 01:38:23.308 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Abdulla Qurbonov - Go’zal yorim (DJ Tab remix) 
+2026-01-26 01:38:23.308 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Rauf & Faik - Вечера 
+2026-01-26 01:38:23.308 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Toiraxmed - 5 kunlik davronime 
+2026-01-26 01:38:23.308 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Shoxrux - Yor Yor 2017 (Music version) 
+2026-01-26 01:38:23.316 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Jaloliddin Ahmadaliyev & Saida Saidbekova - Bu dunyoda siz kam,…
+2026-01-26 01:38:23.316 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Xurshid Rasulov - Kelmading
+2026-01-26 01:38:23.318 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Sevil Sevinc - Ammä yanadën (Azeri Mashup)
+2026-01-26 01:38:23.318 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Omar - Vachacha 
+2026-01-26 01:38:23.318 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Aga - Sori soch qizla (DJ Tab remix) RKT Perreo 
+2026-01-26 01:38:23.320 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Çetin İçten - Toruslu Yollar 
+2026-01-26 01:38:23.320 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - BLOK3 - Napiyosun Mesela (Slowed) 
+2026-01-26 01:38:23.320 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Mirzabek Xolmedov - Bomba Bomba 
+2026-01-26 01:38:23.320 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Bilmas edim dard berar (Suniy intelekt) 
+2026-01-26 01:38:23.320 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Muhammad Chavosh - Oʻtdi besh kunlik davronim 
+2026-01-26 01:38:23.323 | SUCCESS  | userbot:get_new_music_from_channels:143 - Yangi musiqa topildi: Muzikalar UzMuz - Kusub Getdi (Sad oriental) 
+2026-01-26 01:38:23.324 | INFO     | userbot:get_new_music_from_channels:145 - '@Muzikalar_UzMuz' kanalidan 19 ta musiqa topildi
+2026-01-26 01:38:23.559 | INFO     | __main__:post_music:66 - Yangi trek: Muzikalar UzMuz - Mirzabek Xolmedov - Bomba Bomba 
+2026-01-26 01:38:23.559 | INFO     | userbot:download_music:175 - Fayl ruxsatnomasini yangilash uchun xabar (-1001317971375:9026) qayta so'ralmoqda...
+2026-01-26 01:39:03.582 | INFO     | __main__:post_music:74 - Shazam orqali aniqlanmoqda...
+2026-01-26 01:39:05.283 | SUCCESS  | __main__:post_music:131 - ✅ SHAZAM TOPDI: Mirzabek Xolmedov - Bomba
+2026-01-26 01:39:05.283 | INFO     | __main__:post_music:134 - Nom va Shazam natijasini taqqoslash...
+2026-01-26 01:39:09.250 | SUCCESS  | __main__:post_music:184 - ✅ NOMLAR MOS KELDI: Mirzabek Xolmedov - Bomba
+2026-01-26 01:39:09.250 | INFO     | __main__:post_music:187 - YouTube API orqali qidirilmoqda...
+2026-01-26 01:39:09.965 | INFO     | utils:search_youtube_with_api:92 - YouTube topildi: Mirzabek Xolmedov - Bomba, bomba (Music video) - Mirzo teatr
+2026-01-26 01:39:09.965 | INFO     | utils:download_youtube_with_api_url:116 - YouTube'dan yuklanmoqda: https://www.youtube.com/watch?v=MD56Weq5QS8
+2026-01-26 01:39:16.688 | WARNING  | utils:download_youtube_with_api_url:159 - Birinchi usul ishlamadi: 'NoneType' object has no attribute 'setdefault'
+2026-01-26 01:39:19.229 | ERROR    | utils:download_youtube_with_api_url:182 - Minimal usul xatosi: 'NoneType' object has no attribute 'setdefault'
+2026-01-26 01:39:19.229 | WARNING  | utils:get_youtube_with_api:208 - YouTube yuklash ishlamadi. Boshqa variantni sinab ko'ramiz...
+2026-01-26 01:39:19.887 | INFO     | utils:download_youtube_with_api_url:116 - YouTube'dan yuklanmoqda: https://www.youtube.com/watch?v=MD56Weq5QS8
+2026-01-26 01:39:25.334 | WARNING  | utils:download_youtube_with_api_url:159 - Birinchi usul ishlamadi: 'NoneType' object has no attribute 'setdefault'
+2026-01-26 01:39:28.186 | ERROR    | utils:download_youtube_with_api_url:182 - Minimal usul xatosi: 'NoneType' object has no attribute 'setdefault'
+2026-01-26 01:39:28.189 | ERROR    | utils:get_youtube_with_api:221 - Barcha YouTube usullari ishlamadi
+2026-01-26 01:39:28.189 | WARNING  | __main__:post_music:195 - ⚠️ 1-usul ishlamadi. 2-usulga o'tamiz
+2026-01-26 01:39:28.884 | INFO     | utils:search_youtube_with_api:92 - YouTube topildi: Mirzabek Xolmedov - Bomba, bomba (Music video) - Mirzo teatr
+2026-01-26 01:39:28.886 | INFO     | utils:download_youtube_with_api_url:116 - YouTube'dan yuklanmoqda: https://www.youtube.com/watch?v=MD56Weq5QS8
+2026-01-26 01:39:33.920 | WARNING  | utils:download_youtube_with_api_url:159 - Birinchi usul ishlamadi: 'NoneType' object has no attribute 'setdefault'
+2026-01-26 01:39:36.493 | ERROR    | utils:download_youtube_with_api_url:182 - Minimal usul xatosi: 'NoneType' object has no attribute 'setdefault'
+2026-01-26 01:39:36.495 | WARNING  | utils:get_youtube_with_api:208 - YouTube yuklash ishlamadi. Boshqa variantni sinab ko'ramiz...
+2026-01-26 01:39:37.185 | INFO     | utils:download_youtube_with_api_url:116 - YouTube'dan yuklanmoqda: https://www.youtube.com/watch?v=MD56Weq5QS8
+2026-01-26 01:39:42.357 | WARNING  | utils:download_youtube_with_api_url:159 - Birinchi usul ishlamadi: 'NoneType' object has no attribute 'setdefault'
+2026-01-26 01:39:45.010 | ERROR    | utils:download_youtube_with_api_url:182 - Minimal usul xatosi: 'NoneType' object has no attribute 'setdefault'
+2026-01-26 01:39:45.010 | ERROR    | utils:get_youtube_with_api:221 - Barcha YouTube usullari ishlamadi
+2026-01-26 01:39:45.013 | WARNING  | __main__:post_music:203 - ❌ SKIP: Hech qaysi usul ishlamadi
+2026-01-26 21:34:54.442 | SUCCESS  | database:setup_database:56 - Ma'lumotlar bazasi sozlandi. 18 ta trek xotirada.
+2026-01-26 21:34:54.445 | INFO     | userbot:start:32 - Userbot ulanmoqda...
+2026-01-26 21:34:59.732 | SUCCESS  | userbot:start:34 - Userbot muvaffaqiyatli ishga tushdi.
+2026-01-26 21:34:59.853 | INFO     | userbot:start:39 - Userbot: @trendmusicads (Admin)
+2026-01-26 21:35:00.263 | INFO     | userbot:_join_source_channels:58 - Userbot '@Muzikalar_UzMuz' kanaliga a'zo bo'ldi.
+2026-01-26 21:35:02.693 | SUCCESS  | __main__:on_startup:335 - Web App fon rejimida ishga tushdi (Port 8000)
+2026-01-26 21:35:42.360 | INFO     | database:set_setting:99 - Sozlama yangilandi: planning_hour = 4
+2026-01-26 21:35:42.373 | INFO     | database:set_setting:99 - Sozlama yangilandi: daily_post_count = 5
+2026-01-26 21:35:42.384 | INFO     | database:set_setting:99 - Sozlama yangilandi: source_channels = @Muzikalar_UzMuz
+2026-01-26 21:35:42.403 | INFO     | database:set_setting:99 - Sozlama yangilandi: demo_duration = 30
+2026-01-26 21:35:42.403 | SUCCESS  | webapp:update_settings:37 - Web App orqali sozlamalar o'zgartirildi.
+2026-01-26 22:04:55.856 | INFO     | database:set_setting:99 - Sozlama yangilandi: planning_hour = 4
+2026-01-26 22:04:55.873 | INFO     | database:set_setting:99 - Sozlama yangilandi: daily_post_count = 5
+2026-01-26 22:04:55.891 | INFO     | database:set_setting:99 - Sozlama yangilandi: source_channels = @Muzikalar_UzMuz
+2026-01-26 22:04:55.909 | INFO     | database:set_setting:99 - Sozlama yangilandi: demo_duration = 30
+2026-01-26 22:04:55.909 | SUCCESS  | webapp:update_settings:37 - Web App orqali sozlamalar o'zgartirildi.
