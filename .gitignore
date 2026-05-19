@@ -10,3 +10,4 @@ venv/
 *.db
 session/
 *.session
+cookies*.txt

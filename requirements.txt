@@ -1,6 +1,6 @@
 aiogram
 pyrogram
-yt-dlp
+yt-dlp>=2024.0.0
 shazamio
 openai
 pydub

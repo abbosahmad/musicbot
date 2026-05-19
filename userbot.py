@@ -169,7 +169,14 @@ class UserBot:
         collected_tracks = []
         time_limit = datetime.now() - timedelta(hours=hours)
 
-        for channel_id in config.SOURCE_CHANNELS:
+        # Manba kanallarni ma'lumotlar bazasidan olamiz (yoki config dan agar bo'sh bo'lsa)
+        db_channels = database.get_setting("source_channels", "").split(",")
+        channels_to_check = [ch.strip() for ch in db_channels if ch.strip()]
+        
+        if not channels_to_check:
+            channels_to_check = config.SOURCE_CHANNELS
+
+        for channel_id in channels_to_check:
             try:
                 # logger.info(f"Kanal tekshirilmoqda: {channel_id}")
                 async for message in self.app.get_chat_history(channel_id, limit=200):

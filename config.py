@@ -1,12 +1,14 @@
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
 # .env faylidan o'zgaruvchilarni yuklash
-load_dotenv()
+env_path = Path(__file__).parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 # --- Asosiy Telegram Sozlamalari ---
-ADMIN_BOT_TOKEN = os.getenv("ADMIN_BOT_TOKEN")
-ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID", 0))
+ADMIN_BOT_TOKEN = os.getenv("ADMIN_BOT_TOKEN") or "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID", 123456789))
 
 # --- AI Sozlamalari (DeepSeek) ---
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
