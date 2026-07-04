@@ -483,13 +483,19 @@ async def plan_daily_posts(force: bool = False):
 
     await log_to_channel(f"🗓️ Rejalashtirish boshlandi... (Maqsad: {target_count} ta)")
 
-    # --- 1-BOSQICH: Avval 3 kunlik (72 soatlik) musiqalarni qidirish ---
-    raw_tracks = await userbot.get_new_music_from_channels(hours=72)
-    unique_candidates = []
+    # --- 1-BOSQICH: So'nggi 7 kunlik musiqalarni yuklash va Toshkent vaqti bo'yicha saralash ---
+    raw_tracks = await userbot.get_new_music_from_channels(hours=168)
+    
+    tashkent_tz = pytz.timezone("Asia/Tashkent")
+    now = datetime.now(tashkent_tz)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday_start = today_start - timedelta(days=1)
+
+    yesterday_candidates = []
+    older_candidates = []
     seen_track_ids = set()
 
-    def filter_tracks(tracks):
-        result = []
+    def filter_and_categorize(tracks):
         for track in tracks:
             if track['track_id'] in seen_track_ids:
                 continue
@@ -497,9 +503,22 @@ async def plan_daily_posts(force: bool = False):
                 track.get('artist', ''), track.get('title', '')
             ):
                 continue
-            result.append(track)
+            
+            # UTC vaqtni Toshkent vaqtiga o'girish
+            track_date_utc = track['date'].replace(tzinfo=pytz.utc) if track['date'].tzinfo is None else track['date'].astimezone(pytz.utc)
+            track_date_uz = track_date_utc.astimezone(tashkent_tz)
+            
+            if track_date_uz >= today_start:
+                # Bugungi musiqalarga tegmaymiz (ertaga olinadi)
+                continue
+            elif yesterday_start <= track_date_uz < today_start:
+                yesterday_candidates.append(track)
+            else:
+                older_candidates.append(track)
+                
             seen_track_ids.add(track['track_id'])
-        return result
+
+    filter_and_categorize(raw_tracks)
 
     async def check_not_posted(tracks):
         result = []
@@ -511,26 +530,26 @@ async def plan_daily_posts(force: bool = False):
                     result.append(track)
         return result
 
-    filtered_3d = filter_tracks(raw_tracks)
-    unique_candidates = await check_not_posted(filtered_3d)
-    logger.info(f"So'nggi 3 kun ichida {len(unique_candidates)} ta yangi unikal musiqa topildi.")
+    # Birinchi navbatda faqat kechagi (roppa-rosa 1 kun orqadagi) musiqalarni tekshiramiz
+    unique_candidates = await check_not_posted(yesterday_candidates)
+    logger.info(f"Kechagi kun (1 kun oldin) uchun {len(unique_candidates)} ta yangi unikal musiqa topildi.")
 
-    # Agar yetarli musiqa topilmasa (target_count dan kam bo'lsa) -> 7 kunlikka o'tamiz
+    # Agar kechagi musiqalar yetarli bo'lmasa -> eski kunlardagilarni (fallback) qo'shamiz
     if len(unique_candidates) < target_count:
+        needed = target_count - len(unique_candidates)
         logger.info(
-            f"⚠️ 3 kunlik musiqa yetarli emas ({len(unique_candidates)}/{target_count}). "
-            f"7 kunlik qidiruvga o'tilmoqda..."
+            f"⚠️ Kechagi musiqalar yetarli emas ({len(unique_candidates)}/{target_count}). "
+            f"Eski kunlar musiqalaridan {needed} ta zaxira olinmoqda..."
         )
         await log_to_channel(
-            f"⚠️ 3 kunlik musiqa yetarli emas. 7 kunlikka kengaytirildi."
+            f"⚠️ Kechagi musiqalar soni yetarli emas. Qolgan {needed} ta musiqa eski kunlar zaxirasidan to'ldiriladi."
         )
-        raw_tracks_7d = await userbot.get_new_music_from_channels(hours=168)
-        # Faqat yangi (3 kunlikda bo'lmaganlarni) qo'shamiz
-        new_tracks = filter_tracks(raw_tracks_7d)
-        extra = await check_not_posted(new_tracks)
-        unique_candidates.extend(extra)
+        older_unique = await check_not_posted(older_candidates)
+        # Eski kunlar musiqalarini reyting bo'yicha saralab eng yaxshilarini qo'shamiz
+        older_unique.sort(key=utils.calculate_track_score, reverse=True)
+        unique_candidates.extend(older_unique[:needed])
         logger.info(
-            f"7 kun ichida jami {len(unique_candidates)} ta yangi unikal musiqa topildi."
+            f"Zaxira bilan birga jami {len(unique_candidates)} ta unikal musiqa yig'ildi."
         )
 
     if unique_candidates:
