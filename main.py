@@ -679,9 +679,18 @@ async def plan_daily_posts(force: bool = False):
                 return None
 
         # Har bir trek uchun yuklash (ketma-ket, API limitlarini hisobga olib)
+        os.makedirs("downloads/scheduled", exist_ok=True)
         for track in to_post:
             fpath = await predownload_track(track)
             if fpath:
+                # Move to downloads/scheduled to avoid startup deletions
+                scheduled_path = os.path.join("downloads/scheduled", os.path.basename(fpath))
+                try:
+                    os.rename(fpath, scheduled_path)
+                    fpath = scheduled_path
+                except Exception as rename_err:
+                    logger.error(f"Failed to move pre-downloaded file to scheduled directory: {rename_err}")
+                
                 track['direct_file_path'] = fpath
                 # AI bilan yana bir bor tozalab, faylning Artist/Title ni yangilab qo'yamiz
                 ai = await utils.get_clean_details_with_ai(
@@ -1942,9 +1951,11 @@ async def set_main_menu(bot: Bot):
 
 async def on_startup(bot: Bot):
     # Serverni tozalash
-    logger.info("♻️ Server tozalanmoqda: downloads papkasi tozalanmoqda...")
+    logger.info("♻️ Server tozalanmoqda: downloads papkasi tozalanmoqda (scheduled papkasi saqlanadi)...")
     if os.path.exists("downloads"):
         for file in os.listdir("downloads"):
+            if file == "scheduled":
+                continue
             file_path = os.path.join("downloads", file)
             try:
                 if os.path.isfile(file_path):
@@ -1995,6 +2006,9 @@ async def setup_scheduler():
 
     if not scheduler.running:
         scheduler.start()
+        
+    # Qayta ishga tushganda bazadagi rejalarni schedulerga yuklash
+    asyncio.create_task(plan_daily_posts(force=False))
 
 
 async def main():
