@@ -603,6 +603,15 @@ def clean_search_query(query: str) -> str:
     if not query:
         return ""
     
+    # " - " bo'lsa, Artist va Title ni oldindan tozalash (masalan: Muzikalar UzMuz - x13ahram - Dözmüyacam)
+    if " - " in query:
+        parts = query.split(" - ", 1)
+        art, tit = extract_clean_artist_and_title(parts[0], parts[1])
+        if art:
+            query = f"{art} - {tit}"
+        else:
+            query = tit
+
     # 1. Qavslar ichidagi narsalarni olib tashlash (masalan: [MP3], (Official Video))
     cleaned = re.sub(r'[\(\[\{].*?[\)\]\}]', '', query)
     
