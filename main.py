@@ -481,22 +481,55 @@ async def plan_daily_posts(force: bool = False):
 
     await log_to_channel(f"🗓️ Rejalashtirish boshlandi... (Maqsad: {target_count} ta)")
 
-    # --- 1-BOSQICH: So'nggi 7 kunlik (168 soatlik) ommabop musiqalarni qidirish ---
-    raw_tracks = await userbot.get_new_music_from_channels(hours=168)
+    # --- 1-BOSQICH: Avval 3 kunlik (72 soatlik) musiqalarni qidirish ---
+    raw_tracks = await userbot.get_new_music_from_channels(hours=72)
     unique_candidates = []
     seen_track_ids = set()
 
-    for track in raw_tracks:
-        if track['track_id'] not in seen_track_ids:
-            # Xavfsizlik filtri: diniy/siyosiy kalit so'zlarni rejalashtirishda chetlab o'tamiz
-            if utils.check_forbidden_keywords(track.get('artist', ''), track.get('title', '')):
+    def filter_tracks(tracks):
+        result = []
+        for track in tracks:
+            if track['track_id'] in seen_track_ids:
                 continue
-            if not await database.is_track_posted(track['track_id']):
-                if not await database.is_similar_track_posted(track.get('artist', ''), track.get('title', '')):
-                    unique_candidates.append(track)
-                    seen_track_ids.add(track['track_id'])
+            if utils.check_forbidden_keywords(
+                track.get('artist', ''), track.get('title', '')
+            ):
+                continue
+            result.append(track)
+            seen_track_ids.add(track['track_id'])
+        return result
 
-    logger.info(f"7 kun ichida {len(unique_candidates)} ta yangi unikal musiqa topildi.")
+    async def check_not_posted(tracks):
+        result = []
+        for track in tracks:
+            if not await database.is_track_posted(track['track_id']):
+                if not await database.is_similar_track_posted(
+                    track.get('artist', ''), track.get('title', '')
+                ):
+                    result.append(track)
+        return result
+
+    filtered_3d = filter_tracks(raw_tracks)
+    unique_candidates = await check_not_posted(filtered_3d)
+    logger.info(f"So'nggi 3 kun ichida {len(unique_candidates)} ta yangi unikal musiqa topildi.")
+
+    # Agar yetarli musiqa topilmasa (target_count dan kam bo'lsa) -> 7 kunlikka o'tamiz
+    if len(unique_candidates) < target_count:
+        logger.info(
+            f"⚠️ 3 kunlik musiqa yetarli emas ({len(unique_candidates)}/{target_count}). "
+            f"7 kunlik qidiruvga o'tilmoqda..."
+        )
+        await log_to_channel(
+            f"⚠️ 3 kunlik musiqa yetarli emas. 7 kunlikka kengaytirildi."
+        )
+        raw_tracks_7d = await userbot.get_new_music_from_channels(hours=168)
+        # Faqat yangi (3 kunlikda bo'lmaganlarni) qo'shamiz
+        new_tracks = filter_tracks(raw_tracks_7d)
+        extra = await check_not_posted(new_tracks)
+        unique_candidates.extend(extra)
+        logger.info(
+            f"7 kun ichida jami {len(unique_candidates)} ta yangi unikal musiqa topildi."
+        )
 
     if unique_candidates:
         # Group candidates by source channel, sort each by score
