@@ -624,6 +624,79 @@ async def plan_daily_posts(force: bool = False):
             times.append(start_time)
 
         db_entries = []
+        # --- PRE-DOWNLOAD: Rejalash paytida musiqa fayllarini yuklab olish ---
+        await log_to_channel(
+            f"⏬ {len(to_post)} ta musiqa faylli yuklanmoqda (oldindan tayyorlanmoqda)..."
+        )
+
+        async def predownload_track(track: Dict) -> str | None:
+            """Rejalashtirilgan trek uchun fayl yuklab oladi va yo'lini qaytaradi."""
+            raw_a = track.get('artist', '')
+            raw_t = track.get('title', '')
+            try:
+                # AI bilan tozalash
+                ai = await utils.get_clean_details_with_ai(raw_a, raw_t)
+                c_artist = utils._clean_single_string(
+                    ai.get('artist') or raw_a
+                ) or "Trend MUSIC"
+                c_title = utils._clean_single_string(
+                    ai.get('title') or raw_t
+                ) or "Musiqa"
+                query = f"{c_artist} - {c_title}"
+
+                # 1. Target bot orqali matnli qidiruv
+                fpath = await userbot.search_text_via_target_bot(query)
+                if fpath and os.path.exists(fpath):
+                    logger.info(f"✅ [Pre-dl] Topildi (target bot): {query}")
+                    return fpath
+
+                # 2. Forward orqali zaxira
+                fpath = await userbot.search_via_target_bot(
+                    track.get('chat_id'), track.get('message_id')
+                )
+                if fpath and os.path.exists(fpath):
+                    logger.info(f"✅ [Pre-dl] Topildi (forward): {query}")
+                    return fpath
+
+                # 3. Telegram Global Search
+                fpath = await userbot.search_global_music(c_artist, c_title)
+                if fpath and os.path.exists(fpath):
+                    logger.info(f"✅ [Pre-dl] Topildi (global): {query}")
+                    return fpath
+
+                # 4. YouTube fallback
+                fpath = await utils.get_youtube_with_api(c_artist, c_title)
+                if fpath and os.path.exists(fpath):
+                    logger.info(f"✅ [Pre-dl] Topildi (YouTube): {query}")
+                    return fpath
+
+                logger.warning(f"⚠️ [Pre-dl] Topilmadi: {query}")
+                return None
+            except Exception as e:
+                logger.error(f"❌ [Pre-dl] Xato ({raw_a} - {raw_t}): {e}")
+                return None
+
+        # Har bir trek uchun yuklash (ketma-ket, API limitlarini hisobga olib)
+        for track in to_post:
+            fpath = await predownload_track(track)
+            if fpath:
+                track['direct_file_path'] = fpath
+                # AI bilan yana bir bor tozalab, faylning Artist/Title ni yangilab qo'yamiz
+                ai = await utils.get_clean_details_with_ai(
+                    track.get('artist', ''), track.get('title', '')
+                )
+                c_a = utils._clean_single_string(ai.get('artist') or track.get('artist', '')) or "Trend MUSIC"
+                c_t = utils._clean_single_string(ai.get('title') or track.get('title', '')) or "Musiqa"
+                track['artist'] = c_a
+                track['title'] = c_t
+                utils.write_clean_metadata(fpath, c_a, c_t)
+
+        pre_ok = sum(1 for t in to_post if t.get('direct_file_path'))
+        await log_to_channel(
+            f"📦 Oldindan yuklash tugadi: {pre_ok}/{len(to_post)} ta musiqa tayyor."
+        )
+        # -----------------------------------------------------------------------
+
         for i, track in enumerate(to_post):
             run_time = times[i]
             scheduler.add_job(post_music, 'date', run_date=run_time, args=[track])
@@ -636,7 +709,7 @@ async def plan_daily_posts(force: bool = False):
                 'title': f"{track_title} (👁 {views_count}, ❤️ {reactions_count}, 📊 {score})",
                 'time': run_time.strftime('%H:%M')
             })
-            
+
             db_entries.append({
                 'post_time': run_time,
                 'track_id': track['track_id'],
@@ -647,7 +720,7 @@ async def plan_daily_posts(force: bool = False):
                 'direct_file_path': track.get('direct_file_path'),
                 'is_posted': False
             })
-            
+
         await database.save_daily_schedule(db_entries)
         await log_to_channel(f"✅ {len(to_post)} ta eng ommabop musiqa rejalashtirildi.")
     else:
