@@ -11,3 +11,10 @@ venv/
 session/
 *.session
 cookies*.txt
+node_modules/
+bot_logs*.log
+downloads/
+*.mp3
+*.log
+*.jpg
+*.ogg

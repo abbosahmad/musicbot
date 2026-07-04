@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusiqaBot Boshqaruv Paneli</title>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glass-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-music brand-icon"></i>
+                <h2>MusicBot</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-line"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-tab="settings">
+                    <i class="fa-solid fa-sliders"></i> Sozlamalar
+                </a>
+                <a href="#" class="nav-item" data-tab="logs">
+                    <i class="fa-solid fa-terminal"></i> Live Loglar
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="theme-toggle" id="themeBtn">
+                    <i class="fa-solid fa-moon"></i> <span>Tungi Rejim</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <div class="header-title">
+                    <h1 id="tabTitle">Dashboard</h1>
+                    <p id="tabSubtitle">Bot holati va oxirgi faollik ko'rsatkichi</p>
+                </div>
+                <div class="user-status" id="botStatusBadgeContainer">
+                    <span class="status-badge inactive" id="botStatusBadge">
+                        <span class="status-pulse"></span>
+                        <span id="botStatusText">Bot: Noma'lum</span>
+                    </span>
+                </div>
+            </header>
+
+            <!-- Success Alert -->
+            <div id="successAlert" class="alert-banner">
+                <i class="fa-solid fa-circle-check"></i> Sozlamalar muvaffaqiyatli saqlandi va yangilandi!
+            </div>
+
+            <!-- Tab: Dashboard -->
+            <div class="tab-content active" id="tab-dashboard">
+                <!-- Stats Cards Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon pink-gradient">
+                            <i class="fa-solid fa-circle-play"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Jami Postlar</h3>
+                            <p class="stat-value" id="statTotalPosted">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue-gradient">
+                            <i class="fa-solid fa-bullhorn"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Kunlik Limit</h3>
+                            <p class="stat-value" id="statDailyLimit">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple-gradient">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Qidiruv Boti</h3>
+                            <p class="stat-value" id="statSearchBot">@Zoryuklabot</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity & Log Summary -->
+                <div class="dashboard-grid">
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <h2><i class="fa-solid fa-clock-rotate-left"></i> So'nggi Joylangan Musiqalar</h2>
+                        </div>
+                        <div class="panel-body">
+                            <ul class="recent-list" id="recentTracksList">
+                                <li class="empty-state">Musiqalar topilmadi.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <h2><i class="fa-solid fa-shield-halved"></i> Tizim Tafsilotlari</h2>
+                        </div>
+                        <div class="panel-body system-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Rejalashtirish Vaqti:</span>
+                                <span class="detail-val" id="statPlanningHour">05:00</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Demo Davomiyligi:</span>
+                                <span class="detail-val" id="statDemoDuration">30s</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Tungi Jimjitlik:</span>
+                                <span class="detail-val" id="statNightMode">O'chirilgan</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Sessiya Turi:</span>
+                                <span class="detail-val font-mono">PostgreSQL</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <h2><i class="fa-solid fa-gears"></i> Bot Boshqaruvi</h2>
+                        </div>
+                        <div class="panel-body">
+                            <div style="margin-bottom: 15px;">
+                                <label style="font-size: 12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase;">Xizmat Holati</label>
+                                <div style="margin-top: 5px;">
+                                    <span class="status-badge inactive" id="botControlStatusBadge">
+                                        <span class="status-pulse"></span>
+                                        <span id="botControlStatusText">Yuklanmoqda...</span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <label style="font-size: 12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; display:block; margin-bottom: 8px;">Tizim buyruqlari</label>
+                            <div class="bot-controls-grid">
+                                <button type="button" class="btn-control btn-control-start" id="btnBotStart">
+                                    <i class="fa-solid fa-play"></i> Start
+                                </button>
+                                <button type="button" class="btn-control btn-control-stop" id="btnBotStop">
+                                    <i class="fa-solid fa-stop"></i> Stop
+                                </button>
+                                <button type="button" class="btn-control btn-control-restart" id="btnBotRestart">
+                                    <i class="fa-solid fa-rotate"></i> Restart
+                                </button>
+                            </div>
+
+                            <label style="font-size: 12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; display:block; margin-top: 20px; margin-bottom: 8px;">Tezkor harakatlar</label>
+                            <div class="bot-controls-grid" style="grid-template-columns: repeat(2, 1fr);">
+                                <button type="button" class="btn-control btn-control-action" id="btnBotPostNow">
+                                    <i class="fa-solid fa-paper-plane"></i> Hozir Joylash
+                                </button>
+                                <button type="button" class="btn-control btn-control-action" id="btnBotReplan">
+                                    <i class="fa-solid fa-calendar-days"></i> Rejani yangilash
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Settings -->
+            <div class="tab-content" id="tab-settings">
+                <form id="settingsForm" class="panel-card">
+                    <div class="panel-body">
+                        <h2 class="form-section-title">Asosiy Sozlamalar</h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="planning_hour"><i class="fa-solid fa-hourglass-start"></i> Reja Vaqti (Soat, 0-23)</label>
+                                <input type="number" id="planning_hour" name="planning_hour" min="0" max="23" required>
+                                <span class="form-hint">Kunlik yangi musiqalar rejasini tuzish vaqti</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="daily_post_count"><i class="fa-solid fa-list-ol"></i> Kunlik Postlar Soni</label>
+                                <input type="number" id="daily_post_count" name="daily_post_count" min="1" max="50" required>
+                                <span class="form-hint">Bir kunda eng ko'p joylanadigan audio soni</span>
+                            </div>
+                        </div>
+
+                        <h2 class="form-section-title">Media & Qidiruv Sozlamalari</h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="demo_duration"><i class="fa-solid fa-scissors"></i> Demo Kesish Davomiyligi (Sekund)</label>
+                                <input type="number" id="demo_duration" name="demo_duration" min="10" max="60" required>
+                                <span class="form-hint">Ovozli xabar demo davomiyligi</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="target_search_bot"><i class="fa-solid fa-magnifying-glass"></i> Maqsadli Qidiruv Boti</label>
+                                <input type="text" id="target_search_bot" name="target_search_bot" required>
+                                <span class="form-hint">Musiqalarni forward qilib toza topuvchi bot nomi</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="source_channels"><i class="fa-solid fa-link"></i> Manba Kanallar</label>
+                            <input type="text" id="source_channels" name="source_channels" placeholder="@kanal1, @kanal2">
+                            <span class="form-hint">Bir nechta manba kanalni vergul bilan ajrating</span>
+                        </div>
+
+                        <h2 class="form-section-title">Tungi Jimjitlik Rejimi</h2>
+                        <div class="form-group checkbox-group">
+                            <label class="switch">
+                                <input type="checkbox" id="night_mode" name="night_mode" value="true">
+                                <span class="slider round"></span>
+                            </label>
+                            <span class="checkbox-label">Tungi Vaqtda Kanalga Post Joylamaslik</span>
+                        </div>
+
+                        <div id="nightInputs" class="form-grid night-inputs-panel">
+                            <div class="form-group">
+                                <label for="night_start"><i class="fa-solid fa-bed"></i> Tungi Vaqt Boshlanishi (Soat)</label>
+                                <input type="number" id="night_start" name="night_start" min="0" max="23">
+                            </div>
+                            <div class="form-group">
+                                <label for="night_end"><i class="fa-solid fa-sun"></i> Tungi Vaqt Tugashi (Soat)</label>
+                                <input type="number" id="night_end" name="night_end" min="0" max="23">
+                            </div>
+                        </div>
+
+                        <h2 class="form-section-title">Xavfsizlik Sozlamalari</h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="new_password"><i class="fa-solid fa-key"></i> Yangi Parol (Ixtiyoriy)</label>
+                                <input type="password" id="new_password" name="new_password" placeholder="••••••••">
+                                <span class="form-hint">Admin panel parolini o'zgartirish uchun to'ldiring (bo'sh bo'lsa o'zgarmaydi)</span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="fa-solid fa-floppy-disk"></i> Sozlamalarni Yangilash
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tab: Logs -->
+            <div class="tab-content" id="tab-logs">
+                <div class="panel-card log-panel">
+                    <div class="panel-header log-panel-header">
+                        <h2><i class="fa-solid fa-rectangle-list"></i> Real Vaqtdagi Tizim Loglari</h2>
+                        <div class="log-actions">
+                            <button id="clearLogsBtn" class="btn-secondary btn-sm"><i class="fa-solid fa-trash-can"></i> Tozalash</button>
+                            <button id="autoscrollBtn" class="btn-secondary btn-sm active"><i class="fa-solid fa-angles-down"></i> Auto-Scroll</button>
+                        </div>
+                    </div>
+                    <div class="panel-body log-console-wrapper">
+                        <pre id="logConsole" class="log-console">Loglar yuklanmoqda...</pre>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Socket.io library -->
+    <!-- Socket.io from CDN — avoids /music/ subpath routing issues -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -7,8 +7,13 @@ env_path = Path(__file__).parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
 # --- Asosiy Telegram Sozlamalari ---
-ADMIN_BOT_TOKEN = os.getenv("ADMIN_BOT_TOKEN") or "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
-ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID", 123456789))
+ADMIN_BOT_TOKEN = os.getenv("ADMIN_BOT_TOKEN")
+if not ADMIN_BOT_TOKEN:
+    raise ValueError("ADMIN_BOT_TOKEN is required. Please set it in .env file.")
+_admin_user_id = os.getenv("ADMIN_USER_ID")
+if not _admin_user_id:
+    raise ValueError("ADMIN_USER_ID is required. Please set it in .env file.")
+ADMIN_USER_ID = int(_admin_user_id)
 
 # --- AI Sozlamalari (DeepSeek) ---
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
@@ -18,9 +23,17 @@ YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 
 # --- Kanallar Sozlamalari ---
 # Agar .env da bo'lmasa 0 qaytaradi, bu xatolikni oldini oladi lekin tekshirish kerak bo'lishi mumkin
-LOG_CHANNEL_ID = int(os.getenv("LOG_CHANNEL_ID", 0))
-MAIN_CHANNEL_ID = int(os.getenv("MAIN_CHANNEL_ID", 0))
-BACKUP_CHANNEL_ID = int(os.getenv("BACKUP_CHANNEL_ID", 0))
+def _parse_channel_id(val):
+    if not val:
+        return 0
+    try:
+        return int(val)
+    except ValueError:
+        return val.strip()
+
+LOG_CHANNEL_ID = _parse_channel_id(os.getenv("LOG_CHANNEL_ID", "0"))
+MAIN_CHANNEL_ID = _parse_channel_id(os.getenv("MAIN_CHANNEL_ID", "0"))
+BACKUP_CHANNEL_ID = _parse_channel_id(os.getenv("BACKUP_CHANNEL_ID", "0"))
 
 MAIN_CHANNEL_LINK = "https://t.me/trend_musiqaUZ"
 MAIN_CHANNEL_NAME = "Trend MUSIC🔥❤️"

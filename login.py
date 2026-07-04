@@ -16,8 +16,9 @@ async def main():
         await app.send_message("me", "Userbot sessiyasi muvaffaqiyatli yaratildi!")
         
         print("\n--- Muvaffaqiyatli! ---")
-        print("!!! DIQQAT: Quyidagi qatorni nusxalab, config.py fayliga joylashtiring:\n")
-        print(f"USERBOT_SESSION_STRING = \"{session_str}\"\n")
+        print("!!! DIQQAT: Quyidagi sessiya satrini nusxalab, .env faylidagi USERBOT_SESSION_STRING o'zgaruvchisiga yozib qo'ying:\n")
+        print(session_str)
+        print("\n-----------------------\n")
 
 if __name__ == "__main__":
     asyncio.run(main())

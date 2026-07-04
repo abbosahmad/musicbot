@@ -1,0 +1,15 @@
+{
+  "name": "musiqabot-admin-panel",
+  "version": "1.0.0",
+  "description": "Premium Node.js Admin Panel for Telegram Music Bot",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.12.0",
+    "socket.io": "^4.7.5",
+    "dotenv": "^16.4.5"
+  }
+}

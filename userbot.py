@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import re
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 
@@ -12,6 +13,7 @@ from pyrogram.errors import UserAlreadyParticipant
 
 import config
 import database
+import utils
 
 class UserBot:
     def __init__(self):
@@ -67,8 +69,8 @@ class UserBot:
 
     async def start(self):
         try:
-            if not config.USERBOT_SESSION_STRING:
-                logger.critical("USERBOT_SESSION_STRING topilmadi! Iltimos, avval login.py ni ishga tushiring.")
+            if not config.USERBOT_SESSION_STRING and not os.path.exists("session/my_account.session"):
+                logger.critical("USERBOT_SESSION_STRING yoki session/my_account.session topilmadi! Iltimos, avval login.py ni ishga tushiring.")
                 return False
             
             logger.info("Userbot ulanmoqda...")
@@ -133,12 +135,25 @@ class UserBot:
         file_id = ""
         is_voice = False
         views = message.views or 0  # Ko'rishlar sonini olish
+        reactions = 0
+        if message.reactions and message.reactions.reactions:
+            for r in message.reactions.reactions:
+                reactions += r.count
 
         if message.audio:
             audio = message.audio
             track_id = audio.file_unique_id
-            artist = audio.performer
-            title = audio.title or audio.file_name
+            raw_artist = audio.performer or ""
+            raw_title = audio.title or audio.file_name or ""
+            caption = message.caption or ""
+            filename = audio.file_name or ""
+
+            clean_artist, clean_title = utils.extract_clean_artist_and_title(
+                raw_artist, raw_title, caption, filename
+            )
+
+            artist = clean_artist
+            title = clean_title if clean_title else raw_title
             duration_ms = (audio.duration or 0) * 1000
             file_id = audio.file_id
             is_voice = False
@@ -160,17 +175,19 @@ class UserBot:
             'chat_id': message.chat.id,
             'message_id': message.id,
             'is_voice': is_voice,
-            'views': views
+            'views': views,
+            'reactions': reactions,
+            'date': message.date
         }
 
     async def get_new_music_from_channels(self, hours: int = 24) -> List[Dict]:
         if not self.app or not self.app.is_connected: return []
         logger.info(f"Manba kanallardan oxirgi {hours} soatdagi musiqalar qidirilmoqda...")
         collected_tracks = []
-        time_limit = datetime.now() - timedelta(hours=hours)
+        time_limit = datetime.utcnow() - timedelta(hours=hours)
 
         # Manba kanallarni ma'lumotlar bazasidan olamiz (yoki config dan agar bo'sh bo'lsa)
-        db_channels = database.get_setting("source_channels", "").split(",")
+        db_channels = re.split(r'[\s,]+', await database.get_setting("source_channels", ""))
         channels_to_check = [ch.strip() for ch in db_channels if ch.strip()]
         
         if not channels_to_check:
@@ -179,11 +196,11 @@ class UserBot:
         for channel_id in channels_to_check:
             try:
                 # logger.info(f"Kanal tekshirilmoqda: {channel_id}")
-                async for message in self.app.get_chat_history(channel_id, limit=200):
+                async for message in self.app.get_chat_history(channel_id, limit=800):
                     if message.date < time_limit: break
                     media = message.audio or message.voice
-                    # Davomiyligi 60 soniyadan uzun bo'lgan musiqalarni olish
-                    if media and media.duration and (media.duration > 60):
+                    # Davomiyligi 120 soniyadan kam bo'lmagan musiqalarni olish (kamida 2 daqiqa)
+                    if media and media.duration and (media.duration >= 120):
                         processed = self._process_message(message)
                         if processed:
                             # Bu yerda bazani tekshirmaymiz, uni main.py da qilamiz
@@ -197,7 +214,7 @@ class UserBot:
     async def get_recent_music_from_backup(self, hours: int = 48) -> List[Dict]:
         if not self.app or not self.app.is_connected: return []
         logger.warning(f"Zaxira kanaldan oxirgi {hours} soatdagi musiqalar qidirilmoqda...")
-        found_tracks, time_limit = [], datetime.now() - timedelta(hours=hours)
+        found_tracks, time_limit = [], datetime.utcnow() - timedelta(hours=hours)
         try:
             async for message in self.app.get_chat_history(config.BACKUP_CHANNEL_ID, limit=300):
                 if message.date < time_limit: break
@@ -234,4 +251,169 @@ class UserBot:
                 return None
         except Exception as e:
             logger.error(f"Fayl yuklashda Pyrogram xatoligi: {e}")
+            return None
+
+    async def search_via_target_bot(self, chat_id: int, message_id: int) -> Optional[str]:
+        """
+        Reklamali musiqani maqsadli qidiruv botiga (masalan, @Zoryuklabot) forward qilib original toza faylni oladi.
+        """
+        if not self.app or not self.app.is_connected:
+            return None
+            
+        target_search_bot = await database.get_setting("target_search_bot", "@Zoryuklabot")
+        logger.info(f"Musiqa maqsadli botga forward qilinmoqda: {target_search_bot}")
+        
+        try:
+            # Bot chatini olish
+            target_chat = await self.app.get_chat(target_search_bot)
+            target_chat_id = target_chat.id
+            
+            # Forwarddan oldingi so'nggi xabar ID-sini olish
+            last_msg_id = 0
+            async for msg in self.app.get_chat_history(target_chat_id, limit=1):
+                last_msg_id = msg.id
+                
+            # Xabarni forward qilish
+            await self.app.forward_messages(
+                chat_id=target_chat_id,
+                from_chat_id=chat_id,
+                message_ids=message_id
+            )
+            
+            # Botdan javob ro'yxatini kutish
+            response_msg = None
+            for _ in range(12): # Maksimal 12 soniya
+                await asyncio.sleep(1)
+                async for msg in self.app.get_chat_history(target_chat_id, limit=3):
+                    if msg.id > last_msg_id and msg.from_user and msg.from_user.is_bot:
+                        response_msg = msg
+                        break
+                if response_msg:
+                    break
+            
+            if not response_msg:
+                logger.warning("Maqsadli qidiruv botidan javob kelmadi.")
+                return None
+                
+            logger.info(f"Maqsadli botdan javob olindi: {response_msg.id}")
+            last_msg_id_before_click = response_msg.id
+            
+            # Inline tugmalarni tekshirish (1-musiqani tanlash)
+            if response_msg.reply_markup and response_msg.reply_markup.inline_keyboard:
+                btn_row = 0
+                btn_col = 0
+                found = False
+                for r_idx, row in enumerate(response_msg.reply_markup.inline_keyboard):
+                    for c_idx, btn in enumerate(row):
+                        if btn.text.strip() == "1":
+                            btn_row = r_idx
+                            btn_col = c_idx
+                            found = True
+                            break
+                    if found:
+                        break
+                        
+                logger.info(f"Tugma bosilmoqda: [{btn_row}, {btn_col}]")
+                await response_msg.click(btn_col, btn_row)
+            else:
+                # Agar inline tugma bo'lmasa, matn ko'rinishida '1' deb yuboramiz
+                logger.info("Inline tugma topilmadi, matnli '1' javobi yuborilmoqda.")
+                await self.app.send_message(target_chat_id, "1", reply_to_message_id=response_msg.id)
+                
+            # Maqsadli botdan audio fayl kelishini kutish
+            audio_msg = None
+            for _ in range(15): # Maksimal 15 soniya
+                await asyncio.sleep(1)
+                async for msg in self.app.get_chat_history(target_chat_id, limit=3):
+                    if msg.id > last_msg_id_before_click and msg.audio:
+                        audio_msg = msg
+                        break
+                if audio_msg:
+                    break
+                    
+            if audio_msg and audio_msg.audio:
+                file_name = f"downloads/original_{audio_msg.audio.file_unique_id}.mp3"
+                path = await audio_msg.download(file_name=file_name)
+                if path:
+                    logger.success(f"✅ Original toza musiqa muvaffaqiyatli yuklandi: {path}")
+                    return path
+            
+            logger.warning("Maqsadli bot audio fayl qaytarmadi.")
+            return None
+            
+        except Exception as e:
+            logger.error(f"Maqsadli bot orqali qidirishda xatolik: {e}")
+            return None
+
+    async def search_text_via_target_bot(self, query: str) -> Optional[str]:
+        """
+        Matnli so'rovni maqsadli qidiruv botiga (masalan, @Zoryuklabot) yuborib original toza faylni oladi.
+        """
+        if not self.app or not self.app.is_connected:
+            return None
+            
+        target_search_bot = await database.get_setting("target_search_bot", "@Zoryuklabot")
+        logger.info(f"Matnli so'rov maqsadli botga yuborilmoqda: {target_search_bot} | So'rov: {query}")
+        
+        try:
+            target_chat = await self.app.get_chat(target_search_bot)
+            target_chat_id = target_chat.id
+            
+            last_msg_id = 0
+            async for msg in self.app.get_chat_history(target_chat_id, limit=1):
+                last_msg_id = msg.id
+                
+            # So'rovni matn ko'rinishida yuborish
+            await self.app.send_message(chat_id=target_chat_id, text=query)
+            
+            response_msg = None
+            for _ in range(12):
+                await asyncio.sleep(1)
+                async for msg in self.app.get_chat_history(target_chat_id, limit=3):
+                    if msg.id > last_msg_id and msg.from_user and msg.from_user.is_bot:
+                        response_msg = msg
+                        break
+                if response_msg:
+                    break
+            
+            if not response_msg:
+                return None
+                
+            last_msg_id_before_click = response_msg.id
+            
+            if response_msg.reply_markup and response_msg.reply_markup.inline_keyboard:
+                btn_row = 0
+                btn_col = 0
+                found = False
+                for r_idx, row in enumerate(response_msg.reply_markup.inline_keyboard):
+                    for c_idx, btn in enumerate(row):
+                        if btn.text.strip() == "1":
+                            btn_row = r_idx
+                            btn_col = c_idx
+                            found = True
+                            break
+                    if found:
+                        break
+                await response_msg.click(btn_col, btn_row)
+            else:
+                await self.app.send_message(target_chat_id, "1", reply_to_message_id=response_msg.id)
+                
+            audio_msg = None
+            for _ in range(15):
+                await asyncio.sleep(1)
+                async for msg in self.app.get_chat_history(target_chat_id, limit=3):
+                    if msg.id > last_msg_id_before_click and msg.audio:
+                        audio_msg = msg
+                        break
+                if audio_msg:
+                    break
+                    
+            if audio_msg and audio_msg.audio:
+                file_name = f"downloads/original_{audio_msg.audio.file_unique_id}.mp3"
+                path = await audio_msg.download(file_name=file_name)
+                return path
+            
+            return None
+        except Exception as e:
+            logger.error(f"Matn bo'yicha qidiruvda xatolik: {e}")
             return None
