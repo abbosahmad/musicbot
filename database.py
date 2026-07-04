@@ -18,15 +18,33 @@ db_pool = None
 posted_track_ids: Set[str] = set()
 posted_track_hashes: Set[str] = set()
 
-# Matnlarni o'xshashlikka tekshirish uchun normallashtirish
+# Kirill-Lotin transliteratsiya xaritasi va maxsus belgilarni almashtirish
+CYRILLIC_TO_LATIN = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'j', 'з': 'z',
+    'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r',
+    'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'x', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sh',
+    'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya',
+    'ў': 'o', 'қ': 'q', 'ғ': 'g', 'ҳ': 'h', 'ё': 'yo',
+    'ö': 'o', 'ü': 'u', 'ä': 'a', 'ÿ': 'y', 'é': 'e', 'ó': 'o', 'á': 'a', 'í': 'i', 'ú': 'u'
+}
+
 def normalize_string(text: str) -> str:
     if not text:
         return ""
     text = text.lower()
+    
     # Qavslar ichidagi yozuvlarni olib tashlash (masalan: [Remix], (Official video))
     text = re.sub(r'[\(\[\{].*?[\)\]\}]', '', text)
+    
+    # Transliteratsiya qilish
+    translated = []
+    for char in text:
+        translated.append(CYRILLIC_TO_LATIN.get(char, char))
+    text = "".join(translated)
+    
     # Qo'shiqlar uchun keng tarqalgan so'zlarni tozalash
     text = re.sub(r'\b(remix|cover|slowed|reverb|speed up|lyrics|official|audio|video|clip|mp3|t\.me\S*|hq|muz|trend)\b', '', text)
+    
     # Faqat harflar va raqamlarni qoldirish
     text = re.sub(r'[^a-z0-9]', '', text)
     return text.strip()
