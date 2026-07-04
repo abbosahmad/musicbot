@@ -262,3 +262,14 @@ async def update_schedule_entry(post_time, track_id: str, artist: str, title: st
         logger.info(f"Schedule entry updated in DB for post_time {post_time}")
     except Exception as e:
         logger.error(f"Error updating schedule entry: {e}")
+
+async def clear_active_schedule():
+    global db_pool
+    if not db_pool:
+        return
+    try:
+        async with db_pool.acquire() as conn:
+            await conn.execute("DELETE FROM daily_schedule WHERE is_posted = FALSE")
+        logger.info("Database active schedule cleared.")
+    except Exception as e:
+        logger.error(f"Error clearing active schedule: {e}")

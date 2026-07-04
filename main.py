@@ -421,17 +421,26 @@ async def post_music(track_info: Dict):
                     pass
 
 
-async def plan_daily_posts():
+async def plan_daily_posts(force: bool = False):
     global daily_plan
     daily_plan.clear()
 
     # Bazadan sozlamalarni o'qish
     target_count = int(await database.get_setting("daily_post_count", "5"))
 
+    if force:
+        # Clear existing scheduled music jobs
+        for job in scheduler.get_jobs():
+            if job.id not in ['daily_planning', 'settings_checker']:
+                job.remove()
+        # Clear database schedule
+        await database.clear_active_schedule()
+
     # 1. Avval ma'lumotlar bazasidan faol rejalarni yuklashga urinib ko'ramiz
-    active_db_schedule = await database.get_active_schedule()
-    if active_db_schedule:
-        logger.info(f"🔄 Bazasdan faol {len(active_db_schedule)} ta rejalashtirilgan ishlar yuklanmoqda...")
+    if not force:
+        active_db_schedule = await database.get_active_schedule()
+        if active_db_schedule:
+            logger.info(f"🔄 Bazasdan faol {len(active_db_schedule)} ta rejalashtirilgan ishlar yuklanmoqda...")
         
         # Clear existing scheduled music jobs
         for job in scheduler.get_jobs():
@@ -527,8 +536,8 @@ async def plan_daily_posts():
         night_start = int(await database.get_setting("night_start", "23"))
         night_end = int(await database.get_setting("night_end", "7"))
 
-        # Bugungi reja tugash vaqti (night_start soati)
-        today_end_time = now.replace(hour=night_start, minute=0, second=0, microsecond=0)
+        # Bugungi reja tugash vaqti (23:59 gacha)
+        today_end_time = now.replace(hour=23, minute=59, second=0, microsecond=0)
         
         # Agar hozirgi vaqt bugungi night_start dan keyin bo'lsa yoki ungacha 1 soatdan kam qolgan bo'lsa
         if night_mode and (now >= today_end_time - timedelta(hours=1) or now.hour < night_end):
@@ -540,7 +549,7 @@ async def plan_daily_posts():
                 start_date = now.date() + timedelta(days=1)
                 
             start_time = tashkent_tz.localize(datetime.combine(start_date, datetime.min.time())) + timedelta(hours=night_end)
-            end_time = tashkent_tz.localize(datetime.combine(start_date, datetime.min.time())) + timedelta(hours=night_start)
+            end_time = tashkent_tz.localize(datetime.combine(start_date, datetime.min.time())) + timedelta(hours=23, minutes=59)
         else:
             # Bugungi kunning qolgan vaqtiga taqsimlaymiz
             start_time = now + timedelta(minutes=10)
@@ -629,7 +638,7 @@ async def check_schedule_update():
             if action == "post_now":
                 asyncio.create_task(trigger_manual_post_from_action())
             elif action == "replan":
-                asyncio.create_task(plan_daily_posts())
+                asyncio.create_task(plan_daily_posts(force=True))
         
         # 2. Sozlamalar o'zgarganligini tekshirish
         changed = False
@@ -1121,7 +1130,7 @@ async def force_replan_command(message: types.Message):
         return
     await message.answer("🔄 Kunlik reja majburan qayta tuzilmoqda...")
     try:
-        await plan_daily_posts()
+        await plan_daily_posts(force=True)
         await message.answer("✅ Kunlik reja muvaffaqiyatli qayta tuzildi!")
     except Exception as e:
         logger.error(f"Majburiy rejalashtirishda xato: {e}")
