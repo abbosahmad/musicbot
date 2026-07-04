@@ -99,9 +99,9 @@ async def get_clean_details_with_ai(raw_artist: str, raw_title: str) -> dict:
         system_prompt = """You are a music metadata cleaning and safety evaluation expert.
 Your task is to extract the clean 'artist' and 'title' from raw input, and evaluate if the track contains religious or political content.
 - Clean the artist and title: Remove ads, channel names (@...), website URLs, and promotional keywords. If the artist is purely promotional, set it to "". Fix capitalization (Title Case).
-- Evaluate content:
-  1. Set 'is_religious' to true if the track is a religious song, nasheed/nashida, Islamic prayer/recitation, Quran recitation, salovat/salawat, hamd, na't, or clearly religious/Islamic in nature.
-  2. Set 'is_political' to true if the track is political, about political figures (e.g. presidents, ministers), governments, elections, military/war propaganda, or political protests.
+- Evaluate content (Be very lenient and conservative when flagging):
+  1. Set 'is_religious' to true ONLY if the track is explicitly a direct Islamic prayer, Quran recitation, nasheed, salovat, or religious chant. Do NOT flag general cultural love/life songs that mention religious terms or God in a general metaphorical or cultural way.
+  2. Set 'is_political' to true ONLY if the track is explicitly about political figures (e.g. presidents, ministers), governments, elections, military/war propaganda, or political protests. Do NOT flag general songs about struggle, prison, history, life, or freedom unless they are clearly political propaganda or direct government commentary.
   3. Otherwise, set both to false.
   4. Write a brief explanation for your safety evaluation in 'reason'.
 - Return ONLY a JSON object: {"artist": "...", "title": "...", "is_religious": true/false, "is_political": true/false, "reason": "..."}"""
