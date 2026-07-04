@@ -521,38 +521,46 @@ async def plan_daily_posts():
 
         tashkent_tz = pytz.timezone("Asia/Tashkent")
         now = datetime.now(tashkent_tz)
-        current_post_time = now + timedelta(minutes=10)
 
         # Tun rejimi sozlamalari
         night_mode = (await database.get_setting("night_mode")) == "true"
         night_start = int(await database.get_setting("night_start", "23"))
         night_end = int(await database.get_setting("night_end", "7"))
 
+        # Bugungi reja tugash vaqti (night_start soati)
+        today_end_time = now.replace(hour=night_start, minute=0, second=0, microsecond=0)
+        
+        # Agar hozirgi vaqt bugungi night_start dan keyin bo'lsa yoki ungacha 1 soatdan kam qolgan bo'lsa
+        if night_mode and (now >= today_end_time - timedelta(hours=1) or now.hour < night_end):
+            if now.hour < night_end:
+                # Bugun 00:00 - night_end orasida bo'lsak, bugunning o'ziga faqat night_end dan boshlab rejalaymiz
+                start_date = now.date()
+            else:
+                # Kechki night_start dan keyin bo'lsak, ertangi kunga to'liq rejalaymiz
+                start_date = now.date() + timedelta(days=1)
+                
+            start_time = tashkent_tz.localize(datetime.combine(start_date, datetime.min.time())) + timedelta(hours=night_end)
+            end_time = tashkent_tz.localize(datetime.combine(start_date, datetime.min.time())) + timedelta(hours=night_start)
+        else:
+            # Bugungi kunning qolgan vaqtiga taqsimlaymiz
+            start_time = now + timedelta(minutes=10)
+            end_time = today_end_time
+
         times = []
-        interval_hours = 3
-
-        for _ in range(len(to_post)):
-            if night_mode:
-                h = current_post_time.hour
-                is_night = False
-
-                if night_start > night_end:
-                    if h >= night_start or h < night_end:
-                        is_night = True
-                else:
-                    if night_start <= h < night_end:
-                        is_night = True
-
-                if is_night:
-                    target_date = current_post_time.date()
-                    if h >= night_start:
-                        target_date += timedelta(days=1)
-
-                    new_time = datetime.combine(target_date, datetime.min.time()) + timedelta(hours=night_end, minutes=random.randint(0, 30))
-                    current_post_time = tashkent_tz.localize(new_time)
-
-            times.append(current_post_time)
-            current_post_time += timedelta(hours=interval_hours)
+        total_tracks = len(to_post)
+        
+        if total_tracks > 1:
+            total_duration = (end_time - start_time).total_seconds()
+            interval_seconds = total_duration / (total_tracks - 1)
+            interval_seconds = max(900.0, interval_seconds)  # Kamida 15 daqiqa
+            
+            for i in range(total_tracks):
+                post_time = start_time + timedelta(seconds=i * interval_seconds)
+                if post_time > end_time:
+                    post_time = end_time - timedelta(minutes=(total_tracks - 1 - i) * 15)
+                times.append(post_time)
+        elif total_tracks == 1:
+            times.append(start_time)
 
         db_entries = []
         for i, track in enumerate(to_post):
