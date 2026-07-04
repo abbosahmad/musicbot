@@ -37,6 +37,7 @@ userbot = UserBot()
 
 daily_plan: List[Dict] = []
 PROCESSING_LOCK = asyncio.Lock()
+PLANNING_LOCK = asyncio.Lock()
 LAST_SETTINGS: Dict[str, str] = {}
 
 
@@ -423,18 +424,19 @@ async def post_music(track_info: Dict):
 
 async def plan_daily_posts(force: bool = False):
     global daily_plan
-    daily_plan.clear()
+    async with PLANNING_LOCK:
+        daily_plan.clear()
 
-    # Bazadan sozlamalarni o'qish
-    target_count = int(await database.get_setting("daily_post_count", "5"))
+        # Bazadan sozlamalarni o'qish
+        target_count = int(await database.get_setting("daily_post_count", "5"))
 
-    if force:
-        # Clear existing scheduled music jobs
-        for job in scheduler.get_jobs():
-            if job.id not in ['daily_planning', 'settings_checker']:
-                job.remove()
-        # Clear database schedule
-        await database.clear_active_schedule()
+        if force:
+            # Clear existing scheduled music jobs
+            for job in scheduler.get_jobs():
+                if job.id not in ['daily_planning', 'settings_checker']:
+                    job.remove()
+            # Clear database schedule
+            await database.clear_active_schedule()
 
     # 1. Avval ma'lumotlar bazasidan faol rejalarni yuklashga urinib ko'ramiz
     if not force:
