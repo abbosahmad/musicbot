@@ -166,6 +166,15 @@ class UserBot:
             file_id = voice.file_id
             is_voice = True
         
+        source_channel = "Noma'lum"
+        if message.chat:
+            if message.chat.username:
+                source_channel = f"@{message.chat.username}"
+            elif message.chat.title:
+                source_channel = message.chat.title
+            else:
+                source_channel = str(message.chat.id)
+
         return {
             'track_id': track_id,
             'artist': artist,
@@ -177,7 +186,8 @@ class UserBot:
             'is_voice': is_voice,
             'views': views,
             'reactions': reactions,
-            'date': message.date
+            'date': message.date,
+            'source_channel': source_channel
         }
 
     async def get_new_music_from_channels(self, hours: int = 24) -> List[Dict]:

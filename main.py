@@ -129,6 +129,7 @@ async def post_music(track_info: Dict):
     track_id = re.sub(r'[^a-zA-Z0-9_-]', '', str(track_info.get('track_id', 'unknown')))
     raw_artist = track_info.get('artist') or "Unknown Artist"
     raw_title = track_info.get('title') or "Unknown Track"
+    source_channel = track_info.get('source_channel') or "Noma'lum"
 
     # Intercept direct override files from admin schedule replacement
     direct_file = track_info.get('direct_file_path')
@@ -216,7 +217,7 @@ async def post_music(track_info: Dict):
         demo_duration_setting = int(await database.get_setting("demo_duration", "30"))
 
         try:
-            logger.info(f"Yangi trek qayta ishlanmoqda: {raw_artist} - {raw_title}")
+            logger.info(f"Yangi trek qayta ishlanmoqda: {raw_artist} - {raw_title} (Manba: {source_channel})")
             
             # 1. Avval nomini tozalab, matnli qidiruv yordamida original toza variantini olishga urinish
             ai_cleaned = await utils.get_clean_details_with_ai(raw_artist, raw_title)
@@ -228,8 +229,8 @@ async def post_music(track_info: Dict):
             
             if is_religious or is_political or is_forbidden_local:
                 reason = ai_cleaned.get('reason') or "Taqiqlangan kalit so'z aniqlandi"
-                logger.warning(f"❌ Xavfsizlik filtri ishga tushdi: {raw_artist} - {raw_title} (Diniy: {is_religious}, Siyosiy: {is_political}, Mahalliy: {is_forbidden_local}) | Sabab: {reason}")
-                await log_to_channel(f"⏭️ Joylanmadi (Xavfsizlik/Diniy-Siyosiy): {raw_artist} - {raw_title}")
+                logger.warning(f"❌ Xavfsizlik filtri ishga tushdi: {raw_artist} - {raw_title} (Manba: {source_channel}) (Diniy: {is_religious}, Siyosiy: {is_political}, Mahalliy: {is_forbidden_local}) | Sabab: {reason}")
+                await log_to_channel(f"⏭️ Joylanmadi (Xavfsizlik/Diniy-Siyosiy) (Manba: {source_channel}): {raw_artist} - {raw_title}")
                 # Bazada qayta urinmasligi uchun saqlaymiz
                 await database.add_track_to_db(track_id, raw_artist, raw_title)
                 return
@@ -402,7 +403,7 @@ async def post_music(track_info: Dict):
                 duration=full_audio_duration
             )
             await database.mark_schedule_posted(track_id)
-            await log_to_channel(f"✅ Joylandi: {final_artist} - {final_title}")
+            await log_to_channel(f"✅ Joylandi (Manba: {source_channel}): {final_artist} - {final_title}")
 
         except Exception as e:
             logger.error(f"Post xatolik: {e}")
