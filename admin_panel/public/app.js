@@ -381,8 +381,9 @@ btnBotReplan.addEventListener('click', () => sendBotAction('replan', 'Jadvalni y
 // --- Init ---
 fetchSettings();
 fetchStats();
+fetchTodaySchedule();
 checkBotStatus();
 
 // Polling intervals
-setInterval(() => { if (currentTab === 'dashboard') fetchStats(); }, 30000);
+setInterval(() => { if (currentTab === 'dashboard') { fetchStats(); fetchTodaySchedule(); } }, 30000);
 setInterval(checkBotStatus, 5000);
