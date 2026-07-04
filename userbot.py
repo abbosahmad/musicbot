@@ -308,14 +308,17 @@ class UserBot:
             logger.info(f"Maqsadli botdan javob olindi: {response_msg.id}")
             last_msg_id_before_click = response_msg.id
             
-            # Inline tugmalarni tekshirish (1-musiqani tanlash)
+            # Inline tugmalarni tekshirish (Eng yaxshi variantni tanlash)
+            target_btn_text = utils.choose_best_result_number(response_msg.text or response_msg.caption)
+            logger.info(f"Target bot natijalari tahlil qilindi. Tanlangan variant: {target_btn_text}")
+            
             if response_msg.reply_markup and response_msg.reply_markup.inline_keyboard:
                 btn_row = 0
                 btn_col = 0
                 found = False
                 for r_idx, row in enumerate(response_msg.reply_markup.inline_keyboard):
                     for c_idx, btn in enumerate(row):
-                        if btn.text.strip() == "1":
+                        if btn.text.strip() == target_btn_text:
                             btn_row = r_idx
                             btn_col = c_idx
                             found = True
@@ -323,12 +326,12 @@ class UserBot:
                     if found:
                         break
                         
-                logger.info(f"Tugma bosilmoqda: [{btn_row}, {btn_col}]")
+                logger.info(f"Tugma bosilmoqda: [{btn_row}, {btn_col}] (Matn: {target_btn_text})")
                 await response_msg.click(btn_col, btn_row)
             else:
-                # Agar inline tugma bo'lmasa, matn ko'rinishida '1' deb yuboramiz
-                logger.info("Inline tugma topilmadi, matnli '1' javobi yuborilmoqda.")
-                await self.app.send_message(target_chat_id, "1", reply_to_message_id=response_msg.id)
+                # Agar inline tugma bo'lmasa, matn ko'rinishida yuboramiz
+                logger.info(f"Inline tugma topilmadi, matnli '{target_btn_text}' javobi yuborilmoqda.")
+                await self.app.send_message(target_chat_id, target_btn_text, reply_to_message_id=response_msg.id)
                 
             # Maqsadli botdan audio fayl kelishini kutish
             audio_msg = None
@@ -396,22 +399,28 @@ class UserBot:
                 
             last_msg_id_before_click = response_msg.id
             
+            # Inline tugmalarni tekshirish (Eng yaxshi variantni tanlash)
+            target_btn_text = utils.choose_best_result_number(response_msg.text or response_msg.caption)
+            logger.info(f"Target bot natijalari tahlil qilindi (Matn). Tanlangan variant: {target_btn_text}")
+            
             if response_msg.reply_markup and response_msg.reply_markup.inline_keyboard:
                 btn_row = 0
                 btn_col = 0
                 found = False
                 for r_idx, row in enumerate(response_msg.reply_markup.inline_keyboard):
                     for c_idx, btn in enumerate(row):
-                        if btn.text.strip() == "1":
+                        if btn.text.strip() == target_btn_text:
                             btn_row = r_idx
                             btn_col = c_idx
                             found = True
                             break
                     if found:
                         break
+                logger.info(f"Tugma bosilmoqda: [{btn_row}, {btn_col}] (Matn: {target_btn_text})")
                 await response_msg.click(btn_col, btn_row)
             else:
-                await self.app.send_message(target_chat_id, "1", reply_to_message_id=response_msg.id)
+                logger.info(f"Inline tugma topilmadi, matnli '{target_btn_text}' javobi yuborilmoqda.")
+                await self.app.send_message(target_chat_id, target_btn_text, reply_to_message_id=response_msg.id)
                 
             audio_msg = None
             for _ in range(15):

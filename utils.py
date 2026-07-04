@@ -740,4 +740,45 @@ def extract_clean_artist_and_title(raw_artist: str, raw_title: str, caption: str
     return clean_artist, clean_title
 
 
+def choose_best_result_number(text: str) -> str:
+    """
+    Qidiruv natijalarini matn ko'rinishida tahlil qilib, klip/video bo'lmagan,
+    toza original audio (studiya) variantning tartib raqamini aniqlaydi.
+    """
+    if not text:
+        return "1"
+        
+    lines = text.split("\n")
+    results = []
+    
+    for line in lines:
+        match = re.match(r'^(\d+)\.\s*(.*)$', line.strip())
+        if match:
+            num = match.group(1)
+            title = match.group(2).lower()
+            results.append((num, title))
+            
+    if not results:
+        return "1"
+        
+    # Ball tizimi (Past ball = yaxshiroq variant)
+    best_num = "1"
+    best_score = 999
+    
+    for num, title in results:
+        score = 0
+        # Klip yoki videoga oid so'zlar bo'lsa, variantni yomonlashtiramiz
+        if any(w in title for w in ["video", "clip", "klip", "kinodan", "soundtrack", "ost", "o.s.t", "film", "short"]):
+            score += 100
+        # Toza audio yoki studiya variantlar bo'lsa, variantni yaxshilaymiz
+        if any(w in title for w in ["audio", "original", "studio", "studiya", "remastered", "clean"]):
+            score -= 10
+            
+        if score < best_score:
+            best_score = score
+            best_num = num
+            
+    return best_num
+
+
 
