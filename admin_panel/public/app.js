@@ -42,6 +42,7 @@ function switchTab(tab) {
         tabTitle.textContent    = 'Dashboard';
         tabSubtitle.textContent = "Bot holati va oxirgi faollik ko'rsatkichi";
         fetchStats();
+        fetchTodaySchedule();
     } else if (tab === 'settings') {
         tabTitle.textContent    = 'Sozlamalar';
         tabSubtitle.textContent = 'Botning asosiy ish koeffitsiyentlarini boshqarish';
@@ -198,6 +199,57 @@ async function fetchStats() {
         console.error('Stats fetch error:', err);
     }
 }
+
+// --- Today's Schedule ---
+async function fetchTodaySchedule() {
+    const list = document.getElementById('todayScheduleList');
+    if (!list) return;
+    list.innerHTML = '<li class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> Yuklanmoqda...</li>';
+    try {
+        const res  = await fetch('api/schedule/today');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        list.innerHTML = '';
+        if (data.schedule && data.schedule.length > 0) {
+            let postedCount = 0;
+            let pendingCount = 0;
+            data.schedule.forEach((entry, idx) => {
+                if (entry.is_posted) postedCount++; else pendingCount++;
+                const li = document.createElement('li');
+                li.className = 'recent-item';
+                const t = new Date(entry.post_time_local);
+                const timeStr = t.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' });
+                const statusIcon = entry.is_posted
+                    ? '<i class="fa-solid fa-check-double" style="color:var(--success)"></i> Joylandi'
+                    : '<i class="fa-solid fa-clock" style="color:var(--warning)"></i> Kutmoqda';
+                li.innerHTML = `
+                    <div class="recent-track-info">
+                        <h4><span style="color:var(--text-secondary);font-weight:400;font-size:12px;margin-right:6px;">${idx + 1}.</span>${escapeHTML(entry.artist || '—')} – ${escapeHTML(entry.title || '—')}</h4>
+                        <p>${statusIcon}</p>
+                    </div>
+                    <span class="recent-date">${timeStr}</span>
+                `;
+                list.appendChild(li);
+            });
+            // Summary badge
+            const summary = document.createElement('li');
+            summary.style.cssText = 'padding:10px 14px;font-size:12px;color:var(--text-secondary);border-top:1px solid var(--border-color);display:flex;gap:16px;';
+            summary.innerHTML = `
+                <span><i class="fa-solid fa-check-double" style="color:var(--success)"></i> Joylangan: <b>${postedCount}</b></span>
+                <span><i class="fa-solid fa-clock" style="color:var(--warning)"></i> Kutmoqda: <b>${pendingCount}</b></span>
+                <span><i class="fa-solid fa-music"></i> Jami: <b>${data.schedule.length}</b></span>
+            `;
+            list.appendChild(summary);
+        } else {
+            list.innerHTML = '<li class="empty-state">Bugun uchun reja topilmadi. Rejalashtirish tugmasini bosing.</li>';
+        }
+    } catch (err) {
+        console.error('Schedule fetch error:', err);
+        list.innerHTML = '<li class="empty-state">Rejalanish jadvalini yuklab bo\'lmadi.</li>';
+    }
+}
+
+document.getElementById('refreshScheduleBtn').addEventListener('click', fetchTodaySchedule);
 
 // --- Live Logs ---
 autoscrollBtn.addEventListener('click', () => {

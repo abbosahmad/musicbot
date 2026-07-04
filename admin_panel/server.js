@@ -429,6 +429,32 @@ app.get('/api/stats', async (req, res) => {
   }
 });
 
+// Today's Schedule API
+app.get('/api/schedule/today', async (req, res) => {
+  try {
+    // Toshkent vaqti bo'yicha bugungi kun boshlanishi va tugashi
+    const result = await pool.query(`
+      SELECT
+        id,
+        post_time AT TIME ZONE 'Asia/Tashkent' AS post_time_local,
+        track_id,
+        artist,
+        title,
+        chat_id,
+        is_posted
+      FROM daily_schedule
+      WHERE
+        (post_time AT TIME ZONE 'Asia/Tashkent')::date
+          = (NOW() AT TIME ZONE 'Asia/Tashkent')::date
+      ORDER BY post_time ASC
+    `);
+    res.json({ schedule: result.rows });
+  } catch (err) {
+    console.error('Schedule fetch error:', err);
+    res.status(500).json({ error: 'Database error fetching schedule' });
+  }
+});
+
 // Logs Real-time Streaming Logic
 const logFilePath = path.resolve(__dirname, '../bot_logs.log');
 
