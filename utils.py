@@ -602,12 +602,20 @@ def clean_search_query(query: str) -> str:
     """
     if not query:
         return ""
+        
+    # Artist nomidagi noma'lum so'zlarni olib tashlash
+    invalid_artists = ["unknown artist", "unknown performer", "noma'lum ijrochi", "nomalum ijrochi", "noma'lum", "nomalum", "unknown", "trend music", "trend"]
+    for inv_art in invalid_artists:
+        query = re.sub(rf'^{re.escape(inv_art)}\s*-\s*', '', query, flags=re.IGNORECASE)
+        query = re.sub(rf'\s*-\s*{re.escape(inv_art)}$', '', query, flags=re.IGNORECASE)
+        if query.lower().strip() == inv_art:
+            query = ""
     
     # " - " bo'lsa, Artist va Title ni oldindan tozalash (masalan: Muzikalar UzMuz - x13ahram - Dözmüyacam)
     if " - " in query:
         parts = query.split(" - ", 1)
         art, tit = extract_clean_artist_and_title(parts[0], parts[1])
-        if art:
+        if art and art.lower().strip() not in invalid_artists:
             query = f"{art} - {tit}"
         else:
             query = tit

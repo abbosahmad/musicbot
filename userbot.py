@@ -362,6 +362,11 @@ class UserBot:
         if not self.app or not self.app.is_connected:
             return None
             
+        # So'rovni yuborishdan oldin tozalash
+        query = utils.clean_search_query(query)
+        if not query or not query.strip():
+            return None
+            
         target_search_bot = await database.get_setting("target_search_bot", "@Zoryuklabot")
         logger.info(f"Matnli so'rov maqsadli botga yuborilmoqda: {target_search_bot} | So'rov: {query}")
         
