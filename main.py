@@ -499,34 +499,53 @@ async def plan_daily_posts(force: bool = False):
     logger.info(f"7 kun ichida {len(unique_candidates)} ta yangi unikal musiqa topildi.")
 
     if unique_candidates:
-        # Group candidates by source channel (chat_id)
+        # Group candidates by source channel, sort each by score
         candidates_by_channel = {}
         for track in unique_candidates:
             cid = track.get('chat_id')
             if cid not in candidates_by_channel:
                 candidates_by_channel[cid] = []
             candidates_by_channel[cid].append(track)
-            
-        selected_tracks = []
-        remaining_candidates = []
-        
-        # 1. Pick at least 1 most popular track from each channel
-        for cid, tracks in candidates_by_channel.items():
-            # Sort this channel's tracks by score descending
-            tracks.sort(key=utils.calculate_track_score, reverse=True)
-            selected_tracks.append(tracks[0])
-            remaining_candidates.extend(tracks[1:])
-            
-        # Sort selected_tracks by score descending
-        selected_tracks.sort(key=utils.calculate_track_score, reverse=True)
-        
-        if len(selected_tracks) > target_count:
-            to_post = selected_tracks[:target_count]
+
+        for cid in candidates_by_channel:
+            candidates_by_channel[cid].sort(
+                key=utils.calculate_track_score, reverse=True
+            )
+
+        channel_ids = list(candidates_by_channel.keys())
+        num_channels = len(channel_ids)
+
+        # --- 60/40 taqsimoti (2 kanal bo'lsa 60/40, 1 kanal bo'lsa 100%) ---
+        if num_channels == 1:
+            quotas = [target_count]
+        elif num_channels == 2:
+            # Birinchi kanaldan 60%, ikkinchisidan 40% (kamida 1 ta)
+            q0 = max(1, round(target_count * 0.6))
+            q1 = max(1, target_count - q0)
+            quotas = [q0, q1]
         else:
-            # Sort remaining candidates globally by score
-            remaining_candidates.sort(key=utils.calculate_track_score, reverse=True)
-            slots_to_fill = target_count - len(selected_tracks)
-            to_post = selected_tracks + remaining_candidates[:slots_to_fill]
+            # 3 va undan ko'p kanallar: teng taqsimot
+            base = target_count // num_channels
+            rem = target_count % num_channels
+            quotas = [base + (1 if i < rem else 0) for i in range(num_channels)]
+
+        to_post = []
+        leftover = []
+        for i, cid in enumerate(channel_ids):
+            pool = candidates_by_channel[cid]
+            quota = quotas[i] if i < len(quotas) else 0
+            to_post.extend(pool[:quota])
+            leftover.extend(pool[quota:])
+
+        # Agar target_count ga yetmagan bo'lsak, qolganlardan to'ldiramiz
+        if len(to_post) < target_count:
+            leftover.sort(key=utils.calculate_track_score, reverse=True)
+            needed = target_count - len(to_post)
+            to_post.extend(leftover[:needed])
+
+        # Final ro'yxatni score bo'yicha tartiblash
+        to_post.sort(key=utils.calculate_track_score, reverse=True)
+        to_post = to_post[:target_count]
 
         tashkent_tz = pytz.timezone("Asia/Tashkent")
         now = datetime.now(tashkent_tz)
