@@ -199,12 +199,12 @@ async def send_music_to_channel(file_path: str, caption_text: str, artist: str, 
             )
             await asyncio.sleep(1)
             
-            # Userbot o'ziga kelgan oxirgi audio xabarni kanalga forward qiladi
+            # Userbot o'ziga kelgan oxirgi audio xabarni kanalga muallifsiz (toza post sifatida) nusxalaydi
             bot_info = await bot.get_me()
             async for m in userbot.app.get_chat_history(bot_info.id, limit=3):
                 if m.audio:
-                    fwd = await m.forward(config.MAIN_CHANNEL_ID)
-                    logger.success(f"✅ Musiqa Userbot orqali kanalga muvaffaqiyatli forward qilindi (Custom Emoji bilan)! ID: {fwd.id}")
+                    clean_post = await m.copy(config.MAIN_CHANNEL_ID)
+                    logger.success(f"✅ Musiqa Userbot orqali kanalga toza (muallifsiz) joylandi! ID: {clean_post.id}")
                     return True
         except Exception as bridge_err:
             logger.warning(f"Userbot Bridge orqali forward qilishda xato: {bridge_err}. To'g'ridan-to'g'ri kanalga yuborilmoqda...")
