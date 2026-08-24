@@ -47,73 +47,7 @@ class UserBot:
             session_string=config.USERBOT_SESSION_STRING if config.USERBOT_SESSION_STRING else None,
         )
 
-    async def search_global_music(self, artist: str, title: str) -> Optional[str]:
-        """
-        Telegram Global Qidiruv orqali musiqa topish va yuklash
-        """
-        if not self.app or not self.app.is_connected:
-            return None
 
-        # Clean search query
-        clean_query = utils.clean_search_query(f"{artist} - {title}")
-        if not clean_query or len(clean_query) < 2:
-            clean_query = utils._clean_single_string(title)
-
-        if not clean_query:
-            return None
-
-        logger.info(f"Telegram Global Qidiruv: '{clean_query}'")
-
-        queries_to_try = [clean_query]
-        if " - " in clean_query:
-            parts = clean_query.split(" - ", 1)
-            if len(parts) > 1 and parts[1].strip():
-                queries_to_try.append(parts[1].strip())
-
-        for q in queries_to_try:
-            try:
-                candidates = []
-                async for message in self.app.search_global(q, filter=enums.MessagesFilter.AUDIO, limit=15):
-                    if message.audio:
-                        duration = message.audio.duration or 0
-                        size = message.audio.file_size or 0
-
-                        # Filter: Normal song duration (1.5 min - 6.5 min) and size (2 MB - 25 MB)
-                        if 90 <= duration <= 390 and (2 * 1024 * 1024 <= size <= 25 * 1024 * 1024):
-                            performer = message.audio.performer or ""
-                            track_title = message.audio.title or ""
-                            file_name = message.audio.file_name or ""
-                            full_text = f"{performer} {track_title} {file_name}".lower()
-
-                            # Calculate match score
-                            score = 0
-                            if 150 <= duration <= 270:
-                                score += 20
-
-                            words = [w.lower() for w in re.findall(r'\w+', q) if len(w) > 2]
-                            matched_words = sum(1 for w in words if w in full_text)
-                            score += matched_words * 30
-                            score += int(size / (1024 * 1024))
-
-                            candidates.append((score, message))
-
-                if candidates:
-                    candidates.sort(key=lambda x: x[0], reverse=True)
-                    best_msg = candidates[0][1]
-
-                    file_name = f"downloads/global_{best_msg.audio.file_unique_id}.mp3"
-                    logger.info(f"Global qidiruvdan topildi: {best_msg.audio.performer} - {best_msg.audio.title} ({best_msg.audio.duration}s, {best_msg.audio.file_size / 1024 / 1024:.2f} MB)")
-
-                    path = await _safe_download(best_msg, file_name)
-                    if path and os.path.exists(path) and os.path.getsize(path) > 0:
-                        logger.success("✅ Telegram Global Qidiruvdan muvaffaqiyatli yuklandi!")
-                        return path
-
-            except Exception as e:
-                logger.error(f"Global Qidiruv xatosi ('{q}'): {e}")
-
-        logger.warning("Telegram Global Qidiruvda mos variant topilmadi.")
-        return None
 
     async def start(self):
         try:

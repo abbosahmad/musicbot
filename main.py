@@ -258,26 +258,19 @@ async def post_music(track_info: Dict):
                 final_artist = clean_artist
                 final_title = clean_title
             else:
-                logger.info("ℹ️ Matnli qidiruv topmadi. Telegram Global qidiruv tekshirilmoqda...")
-                final_file_path = await userbot.search_global_music(clean_artist, clean_title)
+                logger.warning("⚠️ Matnli qidiruv natija bermadi. Forward orqali maqsadli botdan olishga urinilmoqda...")
+                final_file_path = await userbot.search_via_target_bot(track_info['chat_id'], track_info['message_id'])
                 if final_file_path and os.path.exists(final_file_path):
-                    logger.success("✅ Telegram Global Qidiruvdan original musiqa olindi.")
-                    final_artist = clean_artist
-                    final_title = clean_title
-                else:
-                    logger.warning("⚠️ Global qidiruv topmadi. Forward orqali original variantini olishga urinilmoqda...")
-                    final_file_path = await userbot.search_via_target_bot(track_info['chat_id'], track_info['message_id'])
-                    if final_file_path and os.path.exists(final_file_path):
-                        logger.success("✅ Forward qidiruv muvaffaqiyatli: Maqsadli botdan original musiqa olindi.")
-                        shazam_result = await utils.identify_track_with_shazam(final_file_path)
-                        if shazam_result and shazam_result.get('artist') and shazam_result.get('title'):
-                            final_artist = shazam_result['artist']
-                            final_title = shazam_result['title']
-                        else:
-                            final_artist = clean_artist
-                            final_title = clean_title
+                    logger.success("✅ Forward qidiruv muvaffaqiyatli: Maqsadli botdan original musiqa olindi.")
+                    shazam_result = await utils.identify_track_with_shazam(final_file_path)
+                    if shazam_result and shazam_result.get('artist') and shazam_result.get('title'):
+                        final_artist = shazam_result['artist']
+                        final_title = shazam_result['title']
+                    else:
+                        final_artist = clean_artist
+                        final_title = clean_title
 
-            # 2. Zaxira (Fallback) Rejimi — agar maqsadli botdan ham, globaldan ham topilmasa
+            # 2. Zaxira (Fallback) Rejimi — agar maqsadli botdan (matnli ham, forward ham) topilmasa
             if not final_file_path or not os.path.exists(final_file_path):
                 dirty_file = await userbot.download_music(
                     track_info['chat_id'], track_info['message_id'], temp_dirty_path
@@ -294,19 +287,12 @@ async def post_music(track_info: Dict):
                     shazam_title = shazam_result['title']
                     logger.success(f"✅ Shazam aniqladi: {shazam_artist} - {shazam_title}")
 
-                    # Global qidiruv (Shazam natijasi bilan)
-                    final_file_path = await userbot.search_global_music(shazam_artist, shazam_title)
+                    # YouTube (Shazam natijasi bilan)
+                    final_file_path = await utils.get_youtube_with_api(shazam_artist, shazam_title)
                     if final_file_path:
                         final_artist = shazam_artist
                         final_title = shazam_title
-                        logger.success("✅ Zaxira manba: Telegram Global Search (Shazam)")
-                    else:
-                        # YouTube (Shazam natijasi bilan)
-                        final_file_path = await utils.get_youtube_with_api(shazam_artist, shazam_title)
-                        if final_file_path:
-                            final_artist = shazam_artist
-                            final_title = shazam_title
-                            logger.success("✅ Zaxira manba: YouTube (Shazam)")
+                        logger.success("✅ Zaxira manba: YouTube (Shazam)")
                 
                 # Agar Shazam topa olmagan bo'lsa, tozalangan nom bo'yicha YouTube'dan urinish
                 if not final_file_path or not os.path.exists(final_file_path):
@@ -678,13 +664,7 @@ async def _plan_daily_posts_internal(force: bool = False):
                     logger.info(f"✅ [Pre-dl] Topildi (forward): {query}")
                     return fpath
 
-                # 3. Telegram Global Search
-                fpath = await userbot.search_global_music(c_artist, c_title)
-                if fpath and os.path.exists(fpath):
-                    logger.info(f"✅ [Pre-dl] Topildi (global): {query}")
-                    return fpath
-
-                # 4. YouTube fallback
+                # 3. YouTube fallback
                 fpath = await utils.get_youtube_with_api(c_artist, c_title)
                 if fpath and os.path.exists(fpath):
                     logger.info(f"✅ [Pre-dl] Topildi (YouTube): {query}")
@@ -1300,17 +1280,12 @@ async def text_search_handler(message: types.Message):
     status_msg = await message.answer(f"🔍 Musiqa qidirilmoqda: <b>{query}</b>...")
     
     try:
-        # 1. Target Bot (VK) orqali qidirish
+        # 1. Target Bot orqali qidirish
         file_path = await userbot.search_text_via_target_bot(query)
         
-        # 2. Agar topilmasa, Telegram Global Search orqali zaxira qidiruv
+        # 2. Agar topilmasa, YouTube Fallback
         if not file_path:
-            logger.info("Target botdan topilmadi, Global Search ishlatilmoqda...")
-            file_path = await userbot.search_global_music("", query)
-            
-        # 3. Agar hali ham topilmasa, YouTube Fallback
-        if not file_path:
-            logger.info("Global Searchdan topilmadi, YouTube ishlatilmoqda...")
+            logger.info("Target botdan topilmadi, YouTube ishlatilmoqda...")
             file_path = await utils.get_youtube_with_api("", query)
             
         if file_path and os.path.exists(file_path):
@@ -1416,8 +1391,6 @@ async def process_and_post_direct_bot(status_msg: types.Message, artist: str, ti
     try:
         query = utils.clean_search_query(f"{artist} - {title}")
         file_path = await userbot.search_text_via_target_bot(query)
-        if not file_path:
-            file_path = await userbot.search_global_music(artist, title)
         if not file_path:
             file_path = await utils.get_youtube_with_api(artist, title)
             
@@ -1610,8 +1583,6 @@ async def process_and_schedule_direct_bot(status_msg: types.Message, artist: str
         
         query = utils.clean_search_query(f"{artist} - {title}")
         file_path = await userbot.search_text_via_target_bot(query)
-        if not file_path:
-            file_path = await userbot.search_global_music(artist, title)
         if not file_path:
             file_path = await utils.get_youtube_with_api(artist, title)
             
@@ -1886,8 +1857,6 @@ async def audio_search_handler(message: types.Message, state: FSMContext):
                 # Target Bot orqali qidirish
                 file_path = await userbot.search_text_via_target_bot(query)
                 if not file_path:
-                    file_path = await userbot.search_global_music("", query)
-                if not file_path:
                     file_path = await utils.get_youtube_with_api("", query)
                     
                 if file_path and os.path.exists(file_path):
@@ -1931,8 +1900,6 @@ async def audio_search_handler(message: types.Message, state: FSMContext):
             
             query = utils.clean_search_query(f"{artist} - {title}")
             file_path = await userbot.search_text_via_target_bot(query)
-            if not file_path:
-                file_path = await userbot.search_global_music(artist, title)
             if not file_path:
                 file_path = await utils.get_youtube_with_api(artist, title)
                 
