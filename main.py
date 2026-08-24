@@ -164,32 +164,11 @@ from pyrogram import enums
 
 async def send_music_to_channel(file_path: str, caption_text: str, artist: str, title: str, duration: Optional[int] = None):
     """
-    Musiqani kanalga yuboradi.
-    1. Avval UserBot (Pyrogram) orqali yuborishga harakat qiladi (chunki Premium userbot orqali Custom Emojilar 100% animatsiyali chiqadi).
-    2. Agar userbot ishlamasa yoki ruxsat bo'lmasa, Aiogram Bot orqali yuboradi.
+    Musiqani kanalga ishonchli va tez yuboradi (Aiogram Bot orqali).
     """
     thumb_path = "thumbnail.jpg" if os.path.exists("thumbnail.jpg") else None
     
-    # 1. Userbot orqali yuborish (Premium custom emoji qo'llab-quvvatlaydi)
-    if userbot.app and userbot.app.is_connected:
-        try:
-            logger.info("Musiqa Userbot orqali kanalga yuborilmoqda...")
-            await userbot.app.send_audio(
-                chat_id=config.MAIN_CHANNEL_ID,
-                audio=file_path,
-                caption=caption_text,
-                parse_mode=enums.ParseMode.HTML,
-                performer=artist,
-                title=title,
-                thumb=thumb_path,
-                duration=duration or 0
-            )
-            logger.success("✅ Musiqa Userbot orqali kanalga muvaffaqiyatli yuklandi!")
-            return True
-        except Exception as ub_err:
-            logger.warning(f"Userbot orqali yuborishda xatolik: {ub_err}. Bot orqali yuborilmoqda...")
-
-    # 2. Aiogram Bot orqali zaxira yuborish
+    logger.info(f"Musiqa kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
     await bot.send_audio(
         config.MAIN_CHANNEL_ID,
         audio=FSInputFile(file_path, filename=f"{artist} - {title}.mp3"),
@@ -199,7 +178,7 @@ async def send_music_to_channel(file_path: str, caption_text: str, artist: str, 
         thumbnail=FSInputFile(thumb_path) if thumb_path else None,
         duration=duration
     )
-    logger.success("✅ Musiqa Bot orqali kanalga muvaffaqiyatli yuklandi!")
+    logger.success("✅ Musiqa kanalga muvaffaqiyatli yuklandi!")
     return True
 
 
