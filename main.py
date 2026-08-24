@@ -174,17 +174,17 @@ async def send_music_to_channel(file_path: str, caption_text: str, artist: str, 
     channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
     highlight_time = utils.detect_music_highlight(file_path)
 
-    # Pyrogram HTML formati (Userbot uchun): <emoji id=5222472119295684375>🎧</emoji>
-    # Aiogram HTML formati (Bot uchun): <tg-emoji emoji-id="5222472119295684375">🎧</tg-emoji>
+    # Pyrogram HTML formati (Userbot uchun): <emoji id=5222472119295684375>🎶</emoji>
+    # Aiogram HTML formati (Bot uchun): <tg-emoji emoji-id="5222472119295684375">🎶</tg-emoji>
     if emoji_id and str(emoji_id).strip() not in ["0", ""]:
-        pyro_emoji = f'<emoji id={emoji_id}>🎧</emoji>'
-        aio_emoji = f'<tg-emoji emoji-id="{emoji_id}">🎧</tg-emoji>'
+        pyro_emoji = f'<emoji id={emoji_id}>🎶</emoji>'
+        aio_emoji = f'<tg-emoji emoji-id="{emoji_id}">🎶</tg-emoji>'
     else:
         pyro_emoji = "🎧"
         aio_emoji = "🎧"
 
-    pyro_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name} | {pyro_emoji}</a>"
-    aio_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name} | {aio_emoji}</a>"
+    pyro_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | {pyro_emoji}"
+    aio_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | {aio_emoji}"
 
     # 1. Userbot orqali yuborish (Telegram Premium hisob orqali animatsiyali chiqadi)
     if userbot.app and userbot.app.is_connected:
