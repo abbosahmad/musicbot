@@ -563,6 +563,10 @@ def write_clean_metadata(file_path: str, artist: str, title: str):
     if not file_path or not os.path.exists(file_path):
         return
 
+    # Spotify yoki bo'sh nomlarni Trend Musiqa ga almashtirish
+    if not artist or str(artist).lower().strip() in ["spotify", "unknown artist", "unknown", "noma'lum", "nomalum"]:
+        artist = "Trend Musiqa"
+
     thumb_path = "thumbnail.jpg"
     clean_temp = file_path.replace(".mp3", "_clean_tmp.mp3")
 

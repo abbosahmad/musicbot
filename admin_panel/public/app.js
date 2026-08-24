@@ -85,7 +85,7 @@ async function fetchSettings() {
 
         document.getElementById('planning_hour').value          = data.planning_hour    ?? 5;
         document.getElementById('daily_post_count').value       = data.daily_post_count ?? 5;
-        document.getElementById('main_channel_name').value      = data.main_channel_name ?? 'Spotify';
+        document.getElementById('main_channel_name').value      = data.main_channel_name ?? 'Trend Musiqa';
         document.getElementById('main_channel_link').value      = data.main_channel_link ?? 'https://t.me/trend_musiqaUZ';
         document.getElementById('target_search_bot').value      = data.target_search_bot ?? '@Zoryuklabot';
         document.getElementById('clean_source_channels').value  = data.clean_source_channels ?? (data.source_channels ?? '');

@@ -93,7 +93,7 @@ def get_settings_keyboard(settings: Dict) -> InlineKeyboardMarkup:
     plan_hour = settings.get('planning_hour', '5')
     night_mode = settings.get('night_mode', 'false') == 'true'
     night_icon = "🟢 Yoqilgan" if night_mode else "🔴 O'chirilgan"
-    ch_name = settings.get('main_channel_name', 'Spotify')
+    ch_name = settings.get('main_channel_name', 'Trend Musiqa')
 
     return InlineKeyboardMarkup(inline_keyboard=[
         [
@@ -130,7 +130,7 @@ async def get_admin_panel_text() -> str:
     
     clean_ch = settings.get('clean_source_channels', '') or '(Kiritilmagan)'
     direct_ch = settings.get('direct_source_channels', '') or '(Kiritilmagan)'
-    ch_name = settings.get('main_channel_name', 'Spotify')
+    ch_name = settings.get('main_channel_name', 'Trend Musiqa')
     ch_link = settings.get('main_channel_link', 'https://t.me/trend_musiqaUZ')
     
     night_mode = settings.get('night_mode', 'false') == 'true'
@@ -959,7 +959,7 @@ async def admin_callback_handler(query: CallbackQuery, state: FSMContext):
             f"🎵 <b>Kunlik limit:</b> {settings.get('daily_post_count', '6')} ta post\n"
             f"⏰ <b>Rejalashtirish soati:</b> {settings.get('planning_hour', '5')}:00\n"
             f"🌙 <b>Tun rejimi:</b> {'🟢 Yoqilgan (23:00 - 07:00)' if settings.get('night_mode') == 'true' else '🔴 O\'chirilgan'}\n"
-            f"🏷 <b>Kanal nomi:</b> {settings.get('main_channel_name', 'Spotify')}\n"
+            f"🏷 <b>Kanal nomi:</b> {settings.get('main_channel_name', 'Trend Musiqa')}\n"
             f"🔗 <b>Kanal linki:</b> {settings.get('main_channel_link', 'https://t.me/trend_musiqaUZ')}\n"
             f"🤖 <b>Qidiruv boti:</b> {settings.get('target_search_bot', '@Zoryuklabot')}\n\n"
             "Kerakli parametrni o'zgartirish uchun tugmalardan foydalaning 👇"
