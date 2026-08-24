@@ -172,18 +172,18 @@ async def send_music_to_channel(file_path: str, caption_text: str, artist: str, 
     channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
     highlight_time = utils.detect_music_highlight(file_path)
 
-    # 1. Dublikat nomlarni tozalash (masalan Janaga - Janaga bo'lib qolmasligi)
+    # 1. Dublikat nomlarni tozalash
     clean_a = artist.strip() if artist else ""
     clean_t = title.strip() if title else ""
     if clean_a.lower() == clean_t.lower() or not clean_a:
         final_title = clean_t or "Musiqa"
-        final_performer = None
+        final_performer = channel_name
     else:
         final_performer = clean_a
         final_title = clean_t
 
-    # 2. Toza caption: "00:59 Trend Musiqa | 🎧"
-    final_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | 🎧"
+    # 2. Toza ixcham caption (telefonda ham 1 qatorga sig'adi): "00:59 Trend Musiqa 🎧"
+    final_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> 🎧"
 
     logger.info(f"Musiqa Bot orqali to'g'ridan-to'g'ri kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
     await bot.send_audio(
@@ -248,8 +248,8 @@ async def post_music(track_info: Dict):
             # Avj vaqtini aniqlash
             highlight_time = utils.detect_music_highlight(direct_file, raw_text=track_info.get('raw_caption', ''))
             
-            # Caption: "00:47 Trend Musiqa | 🎧"
-            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | 🎧"
+            # Caption: "00:47 Trend Musiqa 🎧"
+            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> 🎧"
             
             full_audio_duration = utils.get_audio_duration(direct_file)
                 
