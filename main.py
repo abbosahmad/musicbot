@@ -165,8 +165,9 @@ from pyrogram import enums
 async def send_music_to_channel(file_path: str, caption_text: str, artist: str, title: str, duration: Optional[int] = None):
     """
     Musiqani kanalga yuboradi.
-    1. Agar Userbot (Premium shaxsiy hisobingiz) ulangan bo'lsa, u orqali yuboradi (<emoji id=...> tegi orqali animatsiyali chiqadi).
-    2. Agar userbot ishlamasa yoki ruxsat bo'lmasa, Aiogram Bot orqali zaxiradan yuboradi.
+    1. Bot musiqani Userbot shaxsiy chatiga <tg-emoji> bilan jo'natadi,
+       Userbot esa uni kanalga forward qiladi (bu orqali Custom Emoji 100% animatsiyali chiqadi).
+    2. Agar Userbot ulanmagan bo'lsa yoki xatolik yuz bersa: Bot to'g'ridan-to'g'ri kanalga zaxiradan yuboradi.
     """
     thumb_path = "thumbnail.jpg" if os.path.exists("thumbnail.jpg") else None
     emoji_id = await database.get_setting("custom_emoji_id", getattr(config, "CUSTOM_EMOJI_ID", "5222472119295684375"))
@@ -174,7 +175,7 @@ async def send_music_to_channel(file_path: str, caption_text: str, artist: str, 
     channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
     highlight_time = utils.detect_music_highlight(file_path)
 
-    # Telegram Bot API formati
+    # Telegram Bot API formati (Bot egasi Premium bo'lgani uchun DM da ishlaydi)
     if emoji_id and str(emoji_id).strip() not in ["0", ""]:
         emoji_tag = f'<tg-emoji emoji-id="{emoji_id}">🎶</tg-emoji>'
     else:
@@ -182,7 +183,34 @@ async def send_music_to_channel(file_path: str, caption_text: str, artist: str, 
 
     final_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | {emoji_tag}"
 
-    logger.info(f"Musiqa Bot orqali kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
+    # 1. Userbot Bridge orqali (Bot -> Userbot DM -> Channel Forward)
+    if userbot.app and userbot.app.is_connected:
+        try:
+            me = await userbot.app.get_me()
+            logger.info(f"Musiqa Bot orqali Userbot ({me.id}) shaxsiy chatiga yuklanmoqda...")
+            dm_msg = await bot.send_audio(
+                chat_id=me.id,
+                audio=FSInputFile(file_path, filename=f"{artist} - {title}.mp3"),
+                caption=final_caption,
+                performer=artist,
+                title=title,
+                thumbnail=FSInputFile(thumb_path) if thumb_path else None,
+                duration=duration
+            )
+            await asyncio.sleep(1)
+            
+            # Userbot o'ziga kelgan oxirgi audio xabarni kanalga forward qiladi
+            bot_info = await bot.get_me()
+            async for m in userbot.app.get_chat_history(bot_info.id, limit=3):
+                if m.audio:
+                    fwd = await m.forward(config.MAIN_CHANNEL_ID)
+                    logger.success(f"✅ Musiqa Userbot orqali kanalga muvaffaqiyatli forward qilindi (Custom Emoji bilan)! ID: {fwd.id}")
+                    return True
+        except Exception as bridge_err:
+            logger.warning(f"Userbot Bridge orqali forward qilishda xato: {bridge_err}. To'g'ridan-to'g'ri kanalga yuborilmoqda...")
+
+    # 2. To'g'ridan-to'g'ri Bot orqali zaxira yuborish
+    logger.info(f"Musiqa Bot orqali to'g'ridan-to'g'ri kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
     await bot.send_audio(
         config.MAIN_CHANNEL_ID,
         audio=FSInputFile(file_path, filename=f"{artist} - {title}.mp3"),
