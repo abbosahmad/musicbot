@@ -81,59 +81,108 @@ def check_forbidden_keywords(artist: str, title: str) -> bool:
 
 
 async def get_clean_details_with_ai(raw_artist: str, raw_title: str) -> dict:
+    fallback_artist, fallback_title = extract_clean_artist_and_title(raw_artist, raw_title)
+    if not fallback_artist:
+        fallback_artist = _clean_single_string(raw_artist)
+    if not fallback_title:
+        fallback_title = _clean_single_string(raw_title)
+
     if not hasattr(config, 'DEEPSEEK_API_KEY') or not config.DEEPSEEK_API_KEY:
         return {
-            "artist": _clean_single_string(raw_artist),
-            "title": _clean_single_string(raw_title),
+            "artist": fallback_artist or "Trend MUSIC",
+            "title": fallback_title or "Musiqa",
             "is_religious": False,
             "is_political": False,
             "reason": "AI API Key missing"
         }
 
     try:
+        model_name = getattr(config, 'DEEPSEEK_MODEL', 'deepseek/deepseek-v4-flash-vision-exp')
+        base_url = getattr(config, 'DEEPSEEK_BASE_URL', None)
+        if not base_url:
+            if "/" in model_name:
+                base_url = "https://openrouter.ai/api/v1"
+            else:
+                base_url = "https://api.deepseek.com"
+
+        default_headers = {}
+        if "openrouter.ai" in base_url:
+            default_headers = {
+                "HTTP-Referer": "https://abboscoder.uz/music",
+                "X-Title": "Trend Music Telegram Bot"
+            }
+
         client = AsyncOpenAI(
             api_key=config.DEEPSEEK_API_KEY,
-            base_url="https://api.deepseek.com"
+            base_url=base_url,
+            default_headers=default_headers if default_headers else None,
+            timeout=12.0
         )
 
         system_prompt = """You are a music metadata cleaning and safety evaluation expert.
-Your task is to extract the clean 'artist' and 'title' from raw input, and evaluate if the track contains religious or political content.
-- Clean the artist and title: Remove ads, channel names (@...), website URLs, and promotional keywords. If the artist is purely promotional, set it to "". Fix capitalization (Title Case).
-- Evaluate content (Be very lenient and conservative when flagging):
-  1. Set 'is_religious' to true ONLY if the track is explicitly a direct Islamic prayer, Quran recitation, nasheed, salovat, or religious chant. Do NOT flag general cultural love/life songs that mention religious terms or God in a general metaphorical or cultural way.
-  2. Set 'is_political' to true ONLY if the track is explicitly about political figures (e.g. presidents, ministers), governments, elections, military/war propaganda, or political protests. Do NOT flag general songs about struggle, prison, history, life, or freedom unless they are clearly political propaganda or direct government commentary.
+Your task is to extract the clean 'artist' (singer/performer) and 'title' (song name) from raw input, and evaluate if the track contains religious or political content.
+- Rules for metadata cleaning:
+  1. Remove promotional channel names (@...), telegram links, websites (.uz, .ru, .com), and download keywords (skachat, yuklash, mp3, mp3lar, uzmuz, taronalar).
+  2. PRESERVE legitimate music tags like (Remix), (DJ ... Remix), (Speed Up), (Slowed), (Cover), (feat. Singer), (ft. Singer).
+  3. Never delete actual singer names (e.g. Botir Qodirov, Muzaffar Mirzarahimov, Jaloliddin Ahmadaliyev).
+  4. If the raw artist is purely a channel name (e.g. 'Muzikalar UzMuz', 'Taronalar'), extract the real artist from the title if available.
+  5. Format with proper Title Case capitalization.
+- Evaluate safety (Be very lenient and conservative):
+  1. Set 'is_religious' to true ONLY if the track is explicitly a direct Islamic prayer, Quran recitation, nasheed, salovat, or religious chant.
+  2. Set 'is_political' to true ONLY if the track is explicitly about political figures (presidents, ministers), governments, elections, or military/war propaganda.
   3. Otherwise, set both to false.
-  4. Write a brief explanation for your safety evaluation in 'reason'.
-- Return ONLY a JSON object: {"artist": "...", "title": "...", "is_religious": true/false, "is_political": true/false, "reason": "..."}"""
+- Return ONLY a valid JSON object: {"artist": "...", "title": "...", "is_religious": false, "is_political": false, "reason": "..."}"""
 
         user_prompt = f"""Raw Artist: "{raw_artist}"
 Raw Title: "{raw_title}" """
 
-        response = await client.chat.completions.create(
-            model="deepseek-chat",
-            messages=[
+        create_kwargs = {
+            "model": model_name,
+            "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            response_format={ "type": "json_object" },
-            temperature=0.1
-        )
+            "temperature": 0.1
+        }
+        
+        # Add response_format if standard supported
+        try:
+            response = await client.chat.completions.create(
+                **create_kwargs,
+                response_format={"type": "json_object"}
+            )
+        except Exception:
+            # Fallback without json_object constraint for models that don't support it directly
+            response = await client.chat.completions.create(**create_kwargs)
 
-        content = response.choices[0].message.content
+        content = response.choices[0].message.content.strip()
+        
+        # Robust JSON parser for AI responses wrapped in ```json ```
+        if "```" in content:
+            json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', content)
+            if json_match:
+                content = json_match.group(1).strip()
+
         data = json.loads(content)
+        
+        # Ensure returned fields are not empty
+        if not data.get("artist"):
+            data["artist"] = fallback_artist or "Trend MUSIC"
+        if not data.get("title"):
+            data["title"] = fallback_title or "Musiqa"
+            
         return data
 
     except Exception as e:
         err_msg = str(e).lower()
-        logger.error(f"AI xatoligi (Fallback ishlatiladi): {e}")
+        logger.warning(f"AI xatoligi (Aqlli regex fallback ishlatiladi): {e}")
         
-        # DeepSeek balansi tugasa (402 balance xatosi kabi) yoki katta xatolik bo'lsa
-        if "402" in err_msg or "insufficient_quota" in err_msg or "balance" in err_msg:
-             asyncio.create_task(send_alert_to_admin(f"DeepSeek AI API xatolik berdi yoki balansi tugadi! Fallback rejimga o'tildi.\n\nXato: {e}"))
+        if "402" in err_msg or "insufficient_quota" in err_msg or "balance" in err_msg or "401" in err_msg:
+             asyncio.create_task(send_alert_to_admin(f"DeepSeek AI API xatolik berdi (Kalit/Balans): {e}. Aqlli fallback rejimida ishlamoqda."))
              
         return {
-            "artist": _clean_single_string(raw_artist),
-            "title": _clean_single_string(raw_title),
+            "artist": fallback_artist or "Trend MUSIC",
+            "title": fallback_title or "Musiqa",
             "is_religious": False,
             "is_political": False,
             "reason": f"AI Error: {e}"
@@ -214,10 +263,16 @@ async def search_youtube_with_api(artist: str, title: str) -> dict:
 
 def download_youtube_with_api_url(youtube_url: str) -> str:
     """
-    YouTube'dan fayl yuklash (COOKIESIZ - 3 ta usul)
+    YouTube'dan fayl yuklash (Cookies va bir nechta zamonaviy mijozlar bilan)
     """
-    # 1-usul: Android client (cookies'siz)
-    ydl_opts_android = {
+    cookie_file = None
+    for cf in ["cookies.txt", "cookies.txt.txt"]:
+        if os.path.exists(cf) and os.path.getsize(cf) > 100:
+            cookie_file = cf
+            break
+
+    # 1-usul: Android VR / Web Creator (zamonaviy blokirovkasiz mijozlar)
+    ydl_opts_modern = {
         'format': 'bestaudio/best',
         'outtmpl': 'downloads/yt_%(id)s.%(ext)s',
         'postprocessors': [{
@@ -230,20 +285,21 @@ def download_youtube_with_api_url(youtube_url: str) -> str:
         'ignoreerrors': True,
         'extractor_args': {
             'youtube': {
-                'player_client': ['android'],
-                'skip': ['dash', 'hls', 'native']
+                'player_client': ['android_vr', 'web_creator', 'ios'],
+                'skip': ['dash', 'hls']
             }
         },
         'http_headers': {
-            'User-Agent': 'com.google.android.youtube/18.33.35 (Linux; U; Android 11) gzip'
-        },
-        'sleep_interval': 1,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
     }
+    if cookie_file:
+        ydl_opts_modern['cookiefile'] = cookie_file
 
-    # 2-usul: Web client
-    ydl_opts_web = {
+    # 2-usul: iOS Client
+    ydl_opts_ios = {
         'format': 'bestaudio/best',
-        'outtmpl': 'downloads/yt_web_%(id)s.%(ext)s',
+        'outtmpl': 'downloads/yt_ios_%(id)s.%(ext)s',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
@@ -254,43 +310,61 @@ def download_youtube_with_api_url(youtube_url: str) -> str:
         'ignoreerrors': True,
         'extractor_args': {
             'youtube': {
-                'player_client': ['web'],
+                'player_client': ['ios'],
                 'skip': ['dash', 'hls']
             }
-        },
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        },
-        'sleep_interval': 2,
+        }
     }
+    if cookie_file:
+        ydl_opts_ios['cookiefile'] = cookie_file
 
-    # 3-usul: Minimal (eng ishonchli)
+    # 3-usul: Minimal / Web fallback
     ydl_opts_minimal = {
         'format': 'bestaudio[ext=mp3]/bestaudio/best',
         'outtmpl': 'downloads/yt_min_%(id)s.%(ext)s',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
         'quiet': True,
         'no_warnings': True,
         'ignoreerrors': True,
         'extract_flat': False,
     }
+    if cookie_file:
+        ydl_opts_minimal['cookiefile'] = cookie_file
 
-    for i, opts in enumerate([ydl_opts_android, ydl_opts_web, ydl_opts_minimal], 1):
+    methods = [ydl_opts_modern, ydl_opts_ios, ydl_opts_minimal]
+    for i, opts in enumerate(methods, 1):
         try:
-            logger.info(f"YouTube yuklash (usul {i})...")
+            logger.info(f"YouTube yuklash (usul {i})... (Cookies: {'Ha' if cookie_file else 'Yo`q'})")
             with yt_dlp.YoutubeDL(opts) as ydl:
                 info = ydl.extract_info(youtube_url, download=True)
-                if info:
-                    filename = ydl.prepare_filename(info)
-                    final_filename = os.path.splitext(filename)[0] + ".mp3"
-
-                    if os.path.exists(final_filename):
-                        logger.success(f"✅ YouTube'dan muvaffaqiyatli yuklandi (usul {i})!")
-                        return final_filename
+                if info and isinstance(info, dict):
+                    try:
+                        filename = ydl.prepare_filename(info)
+                        final_filename = os.path.splitext(filename)[0] + ".mp3"
+                        if os.path.exists(final_filename) and os.path.getsize(final_filename) > 0:
+                            logger.success(f"✅ YouTube'dan muvaffaqiyatli yuklandi (usul {i})!")
+                            return final_filename
+                    except Exception as prep_err:
+                        logger.warning(f"Fayl nomini tayyorlashda ogohlantirish: {prep_err}")
+                
+                # Zaxira tekshirish: downloads papkasida yangi yaratilgan mp3 bormi?
+                if info and isinstance(info, dict) and 'id' in info:
+                    vid_id = info['id']
+                    for f in os.listdir("downloads"):
+                        if vid_id in f and f.endswith(".mp3"):
+                            candidate = os.path.join("downloads", f)
+                            if os.path.getsize(candidate) > 0:
+                                logger.success(f"✅ YouTube'dan fayl topildi: {candidate}")
+                                return candidate
         except Exception as e:
-            logger.warning(f"Usul {i} ishlamadi: {e}")
+            logger.warning(f"YouTube usul {i} ishlamadi: {e}")
             continue
 
-    logger.error("❌ Barcha YouTube usullari ishlamadi")
+    logger.error("❌ Barcha YouTube yuklash usullari samarasiz bo'ldi")
     return None
 
 
@@ -396,63 +470,69 @@ async def identify_track_with_shazam(file_path: str):
 def _clean_single_string(text: str) -> str:
     if not text:
         return ""
-    # Remove brackets content e.g. [Muzikalar_UzMuz] or (UzMuz)
-    cleaned_text = re.sub(r'[\(\[\{].*?[\)\]\}]', '', text)
-    # Remove usernames
-    cleaned_text = re.sub(r'@[a-zA-Z0-9_]+', '', cleaned_text)
-    # Remove URLs/websites
-    cleaned_text = re.sub(r'(https?://)?(www\.)?[a-zA-Z0-9-]+\.[a-z]{2,}(/[a-zA-Z0-9_-]*)*', '', cleaned_text)
-    
-    # Split into words and check each word individually
-    words = cleaned_text.split()
-    clean_words = []
-    
-    # Substrings to search for and remove inside words (e.g. UzMuz, MuzMusic, ZoryuklaBot)
-    promo_substrings = [
-        "muz", "mp3", "rap", "bot", "tv", "fm", "sound", "music", "audio", "track", 
-        "tarona", "xit", "hit", "baza", "bass", "skachat", "yuklash", "status", 
-        "klip", "media", "premyera", "yangi", "shou", "show", "rizanova", 
-        "uzbekona", "taronalar", "xitlar", "hitlar"
+
+    cleaned = str(text)
+
+    # 1. Remove telegram usernames and web URLs
+    cleaned = re.sub(r'@[a-zA-Z0-9_]+', '', cleaned)
+    cleaned = re.sub(r'https?://\S+', '', cleaned)
+    cleaned = re.sub(r't\.me/\S+', '', cleaned)
+    cleaned = re.sub(r'www\.[a-zA-Z0-9_-]+\.[a-z]+', '', cleaned)
+
+    # 2. Remove known channel watermarks and promotional phrases (case-insensitive)
+    promo_phrases = [
+        r'muzikalar[\_\s]*uzmuz',
+        r'taronalar[\_\s]*qoshiqlar[\_\s]*mp3lar',
+        r'taronalar[\_\s]*qoshiqlar',
+        r'uzbekcha[\_\s]*muzika[\_\s]*mp3lar[\_\s]*xit(?:\s*\d+)?',
+        r'qushiqlar[\_\s]*uzbekcha[\_\s]*qo[\_\'\`]?shiqllar',
+        r'dilnavo[\_\s]*music',
+        r'trend[\_\s]*music(?:[\_\s]*ads)?',
+        r'abbostech',
+        r'rizanova[\_\s]*uz',
+        r'rizanova',
+        r'\buzmuz\b',
+        r'\b(?:skachat|yuklash|yuklab\s*olish|skachat\s*mp3|mp3lar|xitlar|hitlar|premyera|taronalar)\b',
+        r'\b(?:kanalimizga\s*obuna|obuna\s*bo\'ling|obuna\s*boling|kanalimiz)\b',
+        r'\b(?:shazam\s*version|official\s*audio|official\s*video|rasmiy\s*kanal)\b'
     ]
-    
-    # Exact promotional words (case-insensitive matches)
-    promo_exact = {
-        "uz", "ru", "net", "com", "org", "info", "portal", "t.me", "telegram", 
-        "kanal", "channel", "group", "official", "original", "remix", "remiks", 
-        "shazam", "klub", "club", "uzb", "uzbek"
-    }
-    
-    for word in words:
-        # Strip punctuation from word boundaries for comparison
-        clean_word = re.sub(r'^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$', '', word).lower()
-        if not clean_word:
-            continue
-            
-        # Check if it matches promo exact or contains any promo substrings
-        is_promo = False
-        if clean_word in promo_exact:
-            is_promo = True
-        else:
-            for sub in promo_substrings:
-                if sub in clean_word:
-                    is_promo = True
-                    break
-                    
-        if not is_promo:
-            clean_words.append(word)
-            
-    # Join and clean up punctuation
-    cleaned_text = ' '.join(clean_words)
-    cleaned_text = re.sub(r'[-_\|\+•\:\.,~]+', ' ', cleaned_text)
-    
-    # Clean multiple spaces
-    cleaned_text = ' '.join(cleaned_text.split()).strip()
-    
-    # If the clean text contains nothing but punctuation or is too short
-    if len(cleaned_text) < 2 and not cleaned_text.isalnum():
+    for pat in promo_phrases:
+        cleaned = re.sub(pat, '', cleaned, flags=re.IGNORECASE)
+
+    # 3. Strip brackets containing ONLY promotional spam, while PRESERVING music tags
+    # e.g. Preserve (Remix), (DJ ... Remix), (Speed Up), (Slowed), (Cover), (feat. ...)
+    def _bracket_filter(match):
+        inner = match.group(1).strip()
+        inner_lower = inner.lower()
+        music_markers = ['remix', 'feat', 'ft.', 'speed up', 'slowed', 'cover', 'live', 'acoustic', 'dj', 'rkt', 'perreo', 'mashup', 'suniy', 'intelakt', 'ai', 'sad', 'oriental']
+        if any(m in inner_lower for m in music_markers):
+            return f"({inner})"
+        promo_markers = ['uzmuz', 't.me', '@', 'http', '.uz', '.ru', '.com', 'skachat', 'yuklash', 'mp3', 'tarona', 'kanal', 'baza', 'media']
+        if any(p in inner_lower for p in promo_markers):
+            return ""
+        if len(inner) <= 15 and not any(p in inner_lower for p in promo_markers):
+            return f"({inner})"
         return ""
-        
-    return cleaned_text
+
+    cleaned = re.sub(r'[\(\[\{](.*?)[\)\]\}]', _bracket_filter, cleaned)
+
+    # 4. Remove empty brackets like (), [], {}
+    cleaned = re.sub(r'[\(\[\{]\s*[\)\]\}]', '', cleaned)
+
+    # 5. Remove standalone domain names like "site.uz", "baza.ru"
+    cleaned = re.sub(r'\b[a-zA-Z0-9_-]+\.(?:uz|ru|com|net|org|io|biz|info|club|fm|tv)\b', '', cleaned, flags=re.IGNORECASE)
+
+    # 6. Clean multiple punctuation and delimiters
+    cleaned = re.sub(r'[-_\|\+•\:\.,~]+', ' ', cleaned)
+
+    # 7. Normalize whitespace
+    cleaned = ' '.join(cleaned.split()).strip()
+    cleaned = re.sub(r'^[^\w\(\)]+|[^\w\(\)]+$', '', cleaned).strip()
+
+    if len(cleaned) < 2 and not cleaned.isalnum():
+        return ""
+
+    return cleaned
 
 
 def clean_title(title: str, artist: str) -> str:
@@ -598,20 +678,21 @@ def calculate_track_score(track: dict) -> float:
 
 def clean_search_query(query: str) -> str:
     """
-    Foydalanuvchi qidiruv so'rovini target botga yuborishdan oldin keraksiz belgilar, linklar va reklamalardan tozalash.
+    Qidiruv so'rovini target botga yuborishdan oldin keraksiz belgilar, linklar va reklamalardan tozalash.
     """
     if not query:
         return ""
-        
-    # Artist nomidagi noma'lum so'zlarni olib tashlash
-    invalid_artists = ["unknown artist", "unknown performer", "noma'lum ijrochi", "nomalum ijrochi", "noma'lum", "nomalum", "unknown", "trend music", "trend"]
+
+    invalid_artists = [
+        "unknown artist", "unknown performer", "noma'lum ijrochi", "nomalum ijrochi",
+        "noma'lum", "nomalum", "unknown", "trend music", "trend", "musiqa"
+    ]
     for inv_art in invalid_artists:
         query = re.sub(rf'^{re.escape(inv_art)}\s*-\s*', '', query, flags=re.IGNORECASE)
         query = re.sub(rf'\s*-\s*{re.escape(inv_art)}$', '', query, flags=re.IGNORECASE)
         if query.lower().strip() == inv_art:
             query = ""
-    
-    # " - " bo'lsa, Artist va Title ni oldindan tozalash (masalan: Muzikalar UzMuz - x13ahram - Dözmüyacam)
+
     if " - " in query:
         parts = query.split(" - ", 1)
         art, tit = extract_clean_artist_and_title(parts[0], parts[1])
@@ -620,46 +701,17 @@ def clean_search_query(query: str) -> str:
         else:
             query = tit
 
-    # 1. Qavslar ichidagi narsalarni olib tashlash (masalan: [MP3], (Official Video))
-    cleaned = re.sub(r'[\(\[\{].*?[\)\]\}]', '', query)
-    
-    # 2. Telegram username-larini olib tashlash (masalan: @UzMuz, @baza_mp3)
-    cleaned = re.sub(r'@[a-zA-Z0-9_]+', '', cleaned)
-    
-    # 3. URL va linklarni olib tashlash (masalan: t.me/..., http://...)
-    cleaned = re.sub(r'(https?://)?(www\.)?[a-zA-Z0-9-]+\.[a-z]{2,}(/[a-zA-Z0-9_-]*)*', '', cleaned)
-    
-    # 4. Ortiqcha keraksiz reklama / yuklash so'zlarini tozalash (masalan: skachat, yuklash, mp3)
-    promo_words = [
-        r'\bskichat\b', r'\bskachat\b', r'\byuklash\b', r'\byuklab\b', r'\bolish\b',
-        r'\bmp3\b', r'\bxit\b', r'\bhit\b', r'\brap\b', r'\bbass\b', r'\bbot\b',
-        r'\bkanal\b', r'\bkanalimiz\b', r'\bobuna\b', r'\bbo\'ling\b', r'\bboling\b',
-        r'\boriginal\b', r'\bofficial\b', r'\bklip\b', r'\bclip\b', r'\bvideo\b'
-    ]
-    for word_pat in promo_words:
-        cleaned = re.sub(word_pat, '', cleaned, flags=re.IGNORECASE)
-    
-    # 5. Emojilarni olib tashlash (faqat harflar, raqamlar, ajratuvchilar qoladi)
-    cleaned = re.sub(r'[^\w\s\-\.\']', '', cleaned)
-    
-    # 6. Ajratuvchi chiziqlarni normallashtirish (Artist-Title -> Artist - Title)
+    # Clean promo patterns and usernames
+    cleaned = _clean_single_string(query)
     cleaned = re.sub(r'\s*-\s*', ' - ', cleaned)
-    
-    # 7. Ortiqcha bo'shliqlarni olib tashlash
     cleaned = ' '.join(cleaned.split()).strip()
-    
-    # Agar juda qisqa yoki bo'sh bo'lsa, asl so'rovni qaytarish (xavfsizlik uchun)
-    if len(cleaned) < 2:
-        return query.strip()
-        
-    return cleaned
+
+    return cleaned or query.strip()
 
 
 def extract_clean_artist_and_title(raw_artist: str, raw_title: str, caption: str = "", filename: str = "") -> tuple:
     """
-    Manba kanal yuborgan musiqaning audio performer, title, caption va filename lari ichidan
-    kanal reklamasi / suv belgilarini (masalan: Muzikalar UzMuz, Taronalar_qoshiqlar_mp3lar) olib tashlab,
-    haqiqiy Artist va Qo'shiq nomini ajratib oladi.
+    Manba kanallardagi suv belgilari va reklamalarni tozalab, haqiqiy Artist va Qo'shiq nomini ajratib oladi.
     """
     raw_artist = (raw_artist or "").strip()
     raw_title = (raw_title or "").strip()
@@ -670,72 +722,88 @@ def extract_clean_artist_and_title(raw_artist: str, raw_title: str, caption: str
         r'muzikalar[\_\s]*uzmuz',
         r'taronalar[\_\s]*qoshiqlar[\_\s]*mp3lar',
         r'taronalar[\_\s]*qoshiqlar',
-        r'uzmuz',
-        r'taronalar',
-        r'mp3lar',
+        r'uzbekcha[\_\s]*muzika[\_\s]*mp3lar[\_\s]*xit(?:\s*\d+)?',
+        r'qushiqlar[\_\s]*uzbekcha[\_\s]*qo[\_\'\`]?shiqllar',
+        r'dilnavo[\_\s]*music',
+        r'trend[\_\s]*music(?:[\_\s]*ads)?',
+        r'abbostech',
+        r'rizanova[\_\s]*uz',
+        r'rizanova',
+        r'\buzmuz\b',
+        r'\btaronalar\b',
+        r'\bmp3lar\b',
         r'@[a-zA-Z0-9_]+',
         r't\.me/[a-zA-Z0-9_]+',
         r'https?://\S+',
         r'www\.[a-zA-Z0-9_-]+\.[a-z]+'
     ]
 
-    # 1. Artist qismida reklama borligini aniqlash
-    is_artist_promo = False
-    if not raw_artist:
-        is_artist_promo = True
-    else:
+    def is_promo(text: str) -> bool:
+        if not text:
+            return True
+        t_clean = text.lower().strip()
+        if t_clean in ["unknown", "unknown artist", "unknown performer", "noma'lum", "nomalum", "trend music", "trend", "musiqa"]:
+            return True
         for pat in promo_patterns:
-            if re.search(pat, raw_artist, re.IGNORECASE):
-                is_artist_promo = True
-                break
+            if re.search(pat, text, re.IGNORECASE):
+                return True
+        return False
 
-    final_artist = raw_artist
-    final_title = raw_title
+    candidate_artist = raw_artist
+    candidate_title = raw_title
 
-    # Agar title bo'sh bo'lsa yoki fayl nomi bo'lsa, filename yoki caption dan foydalanish
-    if not final_title or final_title.endswith('.mp3'):
+    # Agar title fayl nomi ko'rinishida bo'lsa yoki bo'sh bo'lsa
+    if not candidate_title or candidate_title.endswith('.mp3'):
         if filename:
-            final_title = filename.replace('.mp3', '')
+            candidate_title = filename.replace('.mp3', '')
         elif caption:
-            final_title = caption
+            candidate_title = caption
 
-    # 2. Agar Artist reklama bo'lsa yoki bo'sh bo'lsa, lekin title yoki caption da " - " bo'lsa:
-    if is_artist_promo or not final_artist:
-        if " - " in raw_title:
-            parts = raw_title.split(" - ", 1)
-            final_artist = parts[0].strip()
-            final_title = parts[1].strip()
-        elif " - " in caption:
-            parts = caption.split(" - ", 1)
-            final_artist = parts[0].strip()
-            final_title = parts[1].strip()
-        elif " - " in filename:
-            clean_fn = re.sub(r'^\s*muzikalar[\_\s]*uzmuz[\_\s]*', '', filename, flags=re.IGNORECASE)
-            clean_fn = re.sub(r'[\_\s]*\d+\.mp3$', '.mp3', clean_fn, flags=re.IGNORECASE)
-            clean_fn = clean_fn.replace('.mp3', '').replace('_', ' ')
-            if " - " in clean_fn:
-                parts = clean_fn.split(" - ", 1)
-                final_artist = parts[0].strip()
-                final_title = parts[1].strip()
+    # 1. Agar raw_title ichida " - " bo'lsa (masalan: Muzikalar UzMuz - Botir Qodirov - Jim turing)
+    if " - " in raw_title:
+        parts = [p.strip() for p in raw_title.split(" - ") if p.strip()]
+        if len(parts) >= 3:
+            if is_promo(parts[0]):
+                candidate_artist = parts[1]
+                candidate_title = " - ".join(parts[2:])
             else:
-                final_artist = ""
-                final_title = clean_fn
-        else:
-            final_artist = ""
+                candidate_artist = parts[0]
+                candidate_title = " - ".join(parts[1:])
+        elif len(parts) == 2:
+            if is_promo(candidate_artist) or is_promo(parts[0]) or not candidate_artist:
+                candidate_artist = parts[0]
+                candidate_title = parts[1]
 
-    # 3. Har bir satrdan reklama so'zlarini va qavslarni tozalash
-    def clean_str(s):
-        if not s:
-            return ""
-        s = re.sub(r'[\(\[\{].*?[\)\]\}]', '', s)  # Remove [MP3], (Official)
-        s = re.sub(r'@[a-zA-Z0-9_]+', '', s)
-        for pat in promo_patterns:
-            s = re.sub(pat, '', s, flags=re.IGNORECASE)
-        s = ' '.join(s.split()).strip()
-        return s
+    # 2. Agar artist hali ham reklama bo'lsa yoki bo'sh bo'lsa, caption dan izlash
+    if (is_promo(candidate_artist) or not candidate_artist) and " - " in caption:
+        parts = [p.strip() for p in caption.split(" - ") if p.strip()]
+        if len(parts) >= 3 and is_promo(parts[0]):
+            candidate_artist = parts[1]
+            candidate_title = " - ".join(parts[2:])
+        elif len(parts) >= 2:
+            candidate_artist = parts[0]
+            candidate_title = " - ".join(parts[1:])
 
-    clean_artist = clean_str(final_artist)
-    clean_title = clean_str(final_title)
+    # 3. Agar artist hali ham topilmagan bo'lsa, fayl nomidan izlash
+    if (is_promo(candidate_artist) or not candidate_artist) and filename:
+        clean_fn = re.sub(r'^\s*muzikalar[\_\s]*uzmuz[\_\s]*', '', filename, flags=re.IGNORECASE)
+        clean_fn = re.sub(r'[\_\s]*\d+\.mp3$', '.mp3', clean_fn, flags=re.IGNORECASE)
+        clean_fn = clean_fn.replace('.mp3', '').replace('_', ' ')
+        if " - " in clean_fn:
+            parts = [p.strip() for p in clean_fn.split(" - ") if p.strip()]
+            if len(parts) >= 2:
+                candidate_artist = parts[0]
+                candidate_title = " - ".join(parts[1:])
+
+    # 4. Yakuniy tozalash
+    clean_artist = _clean_single_string(candidate_artist)
+    clean_title = _clean_single_string(candidate_title)
+
+    # 5. Agar artist tozalangandan so'ng bo'shab qolsa va title ichida " - " qolgan bo'lsa
+    if not clean_artist and " - " in clean_title:
+        parts = clean_title.split(" - ", 1)
+        clean_artist = parts[0].strip()
+        clean_title = parts[1].strip()
 
     return clean_artist, clean_title
 

@@ -303,9 +303,6 @@ function scrollToBottom() {
 }
 
 // --- Bot Control & Status Logic ---
-const btnBotStart = document.getElementById('btnBotStart');
-const btnBotStop = document.getElementById('btnBotStop');
-const btnBotRestart = document.getElementById('btnBotRestart');
 const btnBotPostNow = document.getElementById('btnBotPostNow');
 const btnBotReplan = document.getElementById('btnBotReplan');
 
@@ -372,9 +369,6 @@ function showSuccessBanner(message) {
 }
 
 // Bind Button Listeners
-btnBotStart.addEventListener('click', () => sendBotAction('start', 'Bot muvaffaqiyatli ishga tushirildi!'));
-btnBotStop.addEventListener('click', () => sendBotAction('stop', 'Bot muvaffaqiyatli to\'xtatildi!'));
-btnBotRestart.addEventListener('click', () => sendBotAction('restart', 'Bot qayta ishga tushirildi!'));
 btnBotPostNow.addEventListener('click', () => sendBotAction('post-now', 'Musiqa joylash buyrug\'i yuborildi (10s ichida bajariladi)!'));
 btnBotReplan.addEventListener('click', () => sendBotAction('replan', 'Jadvalni yangilash buyrug\'i yuborildi (10s ichida bajariladi)!'));
 

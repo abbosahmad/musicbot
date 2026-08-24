@@ -105,35 +105,11 @@
 
                     <div class="panel-card">
                         <div class="panel-header">
-                            <h2><i class="fa-solid fa-shield-halved"></i> Tizim Tafsilotlari</h2>
-                        </div>
-                        <div class="panel-body system-details">
-                            <div class="detail-row">
-                                <span class="detail-label">Rejalashtirish Vaqti:</span>
-                                <span class="detail-val" id="statPlanningHour">05:00</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Demo Davomiyligi:</span>
-                                <span class="detail-val" id="statDemoDuration">30s</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Tungi Jimjitlik:</span>
-                                <span class="detail-val" id="statNightMode">O'chirilgan</span>
-                            </div>
-                            <div class="detail-row">
-                                <span class="detail-label">Sessiya Turi:</span>
-                                <span class="detail-val font-mono">PostgreSQL</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="panel-card">
-                        <div class="panel-header">
-                            <h2><i class="fa-solid fa-gears"></i> Bot Boshqaruvi</h2>
+                            <h2><i class="fa-solid fa-gears"></i> Tezkor Boshqaruv</h2>
                         </div>
                         <div class="panel-body">
-                            <div style="margin-bottom: 15px;">
-                                <label style="font-size: 12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase;">Xizmat Holati</label>
+                            <div style="margin-bottom: 20px;">
+                                <label style="font-size: 12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase;">Bot Holati</label>
                                 <div style="margin-top: 5px;">
                                     <span class="status-badge inactive" id="botControlStatusBadge">
                                         <span class="status-pulse"></span>
@@ -142,21 +118,8 @@
                                 </div>
                             </div>
                             
-                            <label style="font-size: 12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; display:block; margin-bottom: 8px;">Tizim buyruqlari</label>
-                            <div class="bot-controls-grid">
-                                <button type="button" class="btn-control btn-control-start" id="btnBotStart">
-                                    <i class="fa-solid fa-play"></i> Start
-                                </button>
-                                <button type="button" class="btn-control btn-control-stop" id="btnBotStop">
-                                    <i class="fa-solid fa-stop"></i> Stop
-                                </button>
-                                <button type="button" class="btn-control btn-control-restart" id="btnBotRestart">
-                                    <i class="fa-solid fa-rotate"></i> Restart
-                                </button>
-                            </div>
-
-                            <label style="font-size: 12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; display:block; margin-top: 20px; margin-bottom: 8px;">Tezkor harakatlar</label>
-                            <div class="bot-controls-grid" style="grid-template-columns: repeat(2, 1fr);">
+                            <label style="font-size: 12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; display:block; margin-bottom: 8px;">Tezkor harakatlar</label>
+                            <div class="bot-controls-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
                                 <button type="button" class="btn-control btn-control-action" id="btnBotPostNow">
                                     <i class="fa-solid fa-paper-plane"></i> Hozir Joylash
                                 </button>

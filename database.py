@@ -291,3 +291,36 @@ async def clear_active_schedule():
         logger.info("Database active schedule cleared.")
     except Exception as e:
         logger.error(f"Error clearing active schedule: {e}")
+
+async def is_track_scheduled_before(track_id: str) -> bool:
+    global db_pool
+    if not db_pool:
+        return False
+    try:
+        async with db_pool.acquire() as conn:
+            # Faqat faol navbatda turgan (yuborilmagan) musiqalarni tekshiramiz
+            row = await conn.fetchrow("SELECT 1 FROM daily_schedule WHERE track_id = $1 AND is_posted = FALSE", str(track_id))
+            return row is not None
+    except Exception as e:
+        logger.error(f"Error checking if track is currently scheduled: {e}")
+        return False
+
+async def is_similar_track_scheduled(artist: str, title: str) -> bool:
+    global db_pool
+    if not db_pool:
+        return False
+    norm_candidate = normalize_string(f"{artist} {title}")
+    if not norm_candidate:
+        return False
+    try:
+        async with db_pool.acquire() as conn:
+            # Faqat faol navbatda turgan musiqalar bilan solishtiramiz
+            rows = await conn.fetch("SELECT artist, title FROM daily_schedule WHERE is_posted = FALSE")
+            for row in rows:
+                norm_scheduled = normalize_string(f"{row['artist']} {row['title']}")
+                if norm_scheduled == norm_candidate:
+                    return True
+            return False
+    except Exception as e:
+        logger.error(f"Error checking similar active scheduled track: {e}")
+        return False

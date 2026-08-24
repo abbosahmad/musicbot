@@ -237,28 +237,20 @@ async def post_music(track_info: Dict):
                 return
             
             clean_artist = ai_cleaned.get('artist')
-            if not clean_artist or not clean_artist.strip():
-                clean_artist = utils._clean_single_string(raw_artist)
-            if not clean_artist or not clean_artist.strip():
-                clean_artist = "Trend MUSIC"
-            else:
-                clean_artist = utils._clean_single_string(clean_artist)
-                if not clean_artist or not clean_artist.strip():
-                    clean_artist = "Trend MUSIC"
-
             clean_title = ai_cleaned.get('title')
-            if not clean_title or not clean_title.strip():
-                clean_title = utils._clean_single_string(raw_title)
-            if not clean_title or not clean_title.strip():
-                clean_title = "Musiqa"
-            else:
-                clean_title = utils._clean_single_string(clean_title)
-                if not clean_title or not clean_title.strip():
-                    clean_title = "Musiqa"
+
+            if not clean_artist or not clean_title or clean_artist == "Trend MUSIC" or clean_title == "Musiqa":
+                ext_art, ext_tit = utils.extract_clean_artist_and_title(raw_artist, raw_title)
+                if not clean_artist or clean_artist == "Trend MUSIC":
+                    clean_artist = ext_art or utils._clean_single_string(raw_artist) or "Trend MUSIC"
+                if not clean_title or clean_title == "Musiqa":
+                    clean_title = ext_tit or utils._clean_single_string(raw_title) or "Musiqa"
 
             text_query = f"{clean_artist} - {clean_title}".strip()
+            if clean_artist == "Trend MUSIC":
+                text_query = clean_title
             
-            logger.info(f"Matnli qidiruv boshlandi: {text_query}")
+            logger.info(f"Matnli qidiruv boshlandi: '{text_query}'")
             final_file_path = await userbot.search_text_via_target_bot(text_query)
             
             if final_file_path and os.path.exists(final_file_path):
@@ -266,71 +258,68 @@ async def post_music(track_info: Dict):
                 final_artist = clean_artist
                 final_title = clean_title
             else:
-                logger.warning("⚠️ Matnli qidiruv natija bermadi. Forward orqali original toza variantini olishga urinilmoqda...")
-                # Forward orqali olish (Agar matnli qidiruv topa olmasa zaxira)
-                final_file_path = await userbot.search_via_target_bot(track_info['chat_id'], track_info['message_id'])
-                
+                logger.info("ℹ️ Matnli qidiruv topmadi. Telegram Global qidiruv tekshirilmoqda...")
+                final_file_path = await userbot.search_global_music(clean_artist, clean_title)
                 if final_file_path and os.path.exists(final_file_path):
-                    logger.success("✅ Forward qidiruv muvaffaqiyatli: Maqsadli botdan original musiqa olindi.")
-                    shazam_result = await utils.identify_track_with_shazam(final_file_path)
-                    if shazam_result:
-                        final_artist = shazam_result['artist'] or raw_artist
-                        final_title = shazam_result['title'] or raw_title
-                    else:
-                        final_artist = clean_artist
-                        final_title = clean_title
-            # 2. Zaxira (Fallback) Rejimi — agar maqsadli botdan matnli ham, forward ham topilmasa
+                    logger.success("✅ Telegram Global Qidiruvdan original musiqa olindi.")
+                    final_artist = clean_artist
+                    final_title = clean_title
+                else:
+                    logger.warning("⚠️ Global qidiruv topmadi. Forward orqali original variantini olishga urinilmoqda...")
+                    final_file_path = await userbot.search_via_target_bot(track_info['chat_id'], track_info['message_id'])
+                    if final_file_path and os.path.exists(final_file_path):
+                        logger.success("✅ Forward qidiruv muvaffaqiyatli: Maqsadli botdan original musiqa olindi.")
+                        shazam_result = await utils.identify_track_with_shazam(final_file_path)
+                        if shazam_result and shazam_result.get('artist') and shazam_result.get('title'):
+                            final_artist = shazam_result['artist']
+                            final_title = shazam_result['title']
+                        else:
+                            final_artist = clean_artist
+                            final_title = clean_title
+
+            # 2. Zaxira (Fallback) Rejimi — agar maqsadli botdan ham, globaldan ham topilmasa
             if not final_file_path or not os.path.exists(final_file_path):
                 dirty_file = await userbot.download_music(
                     track_info['chat_id'], track_info['message_id'], temp_dirty_path
                 )
 
                 if not dirty_file:
-                    raise Exception("Telegramdan reklamali faylni yuklab bo'lmadi.")
+                    raise Exception("Telegramdan faylni yuklab bo'lmadi.")
 
                 # Shazam orqali aniqlash
                 shazam_result = await utils.identify_track_with_shazam(dirty_file)
                 
-                if shazam_result:
+                if shazam_result and shazam_result.get('artist') and shazam_result.get('title'):
                     shazam_artist = shazam_result['artist']
                     shazam_title = shazam_result['title']
                     logger.success(f"✅ Shazam aniqladi: {shazam_artist} - {shazam_title}")
 
-                    # Global qidiruv
+                    # Global qidiruv (Shazam natijasi bilan)
                     final_file_path = await userbot.search_global_music(shazam_artist, shazam_title)
                     if final_file_path:
                         final_artist = shazam_artist
                         final_title = shazam_title
-                        logger.success("✅ Zaxira manba: Telegram Global Search")
+                        logger.success("✅ Zaxira manba: Telegram Global Search (Shazam)")
                     else:
-                        # YouTube
+                        # YouTube (Shazam natijasi bilan)
                         final_file_path = await utils.get_youtube_with_api(shazam_artist, shazam_title)
                         if final_file_path:
                             final_artist = shazam_artist
                             final_title = shazam_title
-                            logger.success("✅ Zaxira manba: YouTube")
+                            logger.success("✅ Zaxira manba: YouTube (Shazam)")
                 
-                # Agar Shazam topa olmagan bo'lsa
-                if not final_file_path:
-                    ai_cleaned = await utils.get_clean_details_with_ai(raw_artist, raw_title)
-                    clean_artist = ai_cleaned.get('artist', raw_artist)
-                    clean_title = ai_cleaned.get('title', raw_title)
-
-                    final_file_path = await userbot.search_global_music(clean_artist, clean_title)
-                    if final_file_path:
+                # Agar Shazam topa olmagan bo'lsa, tozalangan nom bo'yicha YouTube'dan urinish
+                if not final_file_path or not os.path.exists(final_file_path):
+                    final_file_path = await utils.get_youtube_with_api(clean_artist, clean_title)
+                    if final_file_path and os.path.exists(final_file_path):
                         final_artist = clean_artist
                         final_title = clean_title
-                        logger.success("✅ Zaxira manba: Telegram Global (AI Cleaned)")
-                    else:
-                        final_file_path = await utils.get_youtube_with_api(clean_artist, clean_title)
-                        if final_file_path:
-                            final_artist = clean_artist
-                            final_title = clean_title
-                            logger.success("✅ Zaxira manba: YouTube (AI Cleaned)")
+                        logger.success("✅ Zaxira manba: YouTube (Cleaned Name)")
 
-                # Reklamali faylni o'chirish
+                # Vaqtinchalik faylni tozalash
                 if os.path.exists(dirty_file):
-                    os.remove(dirty_file)
+                    try: os.remove(dirty_file)
+                    except: pass
 
             # Final tekshiruv
             if not final_file_path or not os.path.exists(final_file_path):
@@ -339,12 +328,8 @@ async def post_music(track_info: Dict):
                 return
 
             # Clean final performer and title using the robust cleaner
-            final_artist = utils._clean_single_string(final_artist)
-            if not final_artist or not final_artist.strip():
-                final_artist = "Trend MUSIC"
-            final_title = utils._clean_single_string(final_title)
-            if not final_title or not final_title.strip():
-                final_title = "Musiqa"
+            final_artist = utils._clean_single_string(final_artist) or clean_artist or "Trend MUSIC"
+            final_title = utils._clean_single_string(final_title) or clean_title or "Musiqa"
 
             # Rewrite ID3 tags in the MP3 file itself
             utils.write_clean_metadata(final_file_path, final_artist, final_title)
@@ -423,20 +408,24 @@ async def post_music(track_info: Dict):
 
 
 async def plan_daily_posts(force: bool = False):
-    global daily_plan
     async with PLANNING_LOCK:
-        daily_plan.clear()
+        await _plan_daily_posts_internal(force)
 
-        # Bazadan sozlamalarni o'qish
-        target_count = int(await database.get_setting("daily_post_count", "5"))
 
-        if force:
-            # Clear existing scheduled music jobs
-            for job in scheduler.get_jobs():
-                if job.id not in ['daily_planning', 'settings_checker']:
-                    job.remove()
-            # Clear database schedule
-            await database.clear_active_schedule()
+async def _plan_daily_posts_internal(force: bool = False):
+    global daily_plan
+    daily_plan.clear()
+
+    # Bazadan sozlamalarni o'qish
+    target_count = int(await database.get_setting("daily_post_count", "5"))
+
+    if force:
+        # Clear existing scheduled music jobs
+        for job in scheduler.get_jobs():
+            if job.id not in ['daily_planning', 'settings_checker']:
+                job.remove()
+        # Clear database schedule
+        await database.clear_active_schedule()
 
     # 1. Avval ma'lumotlar bazasidan faol rejalarni yuklashga urinib ko'ramiz
     if not force:
@@ -444,42 +433,42 @@ async def plan_daily_posts(force: bool = False):
         if active_db_schedule:
             logger.info(f"🔄 Bazasdan faol {len(active_db_schedule)} ta rejalashtirilgan ishlar yuklanmoqda...")
         
-        # Clear existing scheduled music jobs
-        for job in scheduler.get_jobs():
-            if job.id not in ['daily_planning', 'settings_checker']:
-                job.remove()
+            # Clear existing scheduled music jobs
+            for job in scheduler.get_jobs():
+                if job.id not in ['daily_planning', 'settings_checker']:
+                    job.remove()
+                    
+            tashkent_tz = pytz.timezone("Asia/Tashkent")
+            for entry in active_db_schedule:
+                run_time = entry['post_time']
+                if run_time.tzinfo is None:
+                    run_time = tashkent_tz.localize(run_time)
+                else:
+                    run_time = run_time.astimezone(tashkent_tz)
+                    
+                track_info = {
+                    'track_id': entry['track_id'],
+                    'artist': entry['artist'],
+                    'title': entry['title'],
+                    'chat_id': entry.get('chat_id'),
+                    'message_id': entry.get('message_id'),
+                    'direct_file_path': entry.get('direct_file_path')
+                }
                 
-        tashkent_tz = pytz.timezone("Asia/Tashkent")
-        for entry in active_db_schedule:
-            run_time = entry['post_time']
-            if run_time.tzinfo is None:
-                run_time = tashkent_tz.localize(run_time)
-            else:
-                run_time = run_time.astimezone(tashkent_tz)
+                # Add to scheduler
+                scheduler.add_job(post_music, 'date', run_date=run_time, args=[track_info])
                 
-            track_info = {
-                'track_id': entry['track_id'],
-                'artist': entry['artist'],
-                'title': entry['title'],
-                'chat_id': entry.get('chat_id'),
-                'message_id': entry.get('message_id'),
-                'direct_file_path': entry.get('direct_file_path')
-            }
-            
-            # Add to scheduler
-            scheduler.add_job(post_music, 'date', run_date=run_time, args=[track_info])
-            
-            track_title = f"{entry['artist']} - {entry['title']}"
-            if entry.get('direct_file_path'):
-                track_title += " (Admin)"
-            
-            daily_plan.append({
-                'title': track_title,
-                'time': run_time.strftime('%H:%M')
-            })
-            
-        await log_to_channel(f"🔄 Tizim qayta ishga tushdi: Bazasdan {len(active_db_schedule)} ta rejalashtirilgan musiqa qayta yuklandi.")
-        return
+                track_title = f"{entry['artist']} - {entry['title']}"
+                if entry.get('direct_file_path'):
+                    track_title += " (Admin)"
+                
+                daily_plan.append({
+                    'title': track_title,
+                    'time': run_time.strftime('%H:%M')
+                })
+                
+            await log_to_channel(f"🔄 Tizim qayta ishga tushdi: Bazasdan {len(active_db_schedule)} ta rejalashtirilgan musiqa qayta yuklandi.")
+            return
 
     await log_to_channel(f"🗓️ Rejalashtirish boshlandi... (Maqsad: {target_count} ta)")
 
@@ -523,10 +512,20 @@ async def plan_daily_posts(force: bool = False):
     async def check_not_posted(tracks):
         result = []
         for track in tracks:
-            if not await database.is_track_posted(track['track_id']):
-                if not await database.is_similar_track_posted(
-                    track.get('artist', ''), track.get('title', '')
-                ):
+            track_id = track['track_id']
+            artist = track.get('artist', '')
+            title = track.get('title', '')
+            
+            # Check posted status
+            posted = await database.is_track_posted(track_id)
+            similar_posted = await database.is_similar_track_posted(artist, title)
+            
+            # Check scheduled/history status
+            scheduled = await database.is_track_scheduled_before(track_id)
+            similar_scheduled = await database.is_similar_track_scheduled(artist, title)
+            
+            if not posted and not scheduled:
+                if not similar_posted and not similar_scheduled:
                     result.append(track)
         return result
 
@@ -831,7 +830,7 @@ async def check_schedule_update():
                     job.remove()
             
             # Instantly replan with the new settings
-            await plan_daily_posts()
+            await plan_daily_posts(force=True)
             
     except Exception as e:
         logger.error(f"Scheduler yangilashda xato: {e}")
@@ -924,7 +923,7 @@ async def admin_callback_handler(query: CallbackQuery, state: FSMContext):
         except Exception:
             pass
         await query.answer()
-        await plan_daily_posts()
+        await plan_daily_posts(force=True)
         text = await get_admin_panel_text()
         try:
             await query.message.edit_text(text, reply_markup=get_admin_keyboard())
