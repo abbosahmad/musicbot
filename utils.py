@@ -97,13 +97,18 @@ async def get_clean_details_with_ai(raw_artist: str, raw_title: str) -> dict:
         }
 
     try:
-        model_name = getattr(config, 'DEEPSEEK_MODEL', 'deepseek/deepseek-v4-flash-vision-exp')
+        raw_model_name = getattr(config, 'DEEPSEEK_MODEL', 'deepseek-v4-flash-vision-exp')
         base_url = getattr(config, 'DEEPSEEK_BASE_URL', None)
+        
         if not base_url:
-            if "/" in model_name:
+            if "openrouter" in raw_model_name.lower():
                 base_url = "https://openrouter.ai/api/v1"
             else:
                 base_url = "https://api.deepseek.com"
+
+        model_name = raw_model_name
+        if "api.deepseek.com" in base_url and model_name.startswith("deepseek/"):
+            model_name = model_name.replace("deepseek/", "")
 
         default_headers = {}
         if "openrouter.ai" in base_url:
