@@ -181,6 +181,12 @@ async def post_music(track_info: Dict):
         try:
             channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
             channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
+            emoji_id = await database.get_setting("custom_emoji_id", getattr(config, "CUSTOM_EMOJI_ID", "5222472119295684375"))
+            
+            if emoji_id and str(emoji_id).strip() not in ["0", ""]:
+                emoji_tag = f'<tg-emoji emoji-id="{emoji_id}">🎧</tg-emoji>'
+            else:
+                emoji_tag = "🎧"
             
             # AI orqali artist va title ni tozalash
             ai_cleaned = await utils.get_clean_details_with_ai(raw_artist, raw_title)
@@ -196,8 +202,8 @@ async def post_music(track_info: Dict):
             # Avj vaqtini aniqlash
             highlight_time = utils.detect_music_highlight(direct_file, raw_text=track_info.get('raw_caption', ''))
             
-            # 2-rasm ko'rinishidagi minimal caption: "00:47 Spotify | 🎧"
-            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name} | 🎧</a>"
+            # Minimal caption: "00:47 Trend Musiqa | 🎧"
+            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name} | {emoji_tag}</a>"
             
             full_audio_duration = None
             try:
@@ -354,6 +360,12 @@ async def post_music(track_info: Dict):
 
             channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
             channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
+            emoji_id = await database.get_setting("custom_emoji_id", getattr(config, "CUSTOM_EMOJI_ID", "5222472119295684375"))
+
+            if emoji_id and str(emoji_id).strip() not in ["0", ""]:
+                emoji_tag = f'<tg-emoji emoji-id="{emoji_id}">🎧</tg-emoji>'
+            else:
+                emoji_tag = "🎧"
 
             # Clean final performer and title
             final_artist = utils._clean_single_string(final_artist) or clean_artist or channel_name
@@ -377,8 +389,8 @@ async def post_music(track_info: Dict):
             # Avj vaqtini aniqlash
             highlight_time = utils.detect_music_highlight(final_file_path, raw_text=track_info.get('raw_caption', ''))
             
-            # 2-rasmdagi ko'rinishdagi minimal caption
-            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name} | 🎧</a>"
+            # Minimal caption: "00:47 Trend Musiqa | 🎧"
+            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name} | {emoji_tag}</a>"
 
             full_audio_duration = None
             try:
