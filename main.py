@@ -43,7 +43,10 @@ LAST_SETTINGS: Dict[str, str] = {}
 
 class AdminStates(StatesGroup):
     waiting_for_search_bot = State()
-    waiting_for_source_channels = State()
+    waiting_for_clean_channels = State()
+    waiting_for_direct_channels = State()
+    waiting_for_channel_name = State()
+    waiting_for_channel_link = State()
     waiting_for_audio_metadata = State()
 
 
@@ -52,62 +55,107 @@ def is_admin(user_id: int) -> bool:
 
 
 def get_admin_keyboard() -> InlineKeyboardMarkup:
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    return InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="📢 Hozir post qilish", callback_data="admin_post_now"),
-            InlineKeyboardButton(text="🔄 Rejani yangilash", callback_data="admin_replan")
+            InlineKeyboardButton(text="⚡ Hozir Post Qilish", callback_data="admin_post_now"),
+            InlineKeyboardButton(text="🔄 Rejani Qayta Tuzish", callback_data="admin_replan")
         ],
         [
-            InlineKeyboardButton(text="📋 Rejalangan musiqalar", callback_data="admin_view_plan")
+            InlineKeyboardButton(text="📋 Bugungi Reja (Jadval)", callback_data="admin_view_plan"),
+            InlineKeyboardButton(text="📡 Manba Kanallar", callback_data="admin_channels")
         ],
         [
             InlineKeyboardButton(text="⚙️ Sozlamalar", callback_data="admin_settings"),
+            InlineKeyboardButton(text="🌐 Web Panel", url="https://abboscoder.uz/music")
+        ],
+        [
             InlineKeyboardButton(text="❌ Yopish", callback_data="admin_close")
         ]
     ])
-    return keyboard
 
 
-def get_settings_keyboard(daily_post_count: str, planning_hour: str) -> InlineKeyboardMarkup:
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+def get_channels_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text=f"🎵 Limit: {daily_post_count} ta", callback_data="none"),
+            InlineKeyboardButton(text="🤖 1. Bot orqali yangilanadigan kanallar", callback_data="admin_edit_clean_ch")
+        ],
+        [
+            InlineKeyboardButton(text="⚡ 2. To'g'ridan-to'g'ri olinadigan kanallar", callback_data="admin_edit_direct_ch")
+        ],
+        [
+            InlineKeyboardButton(text="↩️ Asosiy Menyu", callback_data="admin_main")
+        ]
+    ])
+
+
+def get_settings_keyboard(settings: Dict) -> InlineKeyboardMarkup:
+    daily_count = settings.get('daily_post_count', '6')
+    plan_hour = settings.get('planning_hour', '5')
+    night_mode = settings.get('night_mode', 'false') == 'true'
+    night_icon = "🟢 Yoqilgan" if night_mode else "🔴 O'chirilgan"
+    ch_name = settings.get('main_channel_name', 'Spotify')
+
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text=f"🎵 Limit: {daily_count} ta", callback_data="none"),
             InlineKeyboardButton(text="➖", callback_data="admin_count_dn"),
             InlineKeyboardButton(text="➕", callback_data="admin_count_up")
         ],
         [
-            InlineKeyboardButton(text=f"⏰ Soat: {planning_hour}:00", callback_data="none"),
+            InlineKeyboardButton(text=f"⏰ Reja soati: {plan_hour}:00", callback_data="none"),
             InlineKeyboardButton(text="➖", callback_data="admin_hour_dn"),
             InlineKeyboardButton(text="➕", callback_data="admin_hour_up")
         ],
         [
-            InlineKeyboardButton(text="✏️ Qidiruv botini o'zgartirish", callback_data="admin_edit_search_bot")
+            InlineKeyboardButton(text=f"🌙 Tun rejimi: {night_icon}", callback_data="admin_toggle_night")
         ],
         [
-            InlineKeyboardButton(text="✏️ Manbalarni o'zgartirish", callback_data="admin_edit_sources")
+            InlineKeyboardButton(text=f"🏷 Kanal nomi: {ch_name}", callback_data="admin_edit_ch_name")
         ],
         [
-            InlineKeyboardButton(text="↩️ Orqaga", callback_data="admin_main")
+            InlineKeyboardButton(text="🔗 Kanal havolasi (Link)", callback_data="admin_edit_ch_link")
+        ],
+        [
+            InlineKeyboardButton(text="🤖 Qidiruv boti (@Zoryuklabot)", callback_data="admin_edit_search_bot")
+        ],
+        [
+            InlineKeyboardButton(text="↩️ Asosiy Menyu", callback_data="admin_main")
         ]
     ])
-    return keyboard
 
 
 async def get_admin_panel_text() -> str:
     settings = await database.get_all_settings()
     total_tracks = len(database.posted_track_ids)
     
-    text = "🤖 <b>MusiqaBot Admin Paneli</b>\n\n"
-    text += f"📊 <b>Statistika:</b>\n"
-    text += f"├ Bazadagi musiqalar: <b>{total_tracks} ta</b>\n"
-    text += f"├ Qidiruv boti: <b>{settings.get('target_search_bot', '@Zoryuklabot')}</b>\n"
-    text += f"├ Bot manbalar: <code>{settings.get('clean_source_channels', '')}</code>\n"
-    text += f"└ To'g'ri manbalar: <code>{settings.get('direct_source_channels', '')}</code>\n\n"
-    text += f"⚙️ <b>Reja sozlamalari:</b>\n"
-    text += f"├ Reja vaqti: <b>{settings.get('planning_hour', '?')}:00</b>\n"
-    text += f"├ Kunlik limit: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
-    text += f"└ Web Panel: https://abboscoder.uz/music\n"
-        
+    clean_ch = settings.get('clean_source_channels', '') or '(Kiritilmagan)'
+    direct_ch = settings.get('direct_source_channels', '') or '(Kiritilmagan)'
+    ch_name = settings.get('main_channel_name', 'Spotify')
+    ch_link = settings.get('main_channel_link', 'https://t.me/trend_musiqaUZ')
+    
+    night_mode = settings.get('night_mode', 'false') == 'true'
+    night_status = f"🟢 Faol ({settings.get('night_start', '23')}:00 – {settings.get('night_end', '7')}:00)" if night_mode else "🔴 O'chirilgan"
+    
+    active_sched = await database.get_active_schedule()
+    
+    text = (
+        "🎛 <b>MusiqaBot Boshqaruv Markazi</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"📊 <b>Statistika:</b>\n"
+        f"├ 🎵 Bazadagi jami musiqalar: <b>{total_tracks} ta</b>\n"
+        f"├ 📋 Navbatdagi musiqalar: <b>{len(active_sched)} ta</b>\n"
+        f"├ 🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '@Zoryuklabot')}</b>\n"
+        f"└ 🌙 Tun rejimi: <b>{night_status}</b>\n\n"
+        f"⚙️ <b>Kunlik Reja (50/50):</b>\n"
+        f"├ ⏰ Rejalashtirish soati: <b>{settings.get('planning_hour', '5')}:00</b>\n"
+        f"└ 🎵 Kunlik limit: <b>{settings.get('daily_post_count', '6')} ta</b>\n\n"
+        f"📡 <b>Manba Kanallar:</b>\n"
+        f"├ 🤖 <b>Bot orqali yangilanadigan:</b>\n"
+        f"│   <code>{clean_ch}</code>\n"
+        f"└ ⚡ <b>To'g'ridan-to'g'ri olinadigan:</b>\n"
+        f"    <code>{direct_ch}</code>\n\n"
+        f"🏷 <b>Post Matni:</b> <code>00:47 <a href='{ch_link}'>{ch_name} | 🎧</a></code>\n"
+    )
     return text
 
 
@@ -792,21 +840,13 @@ async def check_schedule_update():
 
 # --- Telegram Bot Handlerlari ---
 
-@dp.message(Command("start", "holat"))
+@dp.message(Command("start", "holat", "admin"))
 async def start_command(message: types.Message):
     if not is_admin(message.from_user.id):
         # Oddiy foydalanuvchilar uchun start
         await message.answer("👋 <b>Musiqa topuvchi botga xush kelibsiz!</b>\n\nMusiqa topish uchun uning <b>nomini</b> yozing yoki menga <b>ovozli xabar (voice)</b> yuboring. 🔎")
         return
 
-    text = await get_admin_panel_text()
-    await message.answer(text, reply_markup=get_admin_keyboard())
-
-
-@dp.message(Command("admin"))
-async def admin_menu_command(message: types.Message):
-    if not is_admin(message.from_user.id):
-        return
     text = await get_admin_panel_text()
     await message.answer(text, reply_markup=get_admin_keyboard())
 
@@ -841,23 +881,39 @@ async def admin_callback_handler(query: CallbackQuery, state: FSMContext):
         await query.message.edit_text(text, reply_markup=get_admin_keyboard())
         await query.answer()
         
+    elif data == "admin_channels":
+        settings = await database.get_all_settings()
+        clean_ch = settings.get('clean_source_channels', '') or '(Kiritilmagan)'
+        direct_ch = settings.get('direct_source_channels', '') or '(Kiritilmagan)'
+        
+        text = (
+            "📡 <b>Manba Kanallar Boshqaruvi</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"🤖 <b>1. Bot orqali yangilanadigan kanallar:</b>\n"
+            f"└ <code>{clean_ch}</code>\n"
+            f"<i>(Bu kanallardan olingan musiqa @Zoryuklabot orqali qidirilib, toza original varianti joylanadi)</i>\n\n"
+            f"⚡ <b>2. To'g'ridan-to'g'ri olinadigan kanallar:</b>\n"
+            f"└ <code>{direct_ch}</code>\n"
+            f"<i>(Bu kanallardan so'nggi 2 oy ichidagi musiqalar tasodifiy olinib, kanalimizga moslab joylanadi)</i>\n\n"
+            "O'zgartirish uchun kerakli bo'limni tanlang 👇"
+        )
+        await query.message.edit_text(text, reply_markup=get_channels_keyboard())
+        await query.answer()
+
     elif data == "admin_settings":
         settings = await database.get_all_settings()
         text = (
-            "⚙️ <b>Bot Sozlamalari</b>\n\n"
-            f"🎵 Kunlik postlar soni: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
-            f"⏰ Rejalashtirish soati: <b>{settings.get('planning_hour', '?')}:00</b>\n"
-            f"🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '?')}</b>\n"
-            f"📡 Bot manbalar: <code>{settings.get('clean_source_channels', '')}</code>\n"
-            f"📡 To'g'ri manbalar: <code>{settings.get('direct_source_channels', '')}</code>"
+            "⚙️ <b>Asosiy Sozlamalar</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"🎵 <b>Kunlik limit:</b> {settings.get('daily_post_count', '6')} ta post\n"
+            f"⏰ <b>Rejalashtirish soati:</b> {settings.get('planning_hour', '5')}:00\n"
+            f"🌙 <b>Tun rejimi:</b> {'🟢 Yoqilgan (23:00 - 07:00)' if settings.get('night_mode') == 'true' else '🔴 O\'chirilgan'}\n"
+            f"🏷 <b>Kanal nomi:</b> {settings.get('main_channel_name', 'Spotify')}\n"
+            f"🔗 <b>Kanal linki:</b> {settings.get('main_channel_link', 'https://t.me/trend_musiqaUZ')}\n"
+            f"🤖 <b>Qidiruv boti:</b> {settings.get('target_search_bot', '@Zoryuklabot')}\n\n"
+            "Kerakli parametrni o'zgartirish uchun tugmalardan foydalaning 👇"
         )
-        await query.message.edit_text(
-            text, 
-            reply_markup=get_settings_keyboard(
-                settings.get('daily_post_count', '5'),
-                settings.get('planning_hour', '5')
-            )
-        )
+        await query.message.edit_text(text, reply_markup=get_settings_keyboard(settings))
         await query.answer()
         
     elif data == "admin_post_now":
@@ -882,44 +938,38 @@ async def admin_callback_handler(query: CallbackQuery, state: FSMContext):
             await query.message.edit_text(text, reply_markup=get_admin_keyboard())
         except Exception:
             pass
-
             
     elif data == "admin_view_plan":
-        text = "📋 <b>Bugungi rejalashtirilgan musiqalar:</b>\n\n"
-        if daily_plan:
+        active_sched = await database.get_active_schedule()
+        text = "📋 <b>Bugungi Rejadagi Musiqalar:</b>\n━━━━━━━━━━━━━━━━━━━━\n\n"
+        if active_sched:
+            for item in active_sched:
+                post_t = item['post_time'].strftime('%H:%M') if hasattr(item['post_time'], 'strftime') else str(item['post_time'])
+                track_title = f"{item.get('artist', '')} - {item.get('title', '')}"
+                is_direct = bool(item.get('direct_file_path'))
+                badge = "⚡ Direct" if is_direct else "🤖 Clean"
+                text += f"🕒 <b>{post_t}</b> | [{badge}] {track_title}\n"
+        elif daily_plan:
             text += "\n".join([f"🕒 <b>{item['time']}</b> — {item['title']}" for item in daily_plan])
         else:
-            text += "📭 Bugungi reja hali tuzilmagan yoki tugagan."
+            text += "📭 Bugungi reja hali tuzilmagan yoki barcha postlar joylab bo'lingan."
             
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="↩️ Orqaga", callback_data="admin_main")]
+            [InlineKeyboardButton(text="🔄 Rejani Qayta Tuzish", callback_data="admin_replan")],
+            [InlineKeyboardButton(text="↩️ Asosiy Menyu", callback_data="admin_main")]
         ])
         await query.message.edit_text(text, reply_markup=keyboard)
         await query.answer()
 
     elif data in ["admin_count_up", "admin_count_dn"]:
         settings = await database.get_all_settings()
-        curr = int(settings.get('daily_post_count', '5'))
+        curr = int(settings.get('daily_post_count', '6'))
         new_val = curr + 1 if "up" in data else max(1, curr - 1)
         await database.set_setting('daily_post_count', str(new_val))
-        await query.answer(f"Kunlik limit: {new_val}")
-        settings = await database.get_all_settings()
-        text = (
-            "⚙️ <b>Bot Sozlamalari</b>\n\n"
-            f"🎵 Kunlik postlar soni: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
-            f"⏰ Rejalashtirish soati: <b>{settings.get('planning_hour', '?')}:00</b>\n"
-            f"🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '?')}</b>\n"
-            f"📡 Bot manbalar: <code>{settings.get('clean_source_channels', '')}</code>\n"
-            f"📡 To'g'ri manbalar: <code>{settings.get('direct_source_channels', '')}</code>"
-        )
+        await query.answer(f"Kunlik limit: {new_val} ta")
+        settings['daily_post_count'] = str(new_val)
         try:
-            await query.message.edit_text(
-                text, 
-                reply_markup=get_settings_keyboard(
-                    settings.get('daily_post_count', '5'),
-                    settings.get('planning_hour', '5')
-                )
-            )
+            await query.message.edit_reply_markup(reply_markup=get_settings_keyboard(settings))
         except Exception:
             pass
             
@@ -928,46 +978,88 @@ async def admin_callback_handler(query: CallbackQuery, state: FSMContext):
         curr = int(settings.get('planning_hour', '5'))
         new_val = (curr + 1) % 24 if "up" in data else (curr - 1) % 24
         await database.set_setting('planning_hour', str(new_val))
-        await query.answer(f"Rejalash soati: {new_val}:00")
-        settings = await database.get_all_settings()
-        text = (
-            "⚙️ <b>Bot Sozlamalari</b>\n\n"
-            f"🎵 Kunlik postlar soni: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
-            f"⏰ Rejalashtirish soati: <b>{settings.get('planning_hour', '?')}:00</b>\n"
-            f"🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '?')}</b>\n"
-            f"📡 Bot manbalar: <code>{settings.get('clean_source_channels', '')}</code>\n"
-            f"📡 To'g'ri manbalar: <code>{settings.get('direct_source_channels', '')}</code>"
-        )
+        await query.answer(f"Reja soati: {new_val}:00")
+        settings['planning_hour'] = str(new_val)
         try:
-            await query.message.edit_text(
-                text, 
-                reply_markup=get_settings_keyboard(
-                    settings.get('daily_post_count', '5'),
-                    settings.get('planning_hour', '5')
-                )
-            )
+            await query.message.edit_reply_markup(reply_markup=get_settings_keyboard(settings))
         except Exception:
             pass
 
-    elif data == "admin_edit_search_bot":
-        prompt_msg = await query.message.answer("✏️ Yangi qidiruv botini kiriting (masalan: <code>@Zoryuklabot</code>):")
-        await state.update_data(prompt_msg_id=prompt_msg.message_id, settings_msg_id=query.message.message_id)
-        await state.set_state(AdminStates.waiting_for_search_bot)
-        await query.answer()
-
-    elif data == "admin_edit_sources":
+    elif data == "admin_toggle_night":
         settings = await database.get_all_settings()
-        current_sources = settings.get('source_channels', '')
+        current_state = settings.get('night_mode', 'false') == 'true'
+        new_state = 'false' if current_state else 'true'
+        await database.set_setting('night_mode', new_state)
+        settings['night_mode'] = new_state
+        await query.answer(f"Tun rejimi: {'Yoqildi 🟢' if new_state == 'true' else 'Ochirildi 🔴'}")
+        try:
+            await query.message.edit_reply_markup(reply_markup=get_settings_keyboard(settings))
+        except Exception:
+            pass
+
+    elif data == "admin_edit_clean_ch":
+        settings = await database.get_all_settings()
+        current_clean = settings.get('clean_source_channels', '')
         prompt_text = (
-            "📡 <b>Yangi manba kanallarni kiriting:</b>\n\n"
-            f"Hozirgi ro'yxat: <code>{current_sources}</code>\n\n"
-            "🔹 <b>Qo'shish:</b> shunchaki yangi kanallarni yuboring (masalan: <code>@kanal3, @kanal4</code>)\n"
+            "🤖 <b>Bot orqali yangilanadigan kanallarni kiriting:</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━\n"
+            f"Hozirgi ro'yxat: <code>{current_clean}</code>\n\n"
+            "🔹 <b>Qo'shish:</b> shunchaki yangi kanal(lar)ni yuboring (masalan: <code>@kanal1, @kanal2</code>)\n"
             "🔸 <b>O'chirish:</b> kanal nomidan oldin minus qo'ying (masalan: <code>-@kanal1</code>)\n"
             "⚠️ <b>Butunlay almashtirish:</b> boshiga undov qo'ying (masalan: <code>!@kanal1, @kanal2</code>)"
         )
         prompt_msg = await query.message.answer(prompt_text)
         await state.update_data(prompt_msg_id=prompt_msg.message_id, settings_msg_id=query.message.message_id)
-        await state.set_state(AdminStates.waiting_for_source_channels)
+        await state.set_state(AdminStates.waiting_for_clean_channels)
+        await query.answer()
+
+    elif data == "admin_edit_direct_ch":
+        settings = await database.get_all_settings()
+        current_direct = settings.get('direct_source_channels', '')
+        prompt_text = (
+            "⚡ <b>To'g'ridan-to'g'ri olinadigan kanallarni kiriting:</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━\n"
+            f"Hozirgi ro'yxat: <code>{current_direct}</code>\n\n"
+            "🔹 <b>Qo'shish:</b> shunchaki yangi kanal(lar)ni yuboring (masalan: <code>@kanal3, @kanal4</code>)\n"
+            "🔸 <b>O'chirish:</b> kanal nomidan oldin minus qo'ying (masalan: <code>-@kanal3</code>)\n"
+            "⚠️ <b>Butunlay almashtirish:</b> boshiga undov qo'ying (masalan: <code>!@kanal3, @kanal4</code>)"
+        )
+        prompt_msg = await query.message.answer(prompt_text)
+        await state.update_data(prompt_msg_id=prompt_msg.message_id, settings_msg_id=query.message.message_id)
+        await state.set_state(AdminStates.waiting_for_direct_channels)
+        await query.answer()
+
+    elif data == "admin_edit_ch_name":
+        settings = await database.get_all_settings()
+        curr_name = settings.get('main_channel_name', 'Spotify')
+        prompt_msg = await query.message.answer(
+            f"🏷 <b>Yangi kanal nomini kiriting:</b>\n(Hozirgi nom: <code>{curr_name}</code>)\n\n"
+            "Masalan: <code>Spotify</code> yoki <code>Trend MUSIC</code>"
+        )
+        await state.update_data(prompt_msg_id=prompt_msg.message_id, settings_msg_id=query.message.message_id)
+        await state.set_state(AdminStates.waiting_for_channel_name)
+        await query.answer()
+
+    elif data == "admin_edit_ch_link":
+        settings = await database.get_all_settings()
+        curr_link = settings.get('main_channel_link', 'https://t.me/trend_musiqaUZ')
+        prompt_msg = await query.message.answer(
+            f"🔗 <b>Kanal havolasini (Link) kiriting:</b>\n(Hozirgi link: <code>{curr_link}</code>)\n\n"
+            "Masalan: <code>https://t.me/trend_musiqaUZ</code> yoki <code>https://t.me/spotify_muzikala</code>"
+        )
+        await state.update_data(prompt_msg_id=prompt_msg.message_id, settings_msg_id=query.message.message_id)
+        await state.set_state(AdminStates.waiting_for_channel_link)
+        await query.answer()
+
+    elif data == "admin_edit_search_bot":
+        settings = await database.get_all_settings()
+        curr_bot = settings.get('target_search_bot', '@Zoryuklabot')
+        prompt_msg = await query.message.answer(
+            f"🤖 <b>Yangi qidiruv botini kiriting:</b>\n(Hozirgi bot: <code>{curr_bot}</code>)\n\n"
+            "Masalan: <code>@Zoryuklabot</code>"
+        )
+        await state.update_data(prompt_msg_id=prompt_msg.message_id, settings_msg_id=query.message.message_id)
+        await state.set_state(AdminStates.waiting_for_search_bot)
         await query.answer()
 
 
@@ -978,132 +1070,53 @@ async def process_search_bot_input(message: types.Message, state: FSMContext):
         return
         
     val = message.text.strip()
-    
-    # Get stored prompt & settings message ids
     state_data = await state.get_data()
     prompt_msg_id = state_data.get("prompt_msg_id")
-    settings_msg_id = state_data.get("settings_msg_id")
     
-    # Try deleting the user's input message to keep chat clean
-    try:
-        await message.delete()
-    except Exception:
-        pass
-
-    # Try deleting the previous prompt message
+    try: await message.delete()
+    except Exception: pass
     if prompt_msg_id:
-        try:
-            await bot.delete_message(chat_id=message.chat.id, message_id=prompt_msg_id)
-        except Exception:
-            pass
+        try: await bot.delete_message(chat_id=message.chat.id, message_id=prompt_msg_id)
+        except Exception: pass
 
     if not val.startswith("@") or len(val) < 3:
-        # Invalid input! Send new prompt and update prompt_msg_id
-        new_prompt = await message.answer("❌ Xato! Bot nomi @ belgisi bilan boshlanishi va kamida 3 belgidan iborat bo'lishi kerak. Qaytadan urinib ko'ring:")
+        new_prompt = await message.answer("❌ Xato! Bot nomi @ belgisi bilan boshlanishi kerak (masalan: <code>@Zoryuklabot</code>). Qaytadan kiriting:")
         await state.update_data(prompt_msg_id=new_prompt.message_id)
         return
         
     await database.set_setting("target_search_bot", val)
     await state.clear()
     
-    settings = await database.get_all_settings()
-    text = (
-        "⚙️ <b>Bot Sozlamalari</b>\n\n"
-        f"🎵 Kunlik postlar soni: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
-        f"⏰ Rejalashtirish soati: <b>{settings.get('planning_hour', '?')}:00</b>\n"
-        f"🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '?')}</b>\n"
-        f"📡 Bot manbalar: <code>{settings.get('clean_source_channels', '')}</code>\n"
-        f"📡 To'g'ri manbalar: <code>{settings.get('direct_source_channels', '')}</code>"
-    )
-    
-    edited = False
-    if settings_msg_id:
-        try:
-            await bot.edit_message_text(
-                chat_id=message.chat.id,
-                message_id=settings_msg_id,
-                text=f"✅ Qidiruv boti muvaffaqiyatli o'zgartirildi!\n\n{text}",
-                reply_markup=get_settings_keyboard(
-                    settings.get('daily_post_count', '5'),
-                    settings.get('planning_hour', '5')
-                )
-            )
-            edited = True
-        except Exception:
-            pass
-            
-    if not edited:
-        await message.answer(
-            f"✅ Qidiruv boti muvaffaqiyatli o'zgartirildi!\n\n{text}",
-            reply_markup=get_settings_keyboard(
-                settings.get('daily_post_count', '5'),
-                settings.get('planning_hour', '5')
-            )
-        )
+    text = await get_admin_panel_text()
+    await message.answer(f"✅ Qidiruv boti muvaffaqiyatli o'zgartirildi: <b>{val}</b>\n\n{text}", reply_markup=get_admin_keyboard())
 
 
-@dp.message(AdminStates.waiting_for_source_channels)
-async def process_source_channels_input(message: types.Message, state: FSMContext):
+@dp.message(AdminStates.waiting_for_clean_channels)
+async def process_clean_channels_input(message: types.Message, state: FSMContext):
     if not is_admin(message.from_user.id):
         await state.clear()
         return
         
     val = message.text.strip()
-    
-    # Get stored prompt & settings message ids
     state_data = await state.get_data()
     prompt_msg_id = state_data.get("prompt_msg_id")
-    settings_msg_id = state_data.get("settings_msg_id")
     
-    # Try deleting the user's input message to keep chat clean
-    try:
-        await message.delete()
-    except Exception:
-        pass
-
-    # Try deleting the previous prompt message
+    try: await message.delete()
+    except Exception: pass
     if prompt_msg_id:
-        try:
-            await bot.delete_message(chat_id=message.chat.id, message_id=prompt_msg_id)
-        except Exception:
-            pass
+        try: await bot.delete_message(chat_id=message.chat.id, message_id=prompt_msg_id)
+        except Exception: pass
 
-    # Fetch current settings to read current channels list
     settings = await database.get_all_settings()
-    current_val = settings.get('source_channels', '')
+    current_val = settings.get('clean_source_channels', '')
     current_channels = [ch.strip() for ch in current_val.split(",") if ch.strip()]
 
     if val.startswith("!"):
-        # Replace mode: strip the leading "!"
         val_clean = val[1:].strip()
         channels = [ch.strip() for ch in val_clean.split(",") if ch.strip()]
-        invalid = [ch for ch in channels if not ch.startswith("@")]
-        if invalid:
-            new_prompt = await message.answer("❌ Xato! Barcha kanallar nomi @ belgisi bilan boshlanishi kerak. Qaytadan urinib ko'ring:")
-            await state.update_data(prompt_msg_id=new_prompt.message_id)
-            return
         new_list = channels
     else:
-        # Add / Remove mode
         inputs = [ch.strip() for ch in val.split(",") if ch.strip()]
-        
-        # Validate that all inputs either start with @ or -@ or +@
-        invalid = []
-        for ch in inputs:
-            if ch.startswith("-@") or ch.startswith("+@"):
-                continue
-            if ch.startswith("@"):
-                continue
-            invalid.append(ch)
-            
-        if invalid:
-            new_prompt = await message.answer(
-                "❌ Xato! Barcha kanallar nomi @ belgisi bilan boshlanishi kerak (o'chirish uchun -@kanal).\n"
-                "Qaytadan urinib ko'ring:"
-            )
-            await state.update_data(prompt_msg_id=new_prompt.message_id)
-            return
-            
         new_list = list(current_channels)
         for ch in inputs:
             if ch.startswith("-"):
@@ -1115,49 +1128,117 @@ async def process_source_channels_input(message: types.Message, state: FSMContex
                 if target not in new_list:
                     new_list.append(target)
             else:
-                target = ch
-                if target not in new_list:
-                    new_list.append(target)
+                if ch not in new_list:
+                    new_list.append(ch)
                     
-    # Save back
     new_val = ", ".join(new_list)
-    await database.set_setting("source_channels", new_val)
+    await database.set_setting("clean_source_channels", new_val)
     await state.clear()
     
-    settings = await database.get_all_settings()
-    text = (
-        "⚙️ <b>Bot Sozlamalari</b>\n\n"
-        f"🎵 Kunlik postlar soni: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
-        f"⏰ Rejalashtirish soati: <b>{settings.get('planning_hour', '?')}:00</b>\n"
-        f"🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '?')}</b>\n"
-        f"📡 Bot manbalar: <code>{settings.get('clean_source_channels', '')}</code>\n"
-        f"📡 To'g'ri manbalar: <code>{settings.get('direct_source_channels', '')}</code>"
-    )
+    text = await get_admin_panel_text()
+    await message.answer(f"✅ Bot orqali yangilanadigan kanallar yangilandi!\n\n{text}", reply_markup=get_admin_keyboard())
+
+
+@dp.message(AdminStates.waiting_for_direct_channels)
+async def process_direct_channels_input(message: types.Message, state: FSMContext):
+    if not is_admin(message.from_user.id):
+        await state.clear()
+        return
+        
+    val = message.text.strip()
+    state_data = await state.get_data()
+    prompt_msg_id = state_data.get("prompt_msg_id")
     
-    edited = False
-    if settings_msg_id:
-        try:
-            await bot.edit_message_text(
-                chat_id=message.chat.id,
-                message_id=settings_msg_id,
-                text=f"✅ Manbalar ro'yxati muvaffaqiyatli o'zgartirildi!\n\n{text}",
-                reply_markup=get_settings_keyboard(
-                    settings.get('daily_post_count', '5'),
-                    settings.get('planning_hour', '5')
-                )
-            )
-            edited = True
-        except Exception:
-            pass
-            
-    if not edited:
-        await message.answer(
-            f"✅ Manbalar ro'yxati muvaffaqiyatli o'zgartirildi!\n\n{text}",
-            reply_markup=get_settings_keyboard(
-                settings.get('daily_post_count', '5'),
-                settings.get('planning_hour', '5')
-            )
-        )
+    try: await message.delete()
+    except Exception: pass
+    if prompt_msg_id:
+        try: await bot.delete_message(chat_id=message.chat.id, message_id=prompt_msg_id)
+        except Exception: pass
+
+    settings = await database.get_all_settings()
+    current_val = settings.get('direct_source_channels', '')
+    current_channels = [ch.strip() for ch in current_val.split(",") if ch.strip()]
+
+    if val.startswith("!"):
+        val_clean = val[1:].strip()
+        channels = [ch.strip() for ch in val_clean.split(",") if ch.strip()]
+        new_list = channels
+    else:
+        inputs = [ch.strip() for ch in val.split(",") if ch.strip()]
+        new_list = list(current_channels)
+        for ch in inputs:
+            if ch.startswith("-"):
+                target = ch[1:]
+                if target in new_list:
+                    new_list.remove(target)
+            elif ch.startswith("+"):
+                target = ch[1:]
+                if target not in new_list:
+                    new_list.append(target)
+            else:
+                if ch not in new_list:
+                    new_list.append(ch)
+                    
+    new_val = ", ".join(new_list)
+    await database.set_setting("direct_source_channels", new_val)
+    await state.clear()
+    
+    text = await get_admin_panel_text()
+    await message.answer(f"✅ To'g'ridan-to'g'ri olinadigan kanallar yangilandi!\n\n{text}", reply_markup=get_admin_keyboard())
+
+
+@dp.message(AdminStates.waiting_for_channel_name)
+async def process_channel_name_input(message: types.Message, state: FSMContext):
+    if not is_admin(message.from_user.id):
+        await state.clear()
+        return
+        
+    val = message.text.strip()
+    state_data = await state.get_data()
+    prompt_msg_id = state_data.get("prompt_msg_id")
+    
+    try: await message.delete()
+    except Exception: pass
+    if prompt_msg_id:
+        try: await bot.delete_message(chat_id=message.chat.id, message_id=prompt_msg_id)
+        except Exception: pass
+
+    if not val:
+        val = "Spotify"
+
+    await database.set_setting("main_channel_name", val)
+    await state.clear()
+    
+    text = await get_admin_panel_text()
+    await message.answer(f"✅ Kanal nomi o'zgartirildi: <b>{val}</b>\n\n{text}", reply_markup=get_admin_keyboard())
+
+
+@dp.message(AdminStates.waiting_for_channel_link)
+async def process_channel_link_input(message: types.Message, state: FSMContext):
+    if not is_admin(message.from_user.id):
+        await state.clear()
+        return
+        
+    val = message.text.strip()
+    state_data = await state.get_data()
+    prompt_msg_id = state_data.get("prompt_msg_id")
+    
+    try: await message.delete()
+    except Exception: pass
+    if prompt_msg_id:
+        try: await bot.delete_message(chat_id=message.chat.id, message_id=prompt_msg_id)
+        except Exception: pass
+
+    if not val.startswith("http://") and not val.startswith("https://") and not val.startswith("t.me/"):
+        val = f"https://t.me/{val.replace('@', '')}"
+    elif val.startswith("t.me/"):
+        val = f"https://{val}"
+
+    await database.set_setting("main_channel_link", val)
+    await state.clear()
+    
+    text = await get_admin_panel_text()
+    await message.answer(f"✅ Kanal havolasi o'zgartirildi: <b>{val}</b>\n\n{text}", reply_markup=get_admin_keyboard())
 
 
 @dp.message(Command("kanaldan"))
