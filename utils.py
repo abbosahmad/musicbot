@@ -143,8 +143,10 @@ CRITICAL IDENTIFICATION & CLEANING RULES:
    - NEVER output 'Spotify', 'UzMuz', 'Dilnavo', 'Trend Musiqa', or any channel/app name as the artist! The artist MUST be the real musical artist.
    - If the song is completely anonymous and no real singer exists, leave artist as a clean genre or "Unknown".
 
-3. PRESERVE legitimate musical attributes: (Remix), (DJ ... Remix), (Speed Up), (Slowed), (Cover), (feat. ...), (ft. ...).
-4. Always format cleanly in Title Case.
+3. NEVER duplicate artist and title (e.g., NEVER return artist='Janaga', title='Janaga' or 'Konsta' - 'Konsta')! If 'Janaga' is the singer, extract/identify the real song title (e.g. artist='Janaga', title='По щекам слезы').
+
+4. PRESERVE legitimate musical attributes: (Remix), (DJ ... Remix), (Speed Up), (Slowed), (Cover), (feat. ...), (ft. ...).
+5. Always format cleanly in Title Case.
 
 Safety Rules:
 - 'is_religious': true ONLY for explicit Quran recitations, nasheeds, salovats, or sermons.
@@ -190,14 +192,27 @@ Raw Title: "{raw_title}" """
         title_res = (data.get("title") or "").strip()
 
         # Check if artist is invalid, generic, or promo
-        invalid_markers = ["spotify", "unknown", "noma'lum", "nomalum", "music", "mp3", "uzmuz", "tarona", "kanal", "media", "baza", "tiktok"]
+        invalid_markers = ["spotify", "unknown", "noma'lum", "nomalum", "music", "mp3", "uzmuz", "tarona", "kanal", "media", "baza", "tiktok", "trend musiqa", "trend music"]
         if not artist_res or any(inv == artist_res.lower().strip() for inv in invalid_markers) or "spotify" in artist_res.lower():
-            artist_res = fallback_artist or "Trend Musiqa"
+            artist_res = fallback_artist or ""
 
         if not title_res or title_res.lower() in ["musiqa", "unknown", "track", "audio"]:
             title_res = fallback_title or "Musiqa"
 
-        data["artist"] = artist_res
+        # Check for duplicates like Janaga - Janaga
+        if artist_res and title_res and artist_res.lower().strip() == title_res.lower().strip():
+            if " - " in raw_title:
+                pts = raw_title.split(" - ", 1)
+                artist_res = pts[0].strip()
+                title_res = pts[1].strip()
+            elif " – " in raw_title:
+                pts = raw_title.split(" – ", 1)
+                artist_res = pts[0].strip()
+                title_res = pts[1].strip()
+            else:
+                title_res = "Musiqa"
+
+        data["artist"] = artist_res or "Musiqa"
         data["title"] = title_res
             
         return data
@@ -210,7 +225,7 @@ Raw Title: "{raw_title}" """
              asyncio.create_task(send_alert_to_admin(f"DeepSeek AI API xatolik berdi (Kalit/Balans): {e}. Aqlli fallback rejimida ishlamoqda."))
              
         return {
-            "artist": fallback_artist or "Trend Musiqa",
+            "artist": fallback_artist or "Musiqa",
             "title": fallback_title or "Musiqa",
             "is_religious": False,
             "is_political": False,

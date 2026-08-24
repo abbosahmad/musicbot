@@ -164,59 +164,34 @@ from pyrogram import enums
 
 async def send_music_to_channel(file_path: str, caption_text: str, artist: str, title: str, duration: Optional[int] = None):
     """
-    Musiqani kanalga yuboradi.
-    1. Bot musiqani Userbot shaxsiy chatiga <tg-emoji> bilan jo'natadi,
-       Userbot esa uni kanalga forward qiladi (bu orqali Custom Emoji 100% animatsiyali chiqadi).
-    2. Agar Userbot ulanmagan bo'lsa yoki xatolik yuz bersa: Bot to'g'ridan-to'g'ri kanalga zaxiradan yuboradi.
+    Musiqani to'g'ridan-to'g'ri Asosiy Bot orqali kanalga yuklaydi.
+    Olov emojisi (🔥) ishlatiladi.
     """
     thumb_path = "thumbnail.jpg" if os.path.exists("thumbnail.jpg") else None
-    emoji_id = await database.get_setting("custom_emoji_id", getattr(config, "CUSTOM_EMOJI_ID", "5222472119295684375"))
     channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
     channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
     highlight_time = utils.detect_music_highlight(file_path)
 
-    # Telegram Bot API formati (Bot egasi Premium bo'lgani uchun DM da ishlaydi)
-    if emoji_id and str(emoji_id).strip() not in ["0", ""]:
-        emoji_tag = f'<tg-emoji emoji-id="{emoji_id}">🎶</tg-emoji>'
+    # 1. Dublikat nomlarni tozalash (masalan Janaga - Janaga bo'lib qolmasligi)
+    clean_a = artist.strip() if artist else ""
+    clean_t = title.strip() if title else ""
+    if clean_a.lower() == clean_t.lower() or not clean_a:
+        final_title = clean_t or "Musiqa"
+        final_performer = None
     else:
-        emoji_tag = "🎧"
+        final_performer = clean_a
+        final_title = clean_t
 
-    final_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | {emoji_tag}"
+    # 2. Olov emojili toza caption: "00:59 Trend Musiqa | 🔥"
+    final_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | 🔥"
 
-    # 1. Userbot Bridge orqali (Bot -> Userbot DM -> Channel Forward)
-    if userbot.app and userbot.app.is_connected:
-        try:
-            me = await userbot.app.get_me()
-            logger.info(f"Musiqa Bot orqali Userbot ({me.id}) shaxsiy chatiga yuklanmoqda...")
-            dm_msg = await bot.send_audio(
-                chat_id=me.id,
-                audio=FSInputFile(file_path, filename=f"{artist} - {title}.mp3"),
-                caption=final_caption,
-                performer=artist,
-                title=title,
-                thumbnail=FSInputFile(thumb_path) if thumb_path else None,
-                duration=duration
-            )
-            await asyncio.sleep(1)
-            
-            # Userbot o'ziga kelgan oxirgi audio xabarni kanalga muallifsiz (toza post sifatida) nusxalaydi
-            bot_info = await bot.get_me()
-            async for m in userbot.app.get_chat_history(bot_info.id, limit=3):
-                if m.audio:
-                    clean_post = await m.copy(config.MAIN_CHANNEL_ID)
-                    logger.success(f"✅ Musiqa Userbot orqali kanalga toza (muallifsiz) joylandi! ID: {clean_post.id}")
-                    return True
-        except Exception as bridge_err:
-            logger.warning(f"Userbot Bridge orqali forward qilishda xato: {bridge_err}. To'g'ridan-to'g'ri kanalga yuborilmoqda...")
-
-    # 2. To'g'ridan-to'g'ri Bot orqali zaxira yuborish
     logger.info(f"Musiqa Bot orqali to'g'ridan-to'g'ri kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
     await bot.send_audio(
         config.MAIN_CHANNEL_ID,
-        audio=FSInputFile(file_path, filename=f"{artist} - {title}.mp3"),
+        audio=FSInputFile(file_path, filename=f"{final_title}.mp3" if not final_performer else f"{final_performer} - {final_title}.mp3"),
         caption=final_caption,
-        performer=artist,
-        title=title,
+        performer=final_performer,
+        title=final_title,
         thumbnail=FSInputFile(thumb_path) if thumb_path else None,
         duration=duration
     )
