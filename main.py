@@ -1051,7 +1051,7 @@ async def admin_callback_handler(query: CallbackQuery, state: FSMContext):
 
     elif data == "admin_edit_clean_ch":
         settings = await database.get_all_settings()
-        current_clean = settings.get('clean_source_channels', '')
+        current_clean = settings.get('clean_source_channels', '') or "(Bo'sh)"
         prompt_text = (
             "🤖 <b>Bot orqali yangilanadigan kanallarni kiriting:</b>\n"
             "━━━━━━━━━━━━━━━━━━━━\n"
@@ -1060,14 +1060,17 @@ async def admin_callback_handler(query: CallbackQuery, state: FSMContext):
             "🔸 <b>O'chirish:</b> kanal nomidan oldin minus qo'ying (masalan: <code>-@kanal1</code>)\n"
             "⚠️ <b>Butunlay almashtirish:</b> boshiga undov qo'ying (masalan: <code>!@kanal1, @kanal2</code>)"
         )
-        prompt_msg = await query.message.answer(prompt_text)
-        await state.update_data(prompt_msg_id=prompt_msg.message_id, settings_msg_id=query.message.message_id)
+        cancel_kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="↩️ Bekor qilish", callback_data="admin_channels")]
+        ])
+        await query.message.edit_text(prompt_text, reply_markup=cancel_kb)
+        await state.update_data(settings_msg_id=query.message.message_id)
         await state.set_state(AdminStates.waiting_for_clean_channels)
         await query.answer()
 
     elif data == "admin_edit_direct_ch":
         settings = await database.get_all_settings()
-        current_direct = settings.get('direct_source_channels', '')
+        current_direct = settings.get('direct_source_channels', '') or "(Bo'sh)"
         prompt_text = (
             "⚡ <b>To'g'ridan-to'g'ri olinadigan kanallarni kiriting:</b>\n"
             "━━━━━━━━━━━━━━━━━━━━\n"
@@ -1076,43 +1079,91 @@ async def admin_callback_handler(query: CallbackQuery, state: FSMContext):
             "🔸 <b>O'chirish:</b> kanal nomidan oldin minus qo'ying (masalan: <code>-@kanal3</code>)\n"
             "⚠️ <b>Butunlay almashtirish:</b> boshiga undov qo'ying (masalan: <code>!@kanal3, @kanal4</code>)"
         )
-        prompt_msg = await query.message.answer(prompt_text)
-        await state.update_data(prompt_msg_id=prompt_msg.message_id, settings_msg_id=query.message.message_id)
+        cancel_kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="↩️ Bekor qilish", callback_data="admin_channels")]
+        ])
+        await query.message.edit_text(prompt_text, reply_markup=cancel_kb)
+        await state.update_data(settings_msg_id=query.message.message_id)
         await state.set_state(AdminStates.waiting_for_direct_channels)
         await query.answer()
 
     elif data == "admin_edit_ch_name":
         settings = await database.get_all_settings()
-        curr_name = settings.get('main_channel_name', 'Spotify')
-        prompt_msg = await query.message.answer(
+        curr_name = settings.get('main_channel_name', 'Trend Musiqa')
+        prompt_text = (
             f"🏷 <b>Yangi kanal nomini kiriting:</b>\n(Hozirgi nom: <code>{curr_name}</code>)\n\n"
-            "Masalan: <code>Spotify</code> yoki <code>Trend MUSIC</code>"
+            "Masalan: <code>Trend Musiqa</code> yoki <code>Spotify</code>"
         )
-        await state.update_data(prompt_msg_id=prompt_msg.message_id, settings_msg_id=query.message.message_id)
+        cancel_kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="↩️ Bekor qilish", callback_data="admin_settings")]
+        ])
+        await query.message.edit_text(prompt_text, reply_markup=cancel_kb)
+        await state.update_data(settings_msg_id=query.message.message_id)
         await state.set_state(AdminStates.waiting_for_channel_name)
         await query.answer()
 
     elif data == "admin_edit_ch_link":
         settings = await database.get_all_settings()
         curr_link = settings.get('main_channel_link', 'https://t.me/trend_musiqaUZ')
-        prompt_msg = await query.message.answer(
+        prompt_text = (
             f"🔗 <b>Kanal havolasini (Link) kiriting:</b>\n(Hozirgi link: <code>{curr_link}</code>)\n\n"
             "Masalan: <code>https://t.me/trend_musiqaUZ</code> yoki <code>https://t.me/spotify_muzikala</code>"
         )
-        await state.update_data(prompt_msg_id=prompt_msg.message_id, settings_msg_id=query.message.message_id)
+        cancel_kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="↩️ Bekor qilish", callback_data="admin_settings")]
+        ])
+        await query.message.edit_text(prompt_text, reply_markup=cancel_kb)
+        await state.update_data(settings_msg_id=query.message.message_id)
         await state.set_state(AdminStates.waiting_for_channel_link)
         await query.answer()
 
     elif data == "admin_edit_search_bot":
         settings = await database.get_all_settings()
         curr_bot = settings.get('target_search_bot', '@Zoryuklabot')
-        prompt_msg = await query.message.answer(
+        prompt_text = (
             f"🤖 <b>Yangi qidiruv botini kiriting:</b>\n(Hozirgi bot: <code>{curr_bot}</code>)\n\n"
             "Masalan: <code>@Zoryuklabot</code>"
         )
-        await state.update_data(prompt_msg_id=prompt_msg.message_id, settings_msg_id=query.message.message_id)
+        cancel_kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="↩️ Bekor qilish", callback_data="admin_settings")]
+        ])
+        await query.message.edit_text(prompt_text, reply_markup=cancel_kb)
+        await state.update_data(settings_msg_id=query.message.message_id)
         await state.set_state(AdminStates.waiting_for_search_bot)
         await query.answer()
+
+
+async def _apply_admin_edit(message: types.Message, state: FSMContext, target_menu: str = "main"):
+    """
+    Foydalanuvchi yuborgan xabarni o'chirib, mavjud admin panel xabarining o'zini yangilaydi (edit qiladi).
+    """
+    state_data = await state.get_data()
+    settings_msg_id = state_data.get("settings_msg_id")
+    await state.clear()
+
+    try:
+        await message.delete()
+    except Exception:
+        pass
+
+    text = await get_admin_panel_text()
+    reply_markup = get_admin_keyboard()
+
+    edited = False
+    if settings_msg_id:
+        try:
+            await bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=settings_msg_id,
+                text=text,
+                reply_markup=reply_markup
+            )
+            edited = True
+        except Exception:
+            pass
+
+    if not edited:
+        await message.answer(text, reply_markup=reply_markup)
 
 
 @dp.message(AdminStates.waiting_for_search_bot)
@@ -1123,24 +1174,22 @@ async def process_search_bot_input(message: types.Message, state: FSMContext):
         
     val = message.text.strip()
     state_data = await state.get_data()
-    prompt_msg_id = state_data.get("prompt_msg_id")
-    
+    settings_msg_id = state_data.get("settings_msg_id")
+
     try: await message.delete()
     except Exception: pass
-    if prompt_msg_id:
-        try: await bot.delete_message(chat_id=message.chat.id, message_id=prompt_msg_id)
-        except Exception: pass
 
     if not val.startswith("@") or len(val) < 3:
-        new_prompt = await message.answer("❌ Xato! Bot nomi @ belgisi bilan boshlanishi kerak (masalan: <code>@Zoryuklabot</code>). Qaytadan kiriting:")
-        await state.update_data(prompt_msg_id=new_prompt.message_id)
+        if settings_msg_id:
+            try:
+                err_text = "❌ <b>Xato!</b> Bot nomi @ belgisi bilan boshlanishi kerak (masalan: <code>@Zoryuklabot</code>).\n\nQaytadan kiriting:"
+                cancel_kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="↩️ Bekor qilish", callback_data="admin_settings")]])
+                await bot.edit_message_text(chat_id=message.chat.id, message_id=settings_msg_id, text=err_text, reply_markup=cancel_kb)
+            except Exception: pass
         return
         
     await database.set_setting("target_search_bot", val)
-    await state.clear()
-    
-    text = await get_admin_panel_text()
-    await message.answer(f"✅ Qidiruv boti muvaffaqiyatli o'zgartirildi: <b>{val}</b>\n\n{text}", reply_markup=get_admin_keyboard())
+    await _apply_admin_edit(message, state, "settings")
 
 
 @dp.message(AdminStates.waiting_for_clean_channels)
@@ -1150,15 +1199,6 @@ async def process_clean_channels_input(message: types.Message, state: FSMContext
         return
         
     val = message.text.strip()
-    state_data = await state.get_data()
-    prompt_msg_id = state_data.get("prompt_msg_id")
-    
-    try: await message.delete()
-    except Exception: pass
-    if prompt_msg_id:
-        try: await bot.delete_message(chat_id=message.chat.id, message_id=prompt_msg_id)
-        except Exception: pass
-
     settings = await database.get_all_settings()
     current_val = settings.get('clean_source_channels', '')
     current_channels = [ch.strip() for ch in current_val.split(",") if ch.strip()]
@@ -1185,10 +1225,7 @@ async def process_clean_channels_input(message: types.Message, state: FSMContext
                     
     new_val = ", ".join(new_list)
     await database.set_setting("clean_source_channels", new_val)
-    await state.clear()
-    
-    text = await get_admin_panel_text()
-    await message.answer(f"✅ Bot orqali yangilanadigan kanallar yangilandi!\n\n{text}", reply_markup=get_admin_keyboard())
+    await _apply_admin_edit(message, state, "channels")
 
 
 @dp.message(AdminStates.waiting_for_direct_channels)
@@ -1198,15 +1235,6 @@ async def process_direct_channels_input(message: types.Message, state: FSMContex
         return
         
     val = message.text.strip()
-    state_data = await state.get_data()
-    prompt_msg_id = state_data.get("prompt_msg_id")
-    
-    try: await message.delete()
-    except Exception: pass
-    if prompt_msg_id:
-        try: await bot.delete_message(chat_id=message.chat.id, message_id=prompt_msg_id)
-        except Exception: pass
-
     settings = await database.get_all_settings()
     current_val = settings.get('direct_source_channels', '')
     current_channels = [ch.strip() for ch in current_val.split(",") if ch.strip()]
@@ -1233,10 +1261,7 @@ async def process_direct_channels_input(message: types.Message, state: FSMContex
                     
     new_val = ", ".join(new_list)
     await database.set_setting("direct_source_channels", new_val)
-    await state.clear()
-    
-    text = await get_admin_panel_text()
-    await message.answer(f"✅ To'g'ridan-to'g'ri olinadigan kanallar yangilandi!\n\n{text}", reply_markup=get_admin_keyboard())
+    await _apply_admin_edit(message, state, "channels")
 
 
 @dp.message(AdminStates.waiting_for_channel_name)
@@ -1246,23 +1271,11 @@ async def process_channel_name_input(message: types.Message, state: FSMContext):
         return
         
     val = message.text.strip()
-    state_data = await state.get_data()
-    prompt_msg_id = state_data.get("prompt_msg_id")
-    
-    try: await message.delete()
-    except Exception: pass
-    if prompt_msg_id:
-        try: await bot.delete_message(chat_id=message.chat.id, message_id=prompt_msg_id)
-        except Exception: pass
-
     if not val:
-        val = "Spotify"
+        val = "Trend Musiqa"
 
     await database.set_setting("main_channel_name", val)
-    await state.clear()
-    
-    text = await get_admin_panel_text()
-    await message.answer(f"✅ Kanal nomi o'zgartirildi: <b>{val}</b>\n\n{text}", reply_markup=get_admin_keyboard())
+    await _apply_admin_edit(message, state, "settings")
 
 
 @dp.message(AdminStates.waiting_for_channel_link)
@@ -1272,25 +1285,13 @@ async def process_channel_link_input(message: types.Message, state: FSMContext):
         return
         
     val = message.text.strip()
-    state_data = await state.get_data()
-    prompt_msg_id = state_data.get("prompt_msg_id")
-    
-    try: await message.delete()
-    except Exception: pass
-    if prompt_msg_id:
-        try: await bot.delete_message(chat_id=message.chat.id, message_id=prompt_msg_id)
-        except Exception: pass
-
     if not val.startswith("http://") and not val.startswith("https://") and not val.startswith("t.me/"):
         val = f"https://t.me/{val.replace('@', '')}"
     elif val.startswith("t.me/"):
         val = f"https://{val}"
 
     await database.set_setting("main_channel_link", val)
-    await state.clear()
-    
-    text = await get_admin_panel_text()
-    await message.answer(f"✅ Kanal havolasi o'zgartirildi: <b>{val}</b>\n\n{text}", reply_markup=get_admin_keyboard())
+    await _apply_admin_edit(message, state, "settings")
 
 
 @dp.message(Command("kanaldan"))
