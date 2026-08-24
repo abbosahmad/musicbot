@@ -174,46 +174,19 @@ async def send_music_to_channel(file_path: str, caption_text: str, artist: str, 
     channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
     highlight_time = utils.detect_music_highlight(file_path)
 
-    # Pyrogram HTML formati (Userbot uchun): <emoji id=5222472119295684375>🎶</emoji>
-    # Aiogram HTML formati (Bot uchun): <tg-emoji emoji-id="5222472119295684375">🎶</tg-emoji>
+    # Telegram Bot API formati
     if emoji_id and str(emoji_id).strip() not in ["0", ""]:
-        pyro_emoji = f'<emoji id={emoji_id}>🎶</emoji>'
-        aio_emoji = f'<tg-emoji emoji-id="{emoji_id}">🎶</tg-emoji>'
+        emoji_tag = f'<tg-emoji emoji-id="{emoji_id}">🎶</tg-emoji>'
     else:
-        pyro_emoji = "🎧"
-        aio_emoji = "🎧"
+        emoji_tag = "🎧"
 
-    pyro_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | {pyro_emoji}"
-    aio_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | {aio_emoji}"
+    final_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | {emoji_tag}"
 
-    # 1. Userbot orqali yuborish (Telegram Premium hisob orqali animatsiyali chiqadi)
-    if userbot.app and userbot.app.is_connected:
-        try:
-            logger.info(f"Musiqa Userbot (Shaxsiy hisob) orqali kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
-            await asyncio.wait_for(
-                userbot.app.send_audio(
-                    chat_id=config.MAIN_CHANNEL_ID,
-                    audio=file_path,
-                    caption=pyro_caption,
-                    parse_mode=enums.ParseMode.HTML,
-                    performer=artist,
-                    title=title,
-                    thumb=thumb_path,
-                    duration=duration or 0
-                ),
-                timeout=25.0
-            )
-            logger.success("✅ Musiqa Userbot orqali kanalga muvaffaqiyatli yuklandi (Premium Emoji bilan)!")
-            return True
-        except Exception as ub_err:
-            logger.warning(f"Userbot orqali yuborishda xato/timeout: {ub_err}. Bot orqali yuborilmoqda...")
-
-    # 2. Aiogram Bot orqali zaxira yuborish
     logger.info(f"Musiqa Bot orqali kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
     await bot.send_audio(
         config.MAIN_CHANNEL_ID,
         audio=FSInputFile(file_path, filename=f"{artist} - {title}.mp3"),
-        caption=aio_caption,
+        caption=final_caption,
         performer=artist,
         title=title,
         thumbnail=FSInputFile(thumb_path) if thumb_path else None,
