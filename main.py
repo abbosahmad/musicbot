@@ -8,7 +8,7 @@ except RuntimeError:
 import os
 import re
 import random
-from typing import Dict, List
+from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 
 import pytz
@@ -159,6 +159,50 @@ async def get_admin_panel_text() -> str:
     return text
 
 
+from pyrogram import enums
+
+
+async def send_music_to_channel(file_path: str, caption_text: str, artist: str, title: str, duration: Optional[int] = None):
+    """
+    Musiqani kanalga yuboradi.
+    1. Avval UserBot (Pyrogram) orqali yuborishga harakat qiladi (chunki Premium userbot orqali Custom Emojilar 100% animatsiyali chiqadi).
+    2. Agar userbot ishlamasa yoki ruxsat bo'lmasa, Aiogram Bot orqali yuboradi.
+    """
+    thumb_path = "thumbnail.jpg" if os.path.exists("thumbnail.jpg") else None
+    
+    # 1. Userbot orqali yuborish (Premium custom emoji qo'llab-quvvatlaydi)
+    if userbot.app and userbot.app.is_connected:
+        try:
+            logger.info("Musiqa Userbot orqali kanalga yuborilmoqda...")
+            await userbot.app.send_audio(
+                chat_id=config.MAIN_CHANNEL_ID,
+                audio=file_path,
+                caption=caption_text,
+                parse_mode=enums.ParseMode.HTML,
+                performer=artist,
+                title=title,
+                thumb=thumb_path,
+                duration=duration or 0
+            )
+            logger.success("✅ Musiqa Userbot orqali kanalga muvaffaqiyatli yuklandi!")
+            return True
+        except Exception as ub_err:
+            logger.warning(f"Userbot orqali yuborishda xatolik: {ub_err}. Bot orqali yuborilmoqda...")
+
+    # 2. Aiogram Bot orqali zaxira yuborish
+    await bot.send_audio(
+        config.MAIN_CHANNEL_ID,
+        audio=FSInputFile(file_path, filename=f"{artist} - {title}.mp3"),
+        caption=caption_text,
+        performer=artist,
+        title=title,
+        thumbnail=FSInputFile(thumb_path) if thumb_path else None,
+        duration=duration
+    )
+    logger.success("✅ Musiqa Bot orqali kanalga muvaffaqiyatli yuklandi!")
+    return True
+
+
 async def log_to_channel(text: str):
     if not config.LOG_CHANNEL_ID or config.LOG_CHANNEL_ID == 0 or config.LOG_CHANNEL_ID == "0":
         logger.info(f"[LIVE] {text}")
@@ -212,13 +256,11 @@ async def post_music(track_info: Dict):
             except Exception:
                 pass
                 
-            await bot.send_audio(
-                config.MAIN_CHANNEL_ID,
-                audio=FSInputFile(direct_file, filename=f"{final_artist} - {final_title}.mp3"),
-                caption=caption_text,
-                performer=final_artist,
+            await send_music_to_channel(
+                file_path=direct_file,
+                caption_text=caption_text,
+                artist=final_artist,
                 title=final_title,
-                thumbnail=FSInputFile("thumbnail.jpg") if os.path.exists("thumbnail.jpg") else None,
                 duration=full_audio_duration
             )
             
@@ -399,13 +441,11 @@ async def post_music(track_info: Dict):
             except Exception:
                 pass
 
-            await bot.send_audio(
-                config.MAIN_CHANNEL_ID,
-                audio=FSInputFile(final_file_path, filename=f"{final_artist} - {final_title}.mp3"),
-                caption=caption_text,
-                performer=final_artist, 
+            await send_music_to_channel(
+                file_path=final_file_path,
+                caption_text=caption_text,
+                artist=final_artist,
                 title=final_title,
-                thumbnail=FSInputFile("thumbnail.jpg") if os.path.exists("thumbnail.jpg") else None,
                 duration=full_audio_duration
             )
             await database.mark_schedule_posted(track_id)

@@ -550,54 +550,75 @@ def clean_title(title: str, artist: str) -> str:
 
 def write_clean_metadata(file_path: str, artist: str, title: str):
     """
-    MP3 fayldagi barcha eski teglarni, raqobatchi kanal logolarini, havolalarini, 
-    kommentlarini to'liq tozalaydi va faqat yangi Artist va Title ni yozadi.
+    MP3 fayldagi barcha eski teglarni, raqobatchi kanal logolarini to'liq tozalaydi,
+    rasmiy thumbnail.jpg ni audio muqovasi (attached picture) sifatida biriktiradi 
+    va yangi toza Artist va Title ni yozadi.
     """
     if not file_path or not os.path.exists(file_path):
         return
 
-    # 1. FFmpeg orqali barcha mavjud metadata va eski video/muqova rasmlarini butunlay tozalash (-map_metadata -1 -vn)
+    thumb_path = "thumbnail.jpg"
     clean_temp = file_path.replace(".mp3", "_clean_tmp.mp3")
+
+    # 1. FFmpeg orqali eski metadata/rasmlarni tozalash va agar thumbnail.jpg bo'lsa uni cover art qilib biriktirish
     try:
-        res = subprocess.run(
-            ["ffmpeg", "-i", file_path, "-map_metadata", "-1", "-vn", "-c:a", "copy", "-y", clean_temp],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            timeout=15
-        )
+        if os.path.exists(thumb_path):
+            cmd = [
+                "ffmpeg", "-i", file_path, "-i", thumb_path,
+                "-map", "0:a", "-map", "1:v",
+                "-c:a", "copy", "-c:v", "mjpeg",
+                "-id3v2_version", "3",
+                "-metadata:s:v", "title=Album cover",
+                "-metadata:s:v", "comment=Cover (front)",
+                "-disposition:v", "attached_pic",
+                "-map_metadata", "-1",
+                "-y", clean_temp
+            ]
+        else:
+            cmd = [
+                "ffmpeg", "-i", file_path,
+                "-map_metadata", "-1", "-vn",
+                "-c:a", "copy",
+                "-y", clean_temp
+            ]
+
+        res = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=15)
         if res.returncode == 0 and os.path.exists(clean_temp) and os.path.getsize(clean_temp) > 0:
             os.replace(clean_temp, file_path)
-            logger.info("✅ MP3 fayldan eski metadata va logolar FFmpeg orqali to'liq olib tashlandi.")
+            logger.info("✅ MP3 faylga yangi cover art FFmpeg orqali biriktirildi.")
         else:
             if os.path.exists(clean_temp):
                 try: os.remove(clean_temp)
                 except: pass
     except Exception as ffmpeg_err:
-        logger.warning(f"FFmpeg metadata tozalashda xatolik: {ffmpeg_err}")
+        logger.warning(f"FFmpeg metadata/cover yozishda xato: {ffmpeg_err}")
 
     # 2. Mutagen yordamida ID3 teglarni noldan tozalab, faqat toza Artist va Title yozish
     try:
-        from mutagen.id3 import ID3, APIC, TIT2, TPE1, TALB, COMM, USLT, WXXX
+        from mutagen.id3 import ID3, APIC, TIT2, TPE1
         from mutagen.mp3 import MP3
 
-        # Eski ID3 teglarni to'liq o'chirish (delete all frames)
+        # ID3 teglarni olish yoki yaratish
         try:
             tags = ID3(file_path)
-            tags.delete()
         except Exception:
-            pass
-
-        # Yangi toza ID3 obyekti yaratish
-        tags = ID3()
+            tags = ID3()
 
         # Toza Artist va Title yozish
+        tags.delall('TIT2')
+        tags.delall('TPE1')
+        tags.delall('TALB')
+        tags.delall('COMM')
+        tags.delall('USLT')
+        tags.delall('WXXX')
+        tags.delall('TXXX')
         tags.add(TPE1(encoding=3, text=[artist]))
         tags.add(TIT2(encoding=3, text=[title]))
 
-        # Agar o'zimizning rasmiy thumbnail.jpg bo'lsa, o'shani qo'yamiz (boshqa hech qanday eski kanal logosi kirmaydi)
-        thumb_path = "thumbnail.jpg"
+        # Agar thumbnail.jpg bo'lsa, APIC sifatida ham yozib qo'yamiz
         if os.path.exists(thumb_path):
             try:
+                tags.delall('APIC')
                 with open(thumb_path, "rb") as albumart:
                     tags.add(
                         APIC(
@@ -609,13 +630,13 @@ def write_clean_metadata(file_path: str, artist: str, title: str):
                         )
                     )
             except Exception as pic_err:
-                logger.warning(f"O'zimizning muqova rasmini yozishda xato: {pic_err}")
+                logger.warning(f"Mutagen muqova rasmini yozishda xato: {pic_err}")
 
         tags.save(file_path, v2_version=3)
         logger.success(f"🎵 MP3 ID3 teglari noldan yangilandi: Artist: '{artist}', Title: '{title}'")
 
     except Exception as e:
-        logger.error(f"⚠️ MP3 teglarni yozishda xato: {e}")
+        logger.error(f"⚠️ Mutagen orqali teglarni yozishda xato: {e}")
 
 
 def get_daily_post_count() -> int:
