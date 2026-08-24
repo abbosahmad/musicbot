@@ -124,19 +124,23 @@ async def get_clean_details_with_ai(raw_artist: str, raw_title: str) -> dict:
             timeout=12.0
         )
 
-        system_prompt = """You are a music metadata cleaning and safety evaluation expert.
-Your task is to extract the clean 'artist' (singer/performer) and 'title' (song name) from raw input, and evaluate if the track contains religious or political content.
-- Rules for metadata cleaning:
-  1. Remove promotional channel names (@...), telegram links, websites (.uz, .ru, .com), and download keywords (skachat, yuklash, mp3, mp3lar, uzmuz, taronalar).
-  2. PRESERVE legitimate music tags like (Remix), (DJ ... Remix), (Speed Up), (Slowed), (Cover), (feat. Singer), (ft. Singer).
-  3. Never delete actual singer names (e.g. Botir Qodirov, Muzaffar Mirzarahimov, Jaloliddin Ahmadaliyev).
-  4. If the raw artist is purely a channel name (e.g. 'Muzikalar UzMuz', 'Taronalar'), extract the real artist from the title if available.
-  5. Format with proper Title Case capitalization.
-- Evaluate safety (Be very lenient and conservative):
-  1. Set 'is_religious' to true ONLY if the track is explicitly a direct Islamic prayer, Quran recitation, nasheed, salovat, or religious chant.
-  2. Set 'is_political' to true ONLY if the track is explicitly about political figures (presidents, ministers), governments, elections, or military/war propaganda.
-  3. Otherwise, set both to false.
-- Return ONLY a valid JSON object: {"artist": "...", "title": "...", "is_religious": false, "is_political": false, "reason": "..."}"""
+        system_prompt = """You are an expert music metadata cleaning AI.
+Your primary task is to extract the perfectly clean 'artist' (singer/performer) and 'title' (song name) from raw messy input strings, removing all promotional and channel clutter.
+
+Cleaning Rules:
+1. Strip all channel usernames (@...), URLs, websites (.uz, .ru, .com, .net, t.me/...), hashtags (#...), and phone numbers.
+2. Strip download and promo keywords: 'skachat', 'yuklash', 'mp3', 'mp3lar', 'uzmuz', 'taronalar', 'premyera', 'premeyra', 'premier', 'xit', 'hit', 'exclusive', 'yangi', 'new', 'official video', 'klip', 'audio', 'clip'.
+3. If the raw artist field contains channel names (e.g., 'Muzikalar | Shohruhxon' or '@Kanal'), extract the actual human singer name ('Shohruhxon').
+4. If the raw title contains 'Artist - Title' structure (e.g., raw_artist='@Muz', raw_title='Lola - Sevgi'), extract artist='Lola' and title='Sevgi'.
+5. PRESERVE legitimate musical version attributes: (Remix), (DJ ... Remix), (Speed Up), (Slowed), (Cover), (Acoustic), (feat. Singer), (ft. Singer).
+6. Capitalize properly in Title Case.
+
+Safety Rules:
+- 'is_religious': true ONLY for explicit Quran recitations, nasheeds, salovats, or religious sermons.
+- 'is_political': true ONLY for direct political figure anthems, government propaganda, or military warfare chants.
+- Otherwise, both must be false.
+
+Return STRICT JSON: {"artist": "Clean Artist", "title": "Clean Title", "is_religious": false, "is_political": false, "reason": "..."}"""
 
         user_prompt = f"""Raw Artist: "{raw_artist}"
 Raw Title: "{raw_title}" """
@@ -546,93 +550,69 @@ def clean_title(title: str, artist: str) -> str:
 
 def write_clean_metadata(file_path: str, artist: str, title: str):
     """
-    Writes the clean artist and title into the MP3's ID3 tags using mutagen.
-    Removes any old competitor images/comments and embeds the channel's custom thumbnail.jpg into the MP3 file.
+    MP3 fayldagi barcha eski teglarni, raqobatchi kanal logolarini, havolalarini, 
+    kommentlarini to'liq tozalaydi va faqat yangi Artist va Title ni yozadi.
     """
-    # 1. Reconstruct MP3 container using FFmpeg to fix header errors and strip old cover art (-vn)
+    if not file_path or not os.path.exists(file_path):
+        return
+
+    # 1. FFmpeg orqali barcha mavjud metadata va eski video/muqova rasmlarini butunlay tozalash (-map_metadata -1 -vn)
     clean_temp = file_path.replace(".mp3", "_clean_tmp.mp3")
     try:
         res = subprocess.run(
             ["ffmpeg", "-i", file_path, "-map_metadata", "-1", "-vn", "-c:a", "copy", "-y", clean_temp],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-            timeout=10
+            timeout=15
         )
         if res.returncode == 0 and os.path.exists(clean_temp) and os.path.getsize(clean_temp) > 0:
             os.replace(clean_temp, file_path)
-            logger.info("✅ MP3 fayl konteyneri FFmpeg orqali muvaffaqiyatli tiklandi.")
+            logger.info("✅ MP3 fayldan eski metadata va logolar FFmpeg orqali to'liq olib tashlandi.")
         else:
             if os.path.exists(clean_temp):
-                os.remove(clean_temp)
+                try: os.remove(clean_temp)
+                except: pass
     except Exception as ffmpeg_err:
-        logger.warning(f"FFmpeg orqali MP3 ni tiklashda xato: {ffmpeg_err}")
+        logger.warning(f"FFmpeg metadata tozalashda xatolik: {ffmpeg_err}")
 
-    # 2. Write metadata and embed custom cover art using Mutagen
+    # 2. Mutagen yordamida ID3 teglarni noldan tozalab, faqat toza Artist va Title yozish
     try:
-        from mutagen.easyid3 import EasyID3
+        from mutagen.id3 import ID3, APIC, TIT2, TPE1, TALB, COMM, USLT, WXXX
         from mutagen.mp3 import MP3
-        from mutagen.id3 import ID3, APIC
-        
-        def apply_tags(path):
-            try:
-                audio = EasyID3(path)
-            except Exception:
-                audio = MP3(path)
-                audio.add_tags()
-                audio = EasyID3(path)
-                
-            # Clean all other tags to remove competitor promo
-            for key in list(audio.keys()):
-                del audio[key]
-                
-            audio['artist'] = artist
-            audio['title'] = title
-            audio.save()
 
-            # Remove old embedded APIC pictures and embed custom channel thumbnail.jpg
-            try:
-                tags = ID3(path)
-                tags.delall('APIC')
-                
-                thumb_path = "thumbnail.jpg"
-                if os.path.exists(thumb_path):
-                    with open(thumb_path, "rb") as albumart:
-                        tags.add(
-                            APIC(
-                                encoding=3,
-                                mime='image/jpeg',
-                                type=3,  # Front Cover
-                                desc=u'Cover',
-                                data=albumart.read()
-                            )
-                        )
-                tags.save()
-            except Exception as pic_err:
-                logger.warning(f"Album art muqova rasmini yozishda xato: {pic_err}")
-
+        # Eski ID3 teglarni to'liq o'chirish (delete all frames)
         try:
-            apply_tags(file_path)
-            logger.success(f"🎵 MP3 ID3 teglari va muqova rasmi yangilandi: Artist: '{artist}', Title: '{title}'")
-        except Exception as mutagen_err:
-            logger.warning(f"⚠️ Mutagen teglarni yozishda xatolik berdi: {mutagen_err}. FFmpeg orqali qayta kodlash (re-encode) bajarilmoqda...")
-            
-            # Fallback: re-encode the file using FFmpeg to rebuild the audio frame sync (-vn strips video/pictures)
-            clean_temp2 = file_path.replace(".mp3", "_reencode_tmp.mp3")
-            res_encode = subprocess.run(
-                ["ffmpeg", "-i", file_path, "-map_metadata", "-1", "-vn", "-c:a", "libmp3lame", "-q:a", "2", "-y", clean_temp2],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                timeout=15
-            )
-            if res_encode.returncode == 0 and os.path.exists(clean_temp2) and os.path.getsize(clean_temp2) > 0:
-                os.replace(clean_temp2, file_path)
-                # Try applying tags again on the re-encoded clean file
-                apply_tags(file_path)
-                logger.success(f"🎵 MP3 qayta kodlangandan so'ng ID3 teglari va muqova rasmi yangilandi: Artist: '{artist}', Title: '{title}'")
-            else:
-                if os.path.exists(clean_temp2):
-                    os.remove(clean_temp2)
-                raise mutagen_err
+            tags = ID3(file_path)
+            tags.delete()
+        except Exception:
+            pass
+
+        # Yangi toza ID3 obyekti yaratish
+        tags = ID3()
+
+        # Toza Artist va Title yozish
+        tags.add(TPE1(encoding=3, text=[artist]))
+        tags.add(TIT2(encoding=3, text=[title]))
+
+        # Agar o'zimizning rasmiy thumbnail.jpg bo'lsa, o'shani qo'yamiz (boshqa hech qanday eski kanal logosi kirmaydi)
+        thumb_path = "thumbnail.jpg"
+        if os.path.exists(thumb_path):
+            try:
+                with open(thumb_path, "rb") as albumart:
+                    tags.add(
+                        APIC(
+                            encoding=3,
+                            mime='image/jpeg',
+                            type=3,  # Front Cover
+                            desc=u'Cover',
+                            data=albumart.read()
+                        )
+                    )
+            except Exception as pic_err:
+                logger.warning(f"O'zimizning muqova rasmini yozishda xato: {pic_err}")
+
+        tags.save(file_path, v2_version=3)
+        logger.success(f"🎵 MP3 ID3 teglari noldan yangilandi: Artist: '{artist}', Title: '{title}'")
 
     except Exception as e:
         logger.error(f"⚠️ MP3 teglarni yozishda xato: {e}")
@@ -813,10 +793,66 @@ def extract_clean_artist_and_title(raw_artist: str, raw_title: str, caption: str
     return clean_artist, clean_title
 
 
-def choose_best_result_number(text: str) -> str:
+def detect_music_highlight(file_path: str, raw_text: str = "") -> str:
     """
-    Qidiruv natijalarini matn ko'rinishida tahlil qilib, klip/video bo'lmagan,
-    toza original audio (studiya) variantning tartib raqamini aniqlaydi.
+    Musiqaning avj (highlight / drop / chorus) vaqtini aniqlaydi.
+    1. Avval manba xabar matnidan (caption/title) vaqt formatidagi yozuvni qidiradi (masalan: '00:47', '1:38').
+    2. Agar topilmasa, audio faylning dinamik eng baland RMS qismini tahlil qilib 'MM:SS' formatida qaytaradi.
+    """
+    # 1. Matndan vaqtni qidirish
+    if raw_text:
+        time_match = re.search(r'\b([0-5]?[0-9]:[0-5][0-9])\b', raw_text)
+        if time_match:
+            found_time = time_match.group(1)
+            # Agar format '1:38' bo'lsa '01:38' ga aylantirish yoki o'z holicha qoldirish
+            parts = found_time.split(":")
+            if len(parts) == 2:
+                mins = int(parts[0])
+                secs = int(parts[1])
+                return f"{mins:02d}:{secs:02d}"
+            return found_time
+
+    # 2. Audio fayldan RMS balandlik bo'yicha tahlil qilish
+    if file_path and os.path.exists(file_path):
+        try:
+            from pydub import AudioSegment
+            audio = AudioSegment.from_file(file_path)
+            total_duration_ms = len(audio)
+            
+            # Agar audio 1 daqiqadan kam bo'lsa
+            if total_duration_ms < 60 * 1000:
+                return "00:00"
+                
+            # Musiqaning 15% dan 75% gacha bo'lgan qismidan avj qismini qidiramiz
+            start_window = int(total_duration_ms * 0.15)
+            end_window = int(total_duration_ms * 0.75)
+            step_ms = 1000       # Har 1 soniya
+            window_ms = 8000     # 8 soniyalik oyna
+            
+            best_time_ms = 40000 # Sukut bo'yicha 40-soniya
+            max_rms = -1
+            
+            for t in range(start_window, end_window - window_ms, step_ms):
+                chunk = audio[t : t + window_ms]
+                rms = chunk.rms
+                if rms > max_rms:
+                    max_rms = rms
+                    best_time_ms = t
+                    
+            sec = int(best_time_ms / 1000)
+            mins = sec // 60
+            secs = sec % 60
+            return f"{mins:02d}:{secs:02d}"
+        except Exception as e:
+            logger.warning(f"Avj vaqtini audio tahlilida aniqlashda xato: {e}")
+            
+    return "00:45"
+
+
+def choose_best_result_number(text: str, query: str = "") -> str:
+    """
+    Qidiruv natijalarini matn ko'rinishida tahlil qilib, mos variantning tartib raqamini aniqlaydi.
+    Ortiqcha jazo ballarisiz: birinchi mos tushgan yoki 1-variantni qaytaradi.
     """
     if not text:
         return "1"
@@ -825,7 +861,7 @@ def choose_best_result_number(text: str) -> str:
     results = []
     
     for line in lines:
-        match = re.match(r'^(\d+)\.\s*(.*)$', line.strip())
+        match = re.match(r'^(\d+)[\.\)]\s*(.*)$', line.strip())
         if match:
             num = match.group(1)
             title = match.group(2).lower()
@@ -834,24 +870,23 @@ def choose_best_result_number(text: str) -> str:
     if not results:
         return "1"
         
-    # Ball tizimi (Past ball = yaxshiroq variant)
-    best_num = "1"
-    best_score = 999
-    
-    for num, title in results:
-        score = 0
-        # Klip yoki videoga oid so'zlar bo'lsa, variantni yomonlashtiramiz
-        if any(w in title for w in ["video", "clip", "klip", "kinodan", "soundtrack", "ost", "o.s.t", "film", "short"]):
-            score += 100
-        # Toza audio yoki studiya variantlar bo'lsa, variantni yaxshilaymiz
-        if any(w in title for w in ["audio", "original", "studio", "studiya", "remastered", "clean"]):
-            score -= 10
-            
-        if score < best_score:
-            best_score = score
-            best_num = num
-            
-    return best_num
+    # Agar qidiruv so'zi berilgan bo'lsa, moslikni tekshiramiz
+    if query:
+        query_words = [w.lower() for w in re.split(r'\W+', query) if len(w) > 2]
+        best_num = results[0][0]
+        max_matches = -1
+        
+        for num, title in results:
+            matches = sum(1 for w in query_words if w in title)
+            if matches > max_matches:
+                max_matches = matches
+                best_num = num
+                
+        if max_matches > 0:
+            return best_num
+
+    # Aks holda 1-variant
+    return results[0][0]
 
 
 

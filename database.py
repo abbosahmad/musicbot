@@ -53,8 +53,11 @@ def normalize_string(text: str) -> str:
 DEFAULT_SETTINGS = {
     "planning_hour": "5",       # Rejalashtirish soati (0-23)
     "daily_post_count": "5",    # Kunlik postlar soni
-    "source_channels": "@Muzikalar_UzMuz, @Taronalar_qoshiqlar_mp3lar", # Vergul bilan ajratilgan manba kanallar
-    "demo_duration": "30",      # Demo davomiyligi (sekund)
+    "clean_source_channels": "@Muzikalar_UzMuz", # Bot orqali yangilanadigan manba kanallar
+    "direct_source_channels": "@Taronalar_qoshiqlar_mp3lar", # To'g'ridan-to'g'ri olinadigan manba kanallar
+    "source_channels": "@Muzikalar_UzMuz, @Taronalar_qoshiqlar_mp3lar", # Eski sozlama bilan moslik
+    "main_channel_name": "Spotify", # Kanal nomi (post caption va ID3 da)
+    "main_channel_link": "https://t.me/trend_musiqaUZ", # Kanal havolasi (giperhavola uchun)
     "night_mode": "false",      # Tun rejimi (true/false)
     "night_start": "23",        # Tun boshlanishi
     "night_end": "7",            # Tun tugashi (tong)

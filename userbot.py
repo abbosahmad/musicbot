@@ -76,7 +76,13 @@ class UserBot:
     
     async def _join_source_channels(self):
         if not self.app or not self.app.is_connected: return
-        all_channels = config.SOURCE_CHANNELS 
+        
+        # Barcha manba kanallarni yig'amiz
+        clean_db = re.split(r'[\s,]+', await database.get_setting("clean_source_channels", ""))
+        direct_db = re.split(r'[\s,]+', await database.get_setting("direct_source_channels", ""))
+        old_db = re.split(r'[\s,]+', await database.get_setting("source_channels", ""))
+        
+        all_channels = set(config.SOURCE_CHANNELS + [ch.strip() for ch in (clean_db + direct_db + old_db) if ch.strip()])
         for channel in all_channels:
             if not channel: continue
             try:
@@ -96,7 +102,6 @@ class UserBot:
         if hasattr(message.chat, 'username') and message.chat.username:
             for blocked_channel in config.BLACKLIST_CHANNELS:
                 if blocked_channel.lower() in message.chat.username.lower():
-                    # logger.info(f"Qora ro'yxatdagi kanal: {message.chat.username}")
                     return None
         
         # Caption va title'da qora ro'yxat so'zlarini tekshirish
@@ -107,7 +112,6 @@ class UserBot:
         
         for blocked_word in config.BLACKLIST_KEYWORDS:
             if blocked_word.lower() in text_to_check.lower():
-                # logger.info(f"Qora ro'yxatdagi so'z topildi: {blocked_word}")
                 return None
         
         track_id = None
@@ -122,16 +126,16 @@ class UserBot:
             for r in message.reactions.reactions:
                 reactions += r.count
 
+        raw_caption = message.caption or ""
         if message.audio:
             audio = message.audio
             track_id = audio.file_unique_id
             raw_artist = audio.performer or ""
             raw_title = audio.title or audio.file_name or ""
-            caption = message.caption or ""
             filename = audio.file_name or ""
 
             clean_artist, clean_title = utils.extract_clean_artist_and_title(
-                raw_artist, raw_title, caption, filename
+                raw_artist, raw_title, raw_caption, filename
             )
 
             artist = clean_artist
@@ -143,7 +147,7 @@ class UserBot:
             voice = message.voice
             track_id = voice.file_unique_id
             artist = ""
-            title = message.caption or "Unknown Voice"
+            title = raw_caption or "Unknown Voice"
             duration_ms = (voice.duration or 0) * 1000
             file_id = voice.file_id
             is_voice = True
@@ -169,7 +173,8 @@ class UserBot:
             'views': views,
             'reactions': reactions,
             'date': message.date,
-            'source_channel': source_channel
+            'source_channel': source_channel,
+            'raw_caption': raw_caption
         }
 
     async def get_new_music_from_channels(self, hours: int = 24) -> List[Dict]:
@@ -178,25 +183,44 @@ class UserBot:
         collected_tracks = []
         time_limit = datetime.utcnow() - timedelta(hours=hours)
 
-        # Manba kanallarni ma'lumotlar bazasidan olamiz (yoki config dan agar bo'sh bo'lsa)
-        db_channels = re.split(r'[\s,]+', await database.get_setting("source_channels", ""))
-        channels_to_check = [ch.strip() for ch in db_channels if ch.strip()]
-        
-        if not channels_to_check:
-            channels_to_check = config.SOURCE_CHANNELS
+        # 1. Bot orqali yangilanadigan kanallar (Clean)
+        clean_db = re.split(r'[\s,]+', await database.get_setting("clean_source_channels", ""))
+        clean_channels = [ch.strip() for ch in clean_db if ch.strip()]
+        if not clean_channels:
+            clean_channels = config.CLEAN_SOURCE_CHANNELS
 
-        for channel_id in channels_to_check:
+        # 2. To'g'ridan-to'g'ri olinadigan kanallar (Direct)
+        direct_db = re.split(r'[\s,]+', await database.get_setting("direct_source_channels", ""))
+        direct_channels = [ch.strip() for ch in direct_db if ch.strip()]
+        if not direct_channels:
+            direct_channels = config.DIRECT_SOURCE_CHANNELS
+
+        # Agar ikkalasi ham bo'sh bo'lsa, umumiy source_channels dan olamiz
+        if not clean_channels and not direct_channels:
+            old_db = re.split(r'[\s,]+', await database.get_setting("source_channels", ""))
+            clean_channels = [ch.strip() for ch in old_db if ch.strip()] or config.SOURCE_CHANNELS
+
+        channel_configs = []
+        for ch in clean_channels:
+            channel_configs.append((ch, 'clean'))
+        for ch in direct_channels:
+            channel_configs.append((ch, 'direct'))
+
+        for channel_id, mode in channel_configs:
             try:
-                # logger.info(f"Kanal tekshirilmoqda: {channel_id}")
-                async for message in self.app.get_chat_history(channel_id, limit=800):
-                    if message.date < time_limit: break
+                # Direct kanallar uchun 2 oy (1440 soat), Clean kanallar uchun parametr bo'yicha (masalan 168 soat)
+                ch_hours = 1440 if mode == 'direct' else hours
+                ch_time_limit = datetime.utcnow() - timedelta(hours=ch_hours)
+                msg_limit = 2000 if mode == 'direct' else 800
+
+                async for message in self.app.get_chat_history(channel_id, limit=msg_limit):
+                    if message.date < ch_time_limit: break
                     media = message.audio or message.voice
-                    # Davomiyligi 120 soniyadan kam bo'lmagan musiqalarni olish (kamida 2 daqiqa)
-                    if media and media.duration and (media.duration >= 120):
+                    # Kamida 1 daqiqa (60 soniya) bo'lgan musiqalarni olish
+                    if media and media.duration and (media.duration >= 60):
                         processed = self._process_message(message)
                         if processed:
-                            # Bu yerda bazani tekshirmaymiz, uni main.py da qilamiz
-                            # shunda umumiy ro'yxatni sort qilish oson bo'ladi
+                            processed['mode'] = mode
                             collected_tracks.append(processed)
             except Exception as e:
                 logger.error(f"'{channel_id}' kanalidan xabarlarni olishda xatolik: {e}")
@@ -300,7 +324,8 @@ class UserBot:
                 found = False
                 for r_idx, row in enumerate(response_msg.reply_markup.inline_keyboard):
                     for c_idx, btn in enumerate(row):
-                        if btn.text.strip() == target_btn_text:
+                        b_txt = btn.text.strip()
+                        if b_txt == target_btn_text or b_txt.startswith(f"{target_btn_text} ") or b_txt.startswith(f"{target_btn_text}.") or b_txt == f"[{target_btn_text}]":
                             btn_row = r_idx
                             btn_col = c_idx
                             found = True
@@ -382,7 +407,7 @@ class UserBot:
             last_msg_id_before_click = response_msg.id
             
             # Inline tugmalarni tekshirish (Eng yaxshi variantni tanlash)
-            target_btn_text = utils.choose_best_result_number(response_msg.text or response_msg.caption)
+            target_btn_text = utils.choose_best_result_number(response_msg.text or response_msg.caption, query=query)
             logger.info(f"Target bot natijalari tahlil qilindi (Matn). Tanlangan variant: {target_btn_text}")
             
             if response_msg.reply_markup and response_msg.reply_markup.inline_keyboard:
@@ -391,7 +416,8 @@ class UserBot:
                 found = False
                 for r_idx, row in enumerate(response_msg.reply_markup.inline_keyboard):
                     for c_idx, btn in enumerate(row):
-                        if btn.text.strip() == target_btn_text:
+                        b_txt = btn.text.strip()
+                        if b_txt == target_btn_text or b_txt.startswith(f"{target_btn_text} ") or b_txt.startswith(f"{target_btn_text}.") or b_txt == f"[{target_btn_text}]":
                             btn_row = r_idx
                             btn_col = c_idx
                             found = True

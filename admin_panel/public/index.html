@@ -163,24 +163,36 @@
                             </div>
                         </div>
 
-                        <h2 class="form-section-title">Media & Qidiruv Sozlamalari</h2>
+                        <h2 class="form-section-title">Kanal & Qidiruv Sozlamalari</h2>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="demo_duration"><i class="fa-solid fa-scissors"></i> Demo Kesish Davomiyligi (Sekund)</label>
-                                <input type="number" id="demo_duration" name="demo_duration" min="10" max="60" required>
-                                <span class="form-hint">Ovozli xabar demo davomiyligi</span>
+                                <label for="main_channel_name"><i class="fa-solid fa-heading"></i> Asosiy Kanal Nomi</label>
+                                <input type="text" id="main_channel_name" name="main_channel_name" placeholder="Spotify">
+                                <span class="form-hint">Post caption va audio metadatasida ko'rinadigan nom</span>
                             </div>
                             <div class="form-group">
+                                <label for="main_channel_link"><i class="fa-solid fa-link"></i> Asosiy Kanal Havolasi (Link)</label>
+                                <input type="text" id="main_channel_link" name="main_channel_link" placeholder="https://t.me/kanal_link">
+                                <span class="form-hint">Captiondagi giperhavola uchun kanal linki</span>
+                            </div>
+                            <div class="form-group full-width">
                                 <label for="target_search_bot"><i class="fa-solid fa-magnifying-glass"></i> Maqsadli Qidiruv Boti</label>
                                 <input type="text" id="target_search_bot" name="target_search_bot" required>
-                                <span class="form-hint">Musiqalarni forward qilib toza topuvchi bot nomi</span>
+                                <span class="form-hint">Musiqalarni toza yuklovchi bot nomi (masalan: @Zoryuklabot)</span>
                             </div>
                         </div>
 
+                        <h2 class="form-section-title">Manba Kanallar (2 xil Bo'lim)</h2>
+                        <div class="form-group full-width" style="margin-bottom: 18px;">
+                            <label for="clean_source_channels"><i class="fa-solid fa-wand-magic-sparkles"></i> 1. Bot Orqali Yangilanadigan Kanallar</label>
+                            <input type="text" id="clean_source_channels" name="clean_source_channels" placeholder="@kanal1, @kanal2">
+                            <span class="form-hint">Bu kanallardan olingan musiqa nomi tozalab, qidiruv boti orqali toza varianti yangilab olinadi</span>
+                        </div>
+
                         <div class="form-group full-width">
-                            <label for="source_channels"><i class="fa-solid fa-link"></i> Manba Kanallar</label>
-                            <input type="text" id="source_channels" name="source_channels" placeholder="@kanal1, @kanal2">
-                            <span class="form-hint">Bir nechta manba kanalni vergul bilan ajrating</span>
+                            <label for="direct_source_channels"><i class="fa-solid fa-bolt"></i> 2. To'g'ridan-To'g'ri Moslanadigan Kanallar</label>
+                            <input type="text" id="direct_source_channels" name="direct_source_channels" placeholder="@kanal3, @kanal4">
+                            <span class="form-hint">Bu kanallardagi audio qidiruv botiga yuborilmaydi, to'g'ridan-to'g'ri o'zimizning kanalga moslab joylanadi</span>
                         </div>
 
                         <h2 class="form-section-title">Tungi Jimjitlik Rejimi</h2>

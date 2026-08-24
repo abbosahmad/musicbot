@@ -83,11 +83,13 @@ async function fetchSettings() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        document.getElementById('planning_hour').value     = data.planning_hour    ?? 5;
-        document.getElementById('daily_post_count').value  = data.daily_post_count ?? 5;
-        document.getElementById('demo_duration').value     = data.demo_duration    ?? 30;
-        document.getElementById('target_search_bot').value = data.target_search_bot ?? '@Zoryuklabot';
-        document.getElementById('source_channels').value   = data.source_channels  ?? '';
+        document.getElementById('planning_hour').value          = data.planning_hour    ?? 5;
+        document.getElementById('daily_post_count').value       = data.daily_post_count ?? 5;
+        document.getElementById('main_channel_name').value      = data.main_channel_name ?? 'Spotify';
+        document.getElementById('main_channel_link').value      = data.main_channel_link ?? 'https://t.me/trend_musiqaUZ';
+        document.getElementById('target_search_bot').value      = data.target_search_bot ?? '@Zoryuklabot';
+        document.getElementById('clean_source_channels').value  = data.clean_source_channels ?? (data.source_channels ?? '');
+        document.getElementById('direct_source_channels').value = data.direct_source_channels ?? '';
 
         const isNight = data.night_mode === 'true';
         nightModeChk.checked          = isNight;
@@ -100,9 +102,8 @@ async function fetchSettings() {
         const ph = String(data.planning_hour ?? '5');
         document.getElementById('statDailyLimit').textContent   = data.daily_post_count ?? '0';
         document.getElementById('statSearchBot').textContent    = data.target_search_bot ?? '—';
-        document.getElementById('statPlanningHour').textContent = `${ph.padStart(2,'0')}:00`;
-        document.getElementById('statDemoDuration').textContent = `${data.demo_duration ?? '30'}s`;
-        document.getElementById('statNightMode').textContent    = isNight
+        if (document.getElementById('statPlanningHour')) document.getElementById('statPlanningHour').textContent = `${ph.padStart(2,'0')}:00`;
+        if (document.getElementById('statNightMode')) document.getElementById('statNightMode').textContent    = isNight
             ? `Faol (${data.night_start ?? 23}:00 – ${data.night_end ?? 7}:00)`
             : "O'chirilgan";
     } catch (err) {
@@ -116,15 +117,17 @@ settingsForm.addEventListener('submit', async e => {
     const fd = new FormData(settingsForm);
 
     const body = {
-        planning_hour:     fd.get('planning_hour'),
-        daily_post_count:  fd.get('daily_post_count'),
-        demo_duration:     fd.get('demo_duration'),
-        target_search_bot: fd.get('target_search_bot'),
-        source_channels:   fd.get('source_channels'),
-        night_mode:        nightModeChk.checked ? 'true' : 'false',
-        night_start:       document.getElementById('night_start').value || '23',
-        night_end:         document.getElementById('night_end').value   || '7',
-        new_password:      document.getElementById('new_password').value || ''
+        planning_hour:          fd.get('planning_hour'),
+        daily_post_count:       fd.get('daily_post_count'),
+        main_channel_name:      fd.get('main_channel_name'),
+        main_channel_link:      fd.get('main_channel_link'),
+        target_search_bot:      fd.get('target_search_bot'),
+        clean_source_channels:  fd.get('clean_source_channels'),
+        direct_source_channels: fd.get('direct_source_channels'),
+        night_mode:             nightModeChk.checked ? 'true' : 'false',
+        night_start:            document.getElementById('night_start').value || '23',
+        night_end:              document.getElementById('night_end').value   || '7',
+        new_password:           document.getElementById('new_password').value || ''
     };
 
     try {

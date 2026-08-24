@@ -37,27 +37,35 @@ LOG_CHANNEL_ID = _parse_channel_id(os.getenv("LOG_CHANNEL_ID", "0"))
 MAIN_CHANNEL_ID = _parse_channel_id(os.getenv("MAIN_CHANNEL_ID", "0"))
 BACKUP_CHANNEL_ID = _parse_channel_id(os.getenv("BACKUP_CHANNEL_ID", "0"))
 
-MAIN_CHANNEL_LINK = "https://t.me/trend_musiqaUZ"
-MAIN_CHANNEL_NAME = "Trend MUSIC🔥❤️"
+MAIN_CHANNEL_LINK = os.getenv("MAIN_CHANNEL_LINK", "https://t.me/trend_musiqaUZ")
+MAIN_CHANNEL_NAME = os.getenv("MAIN_CHANNEL_NAME", "Spotify")
 
 # --- Userbot Sozlamalari ---
 USERBOT_API_ID = int(os.getenv("USERBOT_API_ID", 0))
 USERBOT_API_HASH = os.getenv("USERBOT_API_HASH")
 USERBOT_SESSION_STRING = os.getenv("USERBOT_SESSION_STRING")
 
-# --- Manba Kanallar ---
-SOURCE_CHANNELS = [
+# --- Manba Kanallar (2 xil toifa) ---
+# 1. Bot orqali yangilanadigan kanallar (Zoryuklabot orqali toza varianti qidiriladi)
+CLEAN_SOURCE_CHANNELS = [
     '@Muzikalar_UzMuz',
 ]
 
+# 2. To'g'ridan-to'g'ri moslanadigan kanallar (Zoryuklabot ga yuborilmaydi, kanaldan to'g'ridan-to'g'ri moslab joylanadi)
+DIRECT_SOURCE_CHANNELS = [
+    '@Taronalar_qoshiqlar_mp3lar',
+]
+
+# Umumiy ro'yxat (userbot a'zo bo'lishi uchun)
+SOURCE_CHANNELS = list(set(CLEAN_SOURCE_CHANNELS + DIRECT_SOURCE_CHANNELS))
+
 # --- Qora Ro'yxat (Bloklash uchun) ---
 BLACKLIST_CHANNELS = [
-    # 'AliMuzTv', 'Surxon_Muz', 'Uzmuz' # Hozircha o'chirilgan
+    # 'AliMuzTv', 'Surxon_Muz', 'Uzmuz'
 ]
 BLACKLIST_KEYWORDS = [
-    # '@AliMuzTv', '@Surxon_Muz', 'AliMuz', 'Surxon Muz' # Hozircha o'chirilgan
+    # '@AliMuzTv', '@Surxon_Muz', 'AliMuz', 'Surxon Muz'
 ]
 
 # --- Botning Ishlash Mantig'i ---
 PLANNING_HOUR = 8
-DEMO_DURATION_SECONDS = 30

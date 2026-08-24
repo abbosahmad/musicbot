@@ -322,7 +322,11 @@ app.post('/api/settings', async (req, res) => {
     const {
       planning_hour,
       daily_post_count,
+      clean_source_channels,
+      direct_source_channels,
       source_channels,
+      main_channel_name,
+      main_channel_link,
       demo_duration,
       night_mode,
       night_start,
@@ -342,12 +346,6 @@ app.post('/api/settings', async (req, res) => {
       const count = parseInt(daily_post_count);
       if (isNaN(count) || count < 1 || count > 100) {
         return res.status(400).json({ error: 'Kunlik postlar soni 1 va 100 oralig\'ida bo\'lishi kerak!' });
-      }
-    }
-    if (demo_duration !== undefined) {
-      const dur = parseInt(demo_duration);
-      if (isNaN(dur) || dur < 5 || dur > 300) {
-        return res.status(400).json({ error: 'Demo davomiyligi 5 va 300 sekund oralig\'ida bo\'lishi kerak!' });
       }
     }
     if (night_start !== undefined) {
@@ -388,13 +386,17 @@ app.post('/api/settings', async (req, res) => {
     }
 
     const updates = {};
-    if (planning_hour !== undefined)   updates.planning_hour   = String(planning_hour);
-    if (daily_post_count !== undefined) updates.daily_post_count = String(daily_post_count);
-    if (source_channels !== undefined)  updates.source_channels  = String(source_channels);
-    if (demo_duration !== undefined)    updates.demo_duration    = String(demo_duration);
-    if (target_search_bot !== undefined) updates.target_search_bot = String(target_search_bot);
-    if (night_start !== undefined)      updates.night_start      = String(night_start);
-    if (night_end !== undefined)        updates.night_end        = String(night_end);
+    if (planning_hour !== undefined)           updates.planning_hour           = String(planning_hour);
+    if (daily_post_count !== undefined)        updates.daily_post_count        = String(daily_post_count);
+    if (clean_source_channels !== undefined)   updates.clean_source_channels   = String(clean_source_channels);
+    if (direct_source_channels !== undefined)  updates.direct_source_channels  = String(direct_source_channels);
+    if (source_channels !== undefined)         updates.source_channels         = String(source_channels);
+    if (main_channel_name !== undefined)       updates.main_channel_name       = String(main_channel_name);
+    if (main_channel_link !== undefined)       updates.main_channel_link       = String(main_channel_link);
+    if (demo_duration !== undefined)           updates.demo_duration           = String(demo_duration);
+    if (target_search_bot !== undefined)       updates.target_search_bot       = String(target_search_bot);
+    if (night_start !== undefined)             updates.night_start             = String(night_start);
+    if (night_end !== undefined)               updates.night_end               = String(night_end);
     updates.night_mode = (night_mode === 'true' || night_mode === true) ? 'true' : 'false';
 
     for (const [key, value] of Object.entries(updates)) {

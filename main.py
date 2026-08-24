@@ -68,7 +68,7 @@ def get_admin_keyboard() -> InlineKeyboardMarkup:
     return keyboard
 
 
-def get_settings_keyboard(daily_post_count: str, planning_hour: str, demo_duration: str) -> InlineKeyboardMarkup:
+def get_settings_keyboard(daily_post_count: str, planning_hour: str) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text=f"🎵 Limit: {daily_post_count} ta", callback_data="none"),
@@ -79,11 +79,6 @@ def get_settings_keyboard(daily_post_count: str, planning_hour: str, demo_durati
             InlineKeyboardButton(text=f"⏰ Soat: {planning_hour}:00", callback_data="none"),
             InlineKeyboardButton(text="➖", callback_data="admin_hour_dn"),
             InlineKeyboardButton(text="➕", callback_data="admin_hour_up")
-        ],
-        [
-            InlineKeyboardButton(text=f"⏳ Demo: {demo_duration}s", callback_data="none"),
-            InlineKeyboardButton(text="➖", callback_data="admin_demo_dn"),
-            InlineKeyboardButton(text="➕", callback_data="admin_demo_up")
         ],
         [
             InlineKeyboardButton(text="✏️ Qidiruv botini o'zgartirish", callback_data="admin_edit_search_bot")
@@ -106,11 +101,11 @@ async def get_admin_panel_text() -> str:
     text += f"📊 <b>Statistika:</b>\n"
     text += f"├ Bazadagi musiqalar: <b>{total_tracks} ta</b>\n"
     text += f"├ Qidiruv boti: <b>{settings.get('target_search_bot', '@Zoryuklabot')}</b>\n"
-    text += f"└ Manbalar: <code>{settings.get('source_channels', '')}</code>\n\n"
+    text += f"├ Bot manbalar: <code>{settings.get('clean_source_channels', '')}</code>\n"
+    text += f"└ To'g'ri manbalar: <code>{settings.get('direct_source_channels', '')}</code>\n\n"
     text += f"⚙️ <b>Reja sozlamalari:</b>\n"
     text += f"├ Reja vaqti: <b>{settings.get('planning_hour', '?')}:00</b>\n"
     text += f"├ Kunlik limit: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
-    text += f"├ Demo davomiyligi: <b>{settings.get('demo_duration', '?')} soniya</b>\n"
     text += f"└ Web Panel: https://abboscoder.uz/music\n"
         
     return text
@@ -136,48 +131,32 @@ async def post_music(track_info: Dict):
     direct_file = track_info.get('direct_file_path')
     if direct_file and os.path.exists(direct_file):
         try:
-            final_artist = utils._clean_single_string(raw_artist) or "Trend MUSIC"
-            final_title = utils._clean_single_string(raw_title) or "Musiqa"
+            channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
+            channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
             
-            # Rewrite metadata tags in the file itself
+            # AI orqali artist va title ni tozalash
+            ai_cleaned = await utils.get_clean_details_with_ai(raw_artist, raw_title)
+            final_artist = ai_cleaned.get('artist') or utils._clean_single_string(raw_artist) or channel_name
+            final_title = ai_cleaned.get('title') or utils._clean_single_string(raw_title) or "Musiqa"
+            
+            # Rewrite metadata tags in the file itself (eski logolar va teglarni butunlay tozalab)
             utils.write_clean_metadata(direct_file, final_artist, final_title)
             
             # Add to database to prevent duplicates later
             await database.add_track_to_db(track_id, final_artist, final_title)
             
-            target_bot = await database.get_setting("target_search_bot", "@Zoryuklabot")
-            if not target_bot.startswith("@"):
-                target_bot = "@" + target_bot
-                
-            caption_text = (f"👇 <b>Musiqa topuvchi bot</b>\n"
-                            f"{target_bot} 🔎\n\n"
-                            f"👉 <a href='{config.MAIN_CHANNEL_LINK}'>Kanalga obuna bo'ling</a>")
-                            
-            reply_msg_id = None
-            full_audio_duration = None
-            demo_duration_setting = int(await database.get_setting("demo_duration", "30"))
+            # Avj vaqtini aniqlash
+            highlight_time = utils.detect_music_highlight(direct_file, raw_text=track_info.get('raw_caption', ''))
             
+            # 2-rasm ko'rinishidagi minimal caption: "00:47 Spotify | 🎧"
+            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name} | 🎧</a>"
+            
+            full_audio_duration = None
             try:
-                demo_path = direct_file.replace(".mp3", "_demo.ogg")
                 audio = AudioSegment.from_file(direct_file)
                 full_audio_duration = len(audio) // 1000
-                
-                if len(audio) > 60 * 1000:
-                    start_ms = 40 * 1000
-                    cut_duration = demo_duration_setting * 1000
-                    demo_audio = audio[start_ms : start_ms + cut_duration]
-                    demo_audio.export(demo_path, format="ogg", codec="libopus")
-                    
-                    demo_msg = await bot.send_voice(
-                        config.MAIN_CHANNEL_ID,
-                        voice=FSInputFile(demo_path),
-                        caption="🎶 To'liq Mp3 Pastda ⬇️",
-                        duration=len(demo_audio) // 1000
-                    )
-                    reply_msg_id = demo_msg.message_id
-                    os.remove(demo_path)
-            except Exception as e:
-                logger.error(f"Scheduled direct override demo cutting error: {e}")
+            except Exception:
+                pass
                 
             await bot.send_audio(
                 config.MAIN_CHANNEL_ID,
@@ -186,12 +165,11 @@ async def post_music(track_info: Dict):
                 performer=final_artist,
                 title=final_title,
                 thumbnail=FSInputFile("thumbnail.jpg") if os.path.exists("thumbnail.jpg") else None,
-                reply_to_message_id=reply_msg_id,
                 duration=full_audio_duration
             )
             
             await database.mark_schedule_posted(track_id)
-            await log_to_channel(f"✅ Joylandi (Jadval o'rniga): {final_artist} - {final_title}")
+            await log_to_channel(f"✅ Joylandi (Jadval): {final_artist} - {final_title}")
         except Exception as e:
             logger.error(f"Error posting scheduled override file: {e}")
         finally:
@@ -215,12 +193,12 @@ async def post_music(track_info: Dict):
         final_file_path = None
         final_artist = raw_artist
         final_title = raw_title
-        demo_duration_setting = int(await database.get_setting("demo_duration", "30"))
+        track_mode = track_info.get('mode', 'clean')
 
         try:
-            logger.info(f"Yangi trek qayta ishlanmoqda: {raw_artist} - {raw_title} (Manba: {source_channel})")
+            logger.info(f"Yangi trek qayta ishlanmoqda: {raw_artist} - {raw_title} (Manba: {source_channel}, Rejim: {track_mode})")
             
-            # 1. Avval nomini tozalab, matnli qidiruv yordamida original toza variantini olishga urinish
+            # AI bilan tozalash
             ai_cleaned = await utils.get_clean_details_with_ai(raw_artist, raw_title)
             
             # Xavfsizlik filtri: Diniy va siyosiy qo'shiqlarni taqiqlash
@@ -230,9 +208,8 @@ async def post_music(track_info: Dict):
             
             if is_religious or is_political or is_forbidden_local:
                 reason = ai_cleaned.get('reason') or "Taqiqlangan kalit so'z aniqlandi"
-                logger.warning(f"❌ Xavfsizlik filtri ishga tushdi: {raw_artist} - {raw_title} (Manba: {source_channel}) (Diniy: {is_religious}, Siyosiy: {is_political}, Mahalliy: {is_forbidden_local}) | Sabab: {reason}")
-                await log_to_channel(f"⏭️ Joylanmadi (Xavfsizlik/Diniy-Siyosiy) (Manba: {source_channel}): {raw_artist} - {raw_title}")
-                # Bazada qayta urinmasligi uchun saqlaymiz
+                logger.warning(f"❌ Xavfsizlik filtri ishga tushdi: {raw_artist} - {raw_title} (Manba: {source_channel}) | Sabab: {reason}")
+                await log_to_channel(f"⏭️ Joylanmadi (Xavfsizlik) (Manba: {source_channel}): {raw_artist} - {raw_title}")
                 await database.add_track_to_db(track_id, raw_artist, raw_title)
                 return
             
@@ -246,66 +223,80 @@ async def post_music(track_info: Dict):
                 if not clean_title or clean_title == "Musiqa":
                     clean_title = ext_tit or utils._clean_single_string(raw_title) or "Musiqa"
 
-            text_query = f"{clean_artist} - {clean_title}".strip()
-            if clean_artist == "Trend MUSIC":
-                text_query = clean_title
-            
-            logger.info(f"Matnli qidiruv boshlandi: '{text_query}'")
-            final_file_path = await userbot.search_text_via_target_bot(text_query)
-            
-            if final_file_path and os.path.exists(final_file_path):
-                logger.success("✅ Asosiy matnli qidiruv muvaffaqiyatli: Maqsadli botdan toza original musiqa yuklab olindi.")
-                final_artist = clean_artist
-                final_title = clean_title
-            else:
-                logger.warning("⚠️ Matnli qidiruv natija bermadi. Forward orqali maqsadli botdan olishga urinilmoqda...")
-                final_file_path = await userbot.search_via_target_bot(track_info['chat_id'], track_info['message_id'])
-                if final_file_path and os.path.exists(final_file_path):
-                    logger.success("✅ Forward qidiruv muvaffaqiyatli: Maqsadli botdan original musiqa olindi.")
-                    shazam_result = await utils.identify_track_with_shazam(final_file_path)
-                    if shazam_result and shazam_result.get('artist') and shazam_result.get('title'):
-                        final_artist = shazam_result['artist']
-                        final_title = shazam_result['title']
-                    else:
-                        final_artist = clean_artist
-                        final_title = clean_title
-
-            # 2. Zaxira (Fallback) Rejimi — agar maqsadli botdan (matnli ham, forward ham) topilmasa
-            if not final_file_path or not os.path.exists(final_file_path):
+            # ----------------------------------------------------
+            # REJIM 1: DIRECT (To'g'ridan-to'g'ri olinadigan kanal)
+            # ----------------------------------------------------
+            if track_mode == 'direct':
+                logger.info(f"Direct kanal: fayl to'g'ridan-to'g'ri kanaldan olinmoqda ({source_channel})")
                 dirty_file = await userbot.download_music(
                     track_info['chat_id'], track_info['message_id'], temp_dirty_path
                 )
-
-                if not dirty_file:
+                if not dirty_file or not os.path.exists(dirty_file):
                     raise Exception("Telegramdan faylni yuklab bo'lmadi.")
+                    
+                final_file_path = dirty_file
+                final_artist = clean_artist
+                final_title = clean_title
 
-                # Shazam orqali aniqlash
-                shazam_result = await utils.identify_track_with_shazam(dirty_file)
+            # ----------------------------------------------------
+            # REJIM 2: CLEAN (Bot orqali yangilanadigan kanal)
+            # ----------------------------------------------------
+            else:
+                text_query = f"{clean_artist} - {clean_title}".strip()
+                if clean_artist == "Trend MUSIC":
+                    text_query = clean_title
                 
-                if shazam_result and shazam_result.get('artist') and shazam_result.get('title'):
-                    shazam_artist = shazam_result['artist']
-                    shazam_title = shazam_result['title']
-                    logger.success(f"✅ Shazam aniqladi: {shazam_artist} - {shazam_title}")
-
-                    # YouTube (Shazam natijasi bilan)
-                    final_file_path = await utils.get_youtube_with_api(shazam_artist, shazam_title)
-                    if final_file_path:
-                        final_artist = shazam_artist
-                        final_title = shazam_title
-                        logger.success("✅ Zaxira manba: YouTube (Shazam)")
+                logger.info(f"Matnli qidiruv boshlandi: '{text_query}'")
+                final_file_path = await userbot.search_text_via_target_bot(text_query)
                 
-                # Agar Shazam topa olmagan bo'lsa, tozalangan nom bo'yicha YouTube'dan urinish
-                if not final_file_path or not os.path.exists(final_file_path):
-                    final_file_path = await utils.get_youtube_with_api(clean_artist, clean_title)
+                if final_file_path and os.path.exists(final_file_path):
+                    logger.success("✅ Asosiy matnli qidiruv muvaffaqiyatli: Maqsadli botdan toza original musiqa yuklab olindi.")
+                    final_artist = clean_artist
+                    final_title = clean_title
+                else:
+                    logger.warning("⚠️ Matnli qidiruv natija bermadi. Forward orqali maqsadli botdan olishga urinilmoqda...")
+                    final_file_path = await userbot.search_via_target_bot(track_info['chat_id'], track_info['message_id'])
                     if final_file_path and os.path.exists(final_file_path):
-                        final_artist = clean_artist
-                        final_title = clean_title
-                        logger.success("✅ Zaxira manba: YouTube (Cleaned Name)")
+                        logger.success("✅ Forward qidiruv muvaffaqiyatli: Maqsadli botdan original musiqa olindi.")
+                        shazam_result = await utils.identify_track_with_shazam(final_file_path)
+                        if shazam_result and shazam_result.get('artist') and shazam_result.get('title'):
+                            final_artist = shazam_result['artist']
+                            final_title = shazam_result['title']
+                        else:
+                            final_artist = clean_artist
+                            final_title = clean_title
 
-                # Vaqtinchalik faylni tozalash
-                if os.path.exists(dirty_file):
-                    try: os.remove(dirty_file)
-                    except: pass
+                # Zaxira (Fallback) Rejimi — agar maqsadli botdan topilmasa
+                if not final_file_path or not os.path.exists(final_file_path):
+                    dirty_file = await userbot.download_music(
+                        track_info['chat_id'], track_info['message_id'], temp_dirty_path
+                    )
+                    if not dirty_file:
+                        raise Exception("Telegramdan faylni yuklab bo'lmadi.")
+
+                    # Shazam orqali aniqlash
+                    shazam_result = await utils.identify_track_with_shazam(dirty_file)
+                    if shazam_result and shazam_result.get('artist') and shazam_result.get('title'):
+                        shazam_artist = shazam_result['artist']
+                        shazam_title = shazam_result['title']
+                        logger.success(f"✅ Shazam aniqladi: {shazam_artist} - {shazam_title}")
+
+                        final_file_path = await utils.get_youtube_with_api(shazam_artist, shazam_title)
+                        if final_file_path:
+                            final_artist = shazam_artist
+                            final_title = shazam_title
+                            logger.success("✅ Zaxira manba: YouTube (Shazam)")
+                    
+                    if not final_file_path or not os.path.exists(final_file_path):
+                        final_file_path = await utils.get_youtube_with_api(clean_artist, clean_title)
+                        if final_file_path and os.path.exists(final_file_path):
+                            final_artist = clean_artist
+                            final_title = clean_title
+                            logger.success("✅ Zaxira manba: YouTube (Cleaned Name)")
+
+                    if os.path.exists(dirty_file) and dirty_file != final_file_path:
+                        try: os.remove(dirty_file)
+                        except: pass
 
             # Final tekshiruv
             if not final_file_path or not os.path.exists(final_file_path):
@@ -313,65 +304,48 @@ async def post_music(track_info: Dict):
                 await log_to_channel(f"⏭️ Joylanmadi (Topilmadi): {raw_artist} - {raw_title}")
                 return
 
-            # Clean final performer and title using the robust cleaner
-            final_artist = utils._clean_single_string(final_artist) or clean_artist or "Trend MUSIC"
+            channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
+            channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
+
+            # Clean final performer and title
+            final_artist = utils._clean_single_string(final_artist) or clean_artist or channel_name
             final_title = utils._clean_single_string(final_title) or clean_title or "Musiqa"
 
             # Rewrite ID3 tags in the MP3 file itself
             utils.write_clean_metadata(final_file_path, final_artist, final_title)
 
-            # O'xshashlikni tekshirish (final artist va nom bo'yicha)
+            # O'xshashlikni tekshirish
             if await database.is_similar_track_posted(final_artist, final_title):
                 logger.warning(f"O'xshash musiqa joylanganligi aniqlandi (Final): {final_artist} - {final_title}. Bekor qilinmoqda.")
                 await log_to_channel(f"⏭️ Joylanmadi (O'xshash): {final_artist} - {final_title}")
                 if final_file_path and os.path.exists(final_file_path):
-                    os.remove(final_file_path)
+                    try: os.remove(final_file_path)
+                    except: pass
                 return
 
             # Bazaga yozish
             await database.add_track_to_db(track_id, final_artist, final_title)
 
-            # Target bot ma'lumotlarini olish (post captionda ko'rsatish uchun)
-            target_bot = await database.get_setting("target_search_bot", "@Zoryuklabot")
-            if not target_bot.startswith("@"):
-                target_bot = "@" + target_bot
+            # Avj vaqtini aniqlash
+            highlight_time = utils.detect_music_highlight(final_file_path, raw_text=track_info.get('raw_caption', ''))
+            
+            # 2-rasmdagi ko'rinishdagi minimal caption
+            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name} | 🎧</a>"
 
-            caption_text = (f"👇 <b>Musiqa topuvchi bot</b>\n"
-                            f"{target_bot} 🔎\n\n"
-                            f"👉 <a href='{config.MAIN_CHANNEL_LINK}'>Kanalga obuna bo'ling</a>")
-
-            reply_msg_id = None
             full_audio_duration = None
             try:
-                if final_file_path and os.path.exists(final_file_path):
-                    demo_path = final_file_path.replace(".mp3", "_demo.ogg")
-                    audio = AudioSegment.from_file(final_file_path)
-                    full_audio_duration = len(audio) // 1000
-
-                    if len(audio) > 60 * 1000:
-                        start_ms = 40 * 1000
-                        cut_duration = demo_duration_setting * 1000
-                        demo_audio = audio[start_ms : start_ms + cut_duration]
-                        demo_audio.export(demo_path, format="ogg", codec="libopus")
-
-                        demo_msg = await bot.send_voice(
-                            config.MAIN_CHANNEL_ID,
-                            voice=FSInputFile(demo_path),
-                            caption="🎶 To'liq Mp3 Pastda ⬇️",
-                            duration=len(demo_audio) // 1000
-                        )
-                        reply_msg_id = demo_msg.message_id
-                        os.remove(demo_path)
-            except Exception as e:
-                logger.error(f"Demo kesishda xato: {e}")
+                audio = AudioSegment.from_file(final_file_path)
+                full_audio_duration = len(audio) // 1000
+            except Exception:
+                pass
 
             await bot.send_audio(
                 config.MAIN_CHANNEL_ID,
                 audio=FSInputFile(final_file_path, filename=f"{final_artist} - {final_title}.mp3"),
                 caption=caption_text,
-                performer=final_artist, title=final_title,
+                performer=final_artist, 
+                title=final_title,
                 thumbnail=FSInputFile("thumbnail.jpg") if os.path.exists("thumbnail.jpg") else None,
-                reply_to_message_id=reply_msg_id,
                 duration=full_audio_duration
             )
             await database.mark_schedule_posted(track_id)
@@ -458,7 +432,7 @@ async def _plan_daily_posts_internal(force: bool = False):
 
     await log_to_channel(f"🗓️ Rejalashtirish boshlandi... (Maqsad: {target_count} ta)")
 
-    # --- 1-BOSQICH: So'nggi 7 kunlik musiqalarni yuklash va Toshkent vaqti bo'yicha saralash ---
+    # --- 1-BOSQICH: Musiqalarni yuklash va Toshkent vaqti bo'yicha saralash ---
     raw_tracks = await userbot.get_new_music_from_channels(hours=168)
     
     tashkent_tz = pytz.timezone("Asia/Tashkent")
@@ -466,34 +440,35 @@ async def _plan_daily_posts_internal(force: bool = False):
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     yesterday_start = today_start - timedelta(days=1)
 
-    yesterday_candidates = []
-    older_candidates = []
+    clean_candidates_yesterday = []
+    clean_candidates_older = []
+    direct_candidates = []
     seen_track_ids = set()
 
-    def filter_and_categorize(tracks):
-        for track in tracks:
-            if track['track_id'] in seen_track_ids:
-                continue
-            if utils.check_forbidden_keywords(
-                track.get('artist', ''), track.get('title', '')
-            ):
-                continue
-            
-            # UTC vaqtni Toshkent vaqtiga o'girish
+    for track in raw_tracks:
+        if track['track_id'] in seen_track_ids:
+            continue
+        if utils.check_forbidden_keywords(
+            track.get('artist', ''), track.get('title', '')
+        ):
+            continue
+        
+        seen_track_ids.add(track['track_id'])
+        mode = track.get('mode', 'clean')
+
+        # Direct kanallar uchun: istalgan sana (oxirgi 2 oylik barcha yangi musiqalar)
+        if mode == 'direct':
+            direct_candidates.append(track)
+        else:
+            # Clean kanallar uchun: kechagi va eski kunlar
             track_date_utc = track['date'].replace(tzinfo=pytz.utc) if track['date'].tzinfo is None else track['date'].astimezone(pytz.utc)
             track_date_uz = track_date_utc.astimezone(tashkent_tz)
-            
             if track_date_uz >= today_start:
-                # Bugungi musiqalarga tegmaymiz (ertaga olinadi)
                 continue
             elif yesterday_start <= track_date_uz < today_start:
-                yesterday_candidates.append(track)
+                clean_candidates_yesterday.append(track)
             else:
-                older_candidates.append(track)
-                
-            seen_track_ids.add(track['track_id'])
-
-    filter_and_categorize(raw_tracks)
+                clean_candidates_older.append(track)
 
     async def check_not_posted(tracks):
         result = []
@@ -515,76 +490,60 @@ async def _plan_daily_posts_internal(force: bool = False):
                     result.append(track)
         return result
 
-    # Birinchi navbatda faqat kechagi (roppa-rosa 1 kun orqadagi) musiqalarni tekshiramiz
-    unique_candidates = await check_not_posted(yesterday_candidates)
-    logger.info(f"Kechagi kun (1 kun oldin) uchun {len(unique_candidates)} ta yangi unikal musiqa topildi.")
+    # Bazada joylanmaganlarini filtrlash
+    valid_direct = await check_not_posted(direct_candidates)
+    valid_clean_yesterday = await check_not_posted(clean_candidates_yesterday)
+    valid_clean_older = await check_not_posted(clean_candidates_older)
 
-    # Agar kechagi musiqalar yetarli bo'lmasa -> eski kunlardagilarni (fallback) qo'shamiz
-    if len(unique_candidates) < target_count:
-        needed = target_count - len(unique_candidates)
-        logger.info(
-            f"⚠️ Kechagi musiqalar yetarli emas ({len(unique_candidates)}/{target_count}). "
-            f"Eski kunlar musiqalaridan {needed} ta zaxira olinmoqda..."
-        )
-        await log_to_channel(
-            f"⚠️ Kechagi musiqalar soni yetarli emas. Qolgan {needed} ta musiqa eski kunlar zaxirasidan to'ldiriladi."
-        )
-        older_unique = await check_not_posted(older_candidates)
-        # Eski kunlar musiqalarini reyting bo'yicha saralab eng yaxshilarini qo'shamiz
-        older_unique.sort(key=utils.calculate_track_score, reverse=True)
-        unique_candidates.extend(older_unique[:needed])
-        logger.info(
-            f"Zaxira bilan birga jami {len(unique_candidates)} ta unikal musiqa yig'ildi."
-        )
+    # Clean musiqalarni birlashtirish (avval kechagilar, keyin eskilar)
+    valid_clean = valid_clean_yesterday + valid_clean_older
 
-    if unique_candidates:
-        # Group candidates by source channel, sort each by score
-        candidates_by_channel = {}
-        for track in unique_candidates:
-            cid = track.get('chat_id')
-            if cid not in candidates_by_channel:
-                candidates_by_channel[cid] = []
-            candidates_by_channel[cid].append(track)
+    # 1. Clean kanallar: Ko'rishlar va reaksiyalar (score) bo'yicha eng yuqori reytinglilari tanlanadi
+    valid_clean.sort(key=utils.calculate_track_score, reverse=True)
 
-        for cid in candidates_by_channel:
-            candidates_by_channel[cid].sort(
-                key=utils.calculate_track_score, reverse=True
-            )
+    # 2. Direct kanallar: Ko'rishlar bo'yicha saralanmaydi, shunchaki RANDOM (tasodifiy) olinadi
+    random.shuffle(valid_direct)
 
-        channel_ids = list(candidates_by_channel.keys())
-        num_channels = len(channel_ids)
+    logger.info(f"Topilgan unikal musiqalar: Clean={len(valid_clean)} ta (Score bo'yicha), Direct={len(valid_direct)} ta (Random)")
 
-        # --- 60/40 taqsimoti (2 kanal bo'lsa 60/40, 1 kanal bo'lsa 100%) ---
-        if num_channels == 1:
-            quotas = [target_count]
-        elif num_channels == 2:
-            # Birinchi kanaldan 60%, ikkinchisidan 40% (kamida 1 ta)
-            q0 = max(1, round(target_count * 0.6))
-            q1 = max(1, target_count - q0)
-            quotas = [q0, q1]
+    # --- 2-BOSQICH: 50% Clean (Score) / 50% Direct (Random) Taqsimoti ---
+    to_post = []
+    if valid_clean or valid_direct:
+        if valid_clean and valid_direct:
+            # 50% clean, 50% direct
+            clean_target = max(1, target_count // 2)
+            direct_target = max(1, target_count - clean_target)
+        elif valid_clean:
+            clean_target = target_count
+            direct_target = 0
         else:
-            # 3 va undan ko'p kanallar: teng taqsimot
-            base = target_count // num_channels
-            rem = target_count % num_channels
-            quotas = [base + (1 if i < rem else 0) for i in range(num_channels)]
+            clean_target = 0
+            direct_target = target_count
 
-        to_post = []
-        leftover = []
-        for i, cid in enumerate(channel_ids):
-            pool = candidates_by_channel[cid]
-            quota = quotas[i] if i < len(quotas) else 0
-            to_post.extend(pool[:quota])
-            leftover.extend(pool[quota:])
+        selected_clean = valid_clean[:clean_target]
+        selected_direct = valid_direct[:direct_target]
 
-        # Agar target_count ga yetmagan bo'lsak, qolganlardan to'ldiramiz
+        to_post.extend(selected_clean)
+        to_post.extend(selected_direct)
+
+        # Agar kvotaga yetmasa, ikkinchi toifadagi qolganlardan to'ldirish
         if len(to_post) < target_count:
-            leftover.sort(key=utils.calculate_track_score, reverse=True)
-            needed = target_count - len(to_post)
-            to_post.extend(leftover[:needed])
+            leftover_clean = valid_clean[clean_target:]
+            leftover_direct = valid_direct[direct_target:]
+            remaining_needed = target_count - len(to_post)
+            
+            # Agar direct qolgan bo'lsa, direct dan to'ldiramiz
+            if leftover_direct:
+                to_post.extend(leftover_direct[:remaining_needed])
+            # Agar hali ham yetmasa, clean qolganlaridan to'ldiramiz
+            if len(to_post) < target_count and leftover_clean:
+                still_needed = target_count - len(to_post)
+                to_post.extend(leftover_clean[:still_needed])
 
-        # Final ro'yxatni score bo'yicha tartiblash
-        to_post.sort(key=utils.calculate_track_score, reverse=True)
+        # Kun davomida turli xil ketma-ketlikda chiqishi uchun ro'yxatni aralashtiramiz
+        random.shuffle(to_post)
         to_post = to_post[:target_count]
+        logger.info(f"Reja uchun tanlandi: {len(to_post)} ta (Clean: {sum(1 for t in to_post if t.get('mode')=='clean')}, Direct: {sum(1 for t in to_post if t.get('mode')=='direct')})")
 
         tashkent_tz = pytz.timezone("Asia/Tashkent")
         now = datetime.now(tashkent_tz)
@@ -650,7 +609,18 @@ async def _plan_daily_posts_internal(force: bool = False):
                 ) or "Musiqa"
                 query = f"{c_artist} - {c_title}"
 
-                # 1. Target bot orqali matnli qidiruv
+                # Direct rejim bo'lsa, to'g'ridan-to'g'ri kanaldan yuklab olamiz
+                if track.get('mode') == 'direct':
+                    temp_f = os.path.join("downloads", f"track_{track.get('track_id', 'tmp')}_predl.mp3")
+                    fpath = await userbot.download_music(
+                        track.get('chat_id'), track.get('message_id'), temp_f
+                    )
+                    if fpath and os.path.exists(fpath):
+                        logger.info(f"✅ [Pre-dl Direct] Yuklandi: {query}")
+                        return fpath
+                    return None
+
+                # Clean rejim: 1. Target bot orqali matnli qidiruv
                 fpath = await userbot.search_text_via_target_bot(query)
                 if fpath and os.path.exists(fpath):
                     logger.info(f"✅ [Pre-dl] Topildi (target bot): {query}")
@@ -776,7 +746,7 @@ async def check_schedule_update():
         
         # 2. Sozlamalar o'zgarganligini tekshirish
         changed = False
-        keys_to_check = ["planning_hour", "daily_post_count", "night_mode", "night_start", "night_end", "source_channels", "target_search_bot"]
+        keys_to_check = ["planning_hour", "daily_post_count", "night_mode", "night_start", "night_end", "source_channels", "clean_source_channels", "direct_source_channels", "target_search_bot"]
         for key in keys_to_check:
             if settings.get(key) != LAST_SETTINGS.get(key):
                 changed = True
@@ -786,8 +756,12 @@ async def check_schedule_update():
             logger.info("⚙️ Sozlamalar o'zgardi. Jadval yangilanmoqda...")
             
             # Update source channels list in config dynamically
-            if 'source_channels' in settings:
-                config.SOURCE_CHANNELS = [ch.strip() for ch in re.split(r'[\s,]+', settings['source_channels']) if ch.strip()]
+            all_channels = []
+            for ch_key in ['source_channels', 'clean_source_channels', 'direct_source_channels']:
+                if ch_key in settings and settings[ch_key]:
+                    all_channels.extend([ch.strip() for ch in re.split(r'[\s,]+', settings[ch_key]) if ch.strip()])
+            if all_channels:
+                config.SOURCE_CHANNELS = list(set(all_channels))
                 # Automatically trigger userbot to join new source channels
                 asyncio.create_task(userbot._join_source_channels())
             if 'target_search_bot' in settings:
@@ -873,16 +847,15 @@ async def admin_callback_handler(query: CallbackQuery, state: FSMContext):
             "⚙️ <b>Bot Sozlamalari</b>\n\n"
             f"🎵 Kunlik postlar soni: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
             f"⏰ Rejalashtirish soati: <b>{settings.get('planning_hour', '?')}:00</b>\n"
-            f"⏳ Demo davomiyligi: <b>{settings.get('demo_duration', '?')} soniya</b>\n"
             f"🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '?')}</b>\n"
-            f"📡 Manbalar: <code>{settings.get('source_channels', '')}</code>"
+            f"📡 Bot manbalar: <code>{settings.get('clean_source_channels', '')}</code>\n"
+            f"📡 To'g'ri manbalar: <code>{settings.get('direct_source_channels', '')}</code>"
         )
         await query.message.edit_text(
             text, 
             reply_markup=get_settings_keyboard(
                 settings.get('daily_post_count', '5'),
-                settings.get('planning_hour', '5'),
-                settings.get('demo_duration', '30')
+                settings.get('planning_hour', '5')
             )
         )
         await query.answer()
@@ -935,17 +908,16 @@ async def admin_callback_handler(query: CallbackQuery, state: FSMContext):
             "⚙️ <b>Bot Sozlamalari</b>\n\n"
             f"🎵 Kunlik postlar soni: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
             f"⏰ Rejalashtirish soati: <b>{settings.get('planning_hour', '?')}:00</b>\n"
-            f"⏳ Demo davomiyligi: <b>{settings.get('demo_duration', '?')} soniya</b>\n"
             f"🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '?')}</b>\n"
-            f"📡 Manbalar: <code>{settings.get('source_channels', '')}</code>"
+            f"📡 Bot manbalar: <code>{settings.get('clean_source_channels', '')}</code>\n"
+            f"📡 To'g'ri manbalar: <code>{settings.get('direct_source_channels', '')}</code>"
         )
         try:
             await query.message.edit_text(
                 text, 
                 reply_markup=get_settings_keyboard(
                     settings.get('daily_post_count', '5'),
-                    settings.get('planning_hour', '5'),
-                    settings.get('demo_duration', '30')
+                    settings.get('planning_hour', '5')
                 )
             )
         except Exception:
@@ -962,44 +934,16 @@ async def admin_callback_handler(query: CallbackQuery, state: FSMContext):
             "⚙️ <b>Bot Sozlamalari</b>\n\n"
             f"🎵 Kunlik postlar soni: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
             f"⏰ Rejalashtirish soati: <b>{settings.get('planning_hour', '?')}:00</b>\n"
-            f"⏳ Demo davomiyligi: <b>{settings.get('demo_duration', '?')} soniya</b>\n"
             f"🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '?')}</b>\n"
-            f"📡 Manbalar: <code>{settings.get('source_channels', '')}</code>"
+            f"📡 Bot manbalar: <code>{settings.get('clean_source_channels', '')}</code>\n"
+            f"📡 To'g'ri manbalar: <code>{settings.get('direct_source_channels', '')}</code>"
         )
         try:
             await query.message.edit_text(
                 text, 
                 reply_markup=get_settings_keyboard(
                     settings.get('daily_post_count', '5'),
-                    settings.get('planning_hour', '5'),
-                    settings.get('demo_duration', '30')
-                )
-            )
-        except Exception:
-            pass
-            
-    elif data in ["admin_demo_up", "admin_demo_dn"]:
-        settings = await database.get_all_settings()
-        curr = int(settings.get('demo_duration', '30'))
-        new_val = curr + 5 if "up" in data else max(5, curr - 5)
-        await database.set_setting('demo_duration', str(new_val))
-        await query.answer(f"Demo davomiyligi: {new_val}s")
-        settings = await database.get_all_settings()
-        text = (
-            "⚙️ <b>Bot Sozlamalari</b>\n\n"
-            f"🎵 Kunlik postlar soni: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
-            f"⏰ Rejalashtirish soati: <b>{settings.get('planning_hour', '?')}:00</b>\n"
-            f"⏳ Demo davomiyligi: <b>{settings.get('demo_duration', '?')} soniya</b>\n"
-            f"🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '?')}</b>\n"
-            f"📡 Manbalar: <code>{settings.get('source_channels', '')}</code>"
-        )
-        try:
-            await query.message.edit_text(
-                text, 
-                reply_markup=get_settings_keyboard(
-                    settings.get('daily_post_count', '5'),
-                    settings.get('planning_hour', '5'),
-                    settings.get('demo_duration', '30')
+                    settings.get('planning_hour', '5')
                 )
             )
         except Exception:
@@ -1067,9 +1011,9 @@ async def process_search_bot_input(message: types.Message, state: FSMContext):
         "⚙️ <b>Bot Sozlamalari</b>\n\n"
         f"🎵 Kunlik postlar soni: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
         f"⏰ Rejalashtirish soati: <b>{settings.get('planning_hour', '?')}:00</b>\n"
-        f"⏳ Demo davomiyligi: <b>{settings.get('demo_duration', '?')} soniya</b>\n"
         f"🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '?')}</b>\n"
-        f"📡 Manbalar: <code>{settings.get('source_channels', '')}</code>"
+        f"📡 Bot manbalar: <code>{settings.get('clean_source_channels', '')}</code>\n"
+        f"📡 To'g'ri manbalar: <code>{settings.get('direct_source_channels', '')}</code>"
     )
     
     edited = False
@@ -1081,8 +1025,7 @@ async def process_search_bot_input(message: types.Message, state: FSMContext):
                 text=f"✅ Qidiruv boti muvaffaqiyatli o'zgartirildi!\n\n{text}",
                 reply_markup=get_settings_keyboard(
                     settings.get('daily_post_count', '5'),
-                    settings.get('planning_hour', '5'),
-                    settings.get('demo_duration', '30')
+                    settings.get('planning_hour', '5')
                 )
             )
             edited = True
@@ -1094,8 +1037,7 @@ async def process_search_bot_input(message: types.Message, state: FSMContext):
             f"✅ Qidiruv boti muvaffaqiyatli o'zgartirildi!\n\n{text}",
             reply_markup=get_settings_keyboard(
                 settings.get('daily_post_count', '5'),
-                settings.get('planning_hour', '5'),
-                settings.get('demo_duration', '30')
+                settings.get('planning_hour', '5')
             )
         )
 
@@ -1187,9 +1129,9 @@ async def process_source_channels_input(message: types.Message, state: FSMContex
         "⚙️ <b>Bot Sozlamalari</b>\n\n"
         f"🎵 Kunlik postlar soni: <b>{settings.get('daily_post_count', '?')} ta</b>\n"
         f"⏰ Rejalashtirish soati: <b>{settings.get('planning_hour', '?')}:00</b>\n"
-        f"⏳ Demo davomiyligi: <b>{settings.get('demo_duration', '?')} soniya</b>\n"
         f"🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '?')}</b>\n"
-        f"📡 Manbalar: <code>{settings.get('source_channels', '')}</code>"
+        f"📡 Bot manbalar: <code>{settings.get('clean_source_channels', '')}</code>\n"
+        f"📡 To'g'ri manbalar: <code>{settings.get('direct_source_channels', '')}</code>"
     )
     
     edited = False
@@ -1201,8 +1143,7 @@ async def process_source_channels_input(message: types.Message, state: FSMContex
                 text=f"✅ Manbalar ro'yxati muvaffaqiyatli o'zgartirildi!\n\n{text}",
                 reply_markup=get_settings_keyboard(
                     settings.get('daily_post_count', '5'),
-                    settings.get('planning_hour', '5'),
-                    settings.get('demo_duration', '30')
+                    settings.get('planning_hour', '5')
                 )
             )
             edited = True
@@ -1214,8 +1155,7 @@ async def process_source_channels_input(message: types.Message, state: FSMContex
             f"✅ Manbalar ro'yxati muvaffaqiyatli o'zgartirildi!\n\n{text}",
             reply_markup=get_settings_keyboard(
                 settings.get('daily_post_count', '5'),
-                settings.get('planning_hour', '5'),
-                settings.get('demo_duration', '30')
+                settings.get('planning_hour', '5')
             )
         )
 
@@ -1339,30 +1279,18 @@ async def process_and_post_direct_orig(status_msg: types.Message, file_id: str, 
                         f"👉 <a href='{config.MAIN_CHANNEL_LINK}'>Kanalga obuna bo'ling</a>")
         
         # Cut demo and post
-        reply_msg_id = None
-        full_audio_duration = None
-        demo_duration_setting = int(await database.get_setting("demo_duration", "30"))
-        demo_path = temp_file_path.replace(".mp3", "_demo.ogg")
+        # Format caption & metadata
+        channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
+        channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
+        highlight_time = utils.detect_music_highlight(temp_file_path)
+        caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name} | 🎧</a>"
         
+        full_audio_duration = None
         try:
             audio = AudioSegment.from_file(temp_file_path)
             full_audio_duration = len(audio) // 1000
-            if len(audio) > 60 * 1000:
-                start_ms = 40 * 1000
-                cut_duration = demo_duration_setting * 1000
-                demo_audio = audio[start_ms : start_ms + cut_duration]
-                demo_audio.export(demo_path, format="ogg", codec="libopus")
-                
-                demo_msg = await bot.send_voice(
-                    config.MAIN_CHANNEL_ID,
-                    voice=FSInputFile(demo_path),
-                    caption="🎶 To'liq Mp3 Pastda ⬇️",
-                    duration=len(demo_audio) // 1000
-                )
-                reply_msg_id = demo_msg.message_id
-                os.remove(demo_path)
-        except Exception as e:
-            logger.error(f"Direct orig demo cutting error: {e}")
+        except Exception:
+            pass
             
         # Post full MP3
         await bot.send_audio(
@@ -1372,7 +1300,6 @@ async def process_and_post_direct_orig(status_msg: types.Message, file_id: str, 
             performer=clean_artist,
             title=clean_title,
             thumbnail=FSInputFile("thumbnail.jpg") if os.path.exists("thumbnail.jpg") else None,
-            reply_to_message_id=reply_msg_id,
             duration=full_audio_duration
         )
         
@@ -1402,47 +1329,24 @@ async def process_and_post_direct_bot(status_msg: types.Message, artist: str, ti
         
         # Clean artist/title with AI
         ai_cleaned = await utils.get_clean_details_with_ai(artist, title)
-        clean_artist = utils._clean_single_string(ai_cleaned.get('artist') or artist)
-        clean_title = utils._clean_single_string(ai_cleaned.get('title') or title)
-        if not clean_artist: clean_artist = "Trend MUSIC"
-        if not clean_title: clean_title = "Musiqa"
+        channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
+        channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
+
+        clean_artist = utils._clean_single_string(ai_cleaned.get('artist') or artist) or channel_name
+        clean_title = utils._clean_single_string(ai_cleaned.get('title') or title) or "Musiqa"
         
         # Clean metadata of the original file
         utils.write_clean_metadata(temp_file_path, clean_artist, clean_title)
         
-        target_bot = await database.get_setting("target_search_bot", "@Zoryuklabot")
-        if not target_bot.startswith("@"):
-            target_bot = "@" + target_bot
-
-        caption_text = (f"👇 <b>Musiqa topuvchi bot</b>\n"
-                        f"{target_bot} 🔎\n\n"
-                        f"👉 <a href='{config.MAIN_CHANNEL_LINK}'>Kanalga obuna bo'ling</a>")
+        highlight_time = utils.detect_music_highlight(temp_file_path)
+        caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name} | 🎧</a>"
         
-        # Cut demo and post
-        reply_msg_id = None
         full_audio_duration = None
-        demo_duration_setting = int(await database.get_setting("demo_duration", "30"))
-        demo_path = temp_file_path.replace(".mp3", "_demo.ogg")
-        
         try:
             audio = AudioSegment.from_file(temp_file_path)
             full_audio_duration = len(audio) // 1000
-            if len(audio) > 60 * 1000:
-                start_ms = 40 * 1000
-                cut_duration = demo_duration_setting * 1000
-                demo_audio = audio[start_ms : start_ms + cut_duration]
-                demo_audio.export(demo_path, format="ogg", codec="libopus")
-                
-                demo_msg = await bot.send_voice(
-                    config.MAIN_CHANNEL_ID,
-                    voice=FSInputFile(demo_path),
-                    caption="🎶 To'liq Mp3 Pastda ⬇️",
-                    duration=len(demo_audio) // 1000
-                )
-                reply_msg_id = demo_msg.message_id
-                os.remove(demo_path)
-        except Exception as e:
-            logger.error(f"Direct bot demo cutting error: {e}")
+        except Exception:
+            pass
             
         # Post full MP3
         await bot.send_audio(
@@ -1452,7 +1356,6 @@ async def process_and_post_direct_bot(status_msg: types.Message, artist: str, ti
             performer=clean_artist,
             title=clean_title,
             thumbnail=FSInputFile("thumbnail.jpg") if os.path.exists("thumbnail.jpg") else None,
-            reply_to_message_id=reply_msg_id,
             duration=full_audio_duration
         )
         
@@ -1953,8 +1856,12 @@ async def on_startup(bot: Bot):
     
     # Load database settings into config
     settings = await database.get_all_settings()
-    if 'source_channels' in settings:
-        config.SOURCE_CHANNELS = [ch.strip() for ch in re.split(r'[\s,]+', settings['source_channels']) if ch.strip()]
+    all_channels = []
+    for ch_key in ['source_channels', 'clean_source_channels', 'direct_source_channels']:
+        if ch_key in settings and settings[ch_key]:
+            all_channels.extend([ch.strip() for ch in re.split(r'[\s,]+', settings[ch_key]) if ch.strip()])
+    if all_channels:
+        config.SOURCE_CHANNELS = list(set(all_channels))
     if 'target_search_bot' in settings:
         config.TARGET_SEARCH_BOT = settings['target_search_bot']
         
