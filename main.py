@@ -164,11 +164,33 @@ from pyrogram import enums
 
 async def send_music_to_channel(file_path: str, caption_text: str, artist: str, title: str, duration: Optional[int] = None):
     """
-    Musiqani kanalga ishonchli va tez yuboradi (Aiogram Bot orqali).
+    Musiqani kanalga yuboradi.
+    1. Avval UserBot (Pyrogram) orqali yuborishga harakat qiladi (Premium custom emoji qo'llab-quvvatlaydi).
+    2. Agar userbot ishlamasa yoki ruxsat bo'lmasa, Aiogram Bot orqali zaxiradan yuboradi.
     """
     thumb_path = "thumbnail.jpg" if os.path.exists("thumbnail.jpg") else None
     
-    logger.info(f"Musiqa kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
+    # 1. Userbot orqali yuborish
+    if userbot.app and userbot.app.is_connected:
+        try:
+            logger.info(f"Musiqa Userbot orqali kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
+            await userbot.app.send_audio(
+                chat_id=config.MAIN_CHANNEL_ID,
+                audio=file_path,
+                caption=caption_text,
+                parse_mode=enums.ParseMode.HTML,
+                performer=artist,
+                title=title,
+                thumb=thumb_path,
+                duration=duration or 0
+            )
+            logger.success("✅ Musiqa Userbot orqali kanalga muvaffaqiyatli yuklandi!")
+            return True
+        except Exception as ub_err:
+            logger.warning(f"Userbot orqali yuborishda xato: {ub_err}. Bot orqali yuborilmoqda...")
+
+    # 2. Aiogram Bot orqali zaxira yuborish
+    logger.info(f"Musiqa Bot orqali kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
     await bot.send_audio(
         config.MAIN_CHANNEL_ID,
         audio=FSInputFile(file_path, filename=f"{artist} - {title}.mp3"),
@@ -178,7 +200,7 @@ async def send_music_to_channel(file_path: str, caption_text: str, artist: str, 
         thumbnail=FSInputFile(thumb_path) if thumb_path else None,
         duration=duration
     )
-    logger.success("✅ Musiqa kanalga muvaffaqiyatli yuklandi!")
+    logger.success("✅ Musiqa Bot orqali kanalga muvaffaqiyatli yuklandi!")
     return True
 
 
@@ -216,6 +238,9 @@ async def post_music(track_info: Dict):
             final_artist = ai_cleaned.get('artist') or utils._clean_single_string(raw_artist) or channel_name
             final_title = ai_cleaned.get('title') or utils._clean_single_string(raw_title) or "Musiqa"
             
+            if final_artist.lower() in ["spotify", "unknown artist", "unknown", "noma'lum"]:
+                final_artist = channel_name
+
             # Rewrite metadata tags in the file itself (eski logolar va teglarni butunlay tozalab)
             utils.write_clean_metadata(direct_file, final_artist, final_title)
             
@@ -228,12 +253,7 @@ async def post_music(track_info: Dict):
             # Minimal caption: "00:47 Trend Musiqa | 🎧"
             caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name} | {emoji_tag}</a>"
             
-            full_audio_duration = None
-            try:
-                audio = AudioSegment.from_file(direct_file)
-                full_audio_duration = len(audio) // 1000
-            except Exception:
-                pass
+            full_audio_duration = utils.get_audio_duration(direct_file)
                 
             await send_music_to_channel(
                 file_path=direct_file,
@@ -392,6 +412,9 @@ async def post_music(track_info: Dict):
             final_artist = utils._clean_single_string(final_artist) or clean_artist or channel_name
             final_title = utils._clean_single_string(final_title) or clean_title or "Musiqa"
 
+            if final_artist.lower() in ["spotify", "unknown artist", "unknown", "noma'lum"]:
+                final_artist = channel_name
+
             # Rewrite ID3 tags in the MP3 file itself
             utils.write_clean_metadata(final_file_path, final_artist, final_title)
 
@@ -413,12 +436,7 @@ async def post_music(track_info: Dict):
             # Minimal caption: "00:47 Trend Musiqa | 🎧"
             caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name} | {emoji_tag}</a>"
 
-            full_audio_duration = None
-            try:
-                audio = AudioSegment.from_file(final_file_path)
-                full_audio_duration = len(audio) // 1000
-            except Exception:
-                pass
+            full_audio_duration = utils.get_audio_duration(final_file_path)
 
             await send_music_to_channel(
                 file_path=final_file_path,
@@ -743,8 +761,10 @@ async def _plan_daily_posts_internal(force: bool = False):
                 ai = await utils.get_clean_details_with_ai(
                     track.get('artist', ''), track.get('title', '')
                 )
-                c_a = utils._clean_single_string(ai.get('artist') or track.get('artist', '')) or "Trend MUSIC"
+                c_a = utils._clean_single_string(ai.get('artist') or track.get('artist', '')) or "Trend Musiqa"
                 c_t = utils._clean_single_string(ai.get('title') or track.get('title', '')) or "Musiqa"
+                if c_a.lower() in ["spotify", "unknown artist", "unknown", "noma'lum"]:
+                    c_a = "Trend Musiqa"
                 track['artist'] = c_a
                 track['title'] = c_t
                 utils.write_clean_metadata(fpath, c_a, c_t)

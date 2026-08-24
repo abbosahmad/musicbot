@@ -490,6 +490,10 @@ def _clean_single_string(text: str) -> str:
 
     # 2. Remove known channel watermarks and promotional phrases (case-insensitive)
     promo_phrases = [
+        r'spotify[\_\s]*muzikala',
+        r'spotify[\_\s]*music',
+        r'spotify[\_\s]*uz',
+        r'\bspotify\b',
         r'muzikalar[\_\s]*uzmuz',
         r'taronalar[\_\s]*qoshiqlar[\_\s]*mp3lar',
         r'taronalar[\_\s]*qoshiqlar',
@@ -501,6 +505,8 @@ def _clean_single_string(text: str) -> str:
         r'rizanova[\_\s]*uz',
         r'rizanova',
         r'\buzmuz\b',
+        r'\btaronalar\b',
+        r'\bmp3lar\b',
         r'\b(?:skachat|yuklash|yuklab\s*olish|skachat\s*mp3|mp3lar|xitlar|hitlar|premyera|taronalar)\b',
         r'\b(?:kanalimizga\s*obuna|obuna\s*bo\'ling|obuna\s*boling|kanalimiz)\b',
         r'\b(?:shazam\s*version|official\s*audio|official\s*video|rasmiy\s*kanal)\b'
@@ -817,21 +823,19 @@ def extract_clean_artist_and_title(raw_artist: str, raw_title: str, caption: str
 def detect_music_highlight(file_path: str, raw_text: str = "") -> str:
     """
     Musiqaning avj (highlight / drop / chorus) vaqtini aniqlaydi.
-    1. Avval manba xabar matnidan (caption/title) vaqt formatidagi yozuvni qidiradi (masalan: '00:47', '1:38').
-    2. Agar topilmasa, audio faylning dinamik eng baland RMS qismini tahlil qilib 'MM:SS' formatida qaytaradi.
+    Hech qachon '00:00' qaytarmaydi (eng kamida '00:35' yoki audioning eng baland cho'qqisini tanlaydi).
     """
     # 1. Matndan vaqtni qidirish
     if raw_text:
         time_match = re.search(r'\b([0-5]?[0-9]:[0-5][0-9])\b', raw_text)
         if time_match:
             found_time = time_match.group(1)
-            # Agar format '1:38' bo'lsa '01:38' ga aylantirish yoki o'z holicha qoldirish
             parts = found_time.split(":")
             if len(parts) == 2:
                 mins = int(parts[0])
                 secs = int(parts[1])
-                return f"{mins:02d}:{secs:02d}"
-            return found_time
+                if mins > 0 or secs >= 10:
+                    return f"{mins:02d}:{secs:02d}"
 
     # 2. Audio fayldan RMS balandlik bo'yicha tahlil qilish
     if file_path and os.path.exists(file_path):
@@ -840,34 +844,57 @@ def detect_music_highlight(file_path: str, raw_text: str = "") -> str:
             audio = AudioSegment.from_file(file_path)
             total_duration_ms = len(audio)
             
-            # Agar audio 1 daqiqadan kam bo'lsa
-            if total_duration_ms < 60 * 1000:
-                return "00:00"
+            if total_duration_ms >= 45 * 1000:
+                start_window = int(total_duration_ms * 0.15)
+                end_window = int(total_duration_ms * 0.75)
+                step_ms = 1000       # Har 1 soniya
+                window_ms = 8000     # 8 soniyalik oyna
                 
-            # Musiqaning 15% dan 75% gacha bo'lgan qismidan avj qismini qidiramiz
-            start_window = int(total_duration_ms * 0.15)
-            end_window = int(total_duration_ms * 0.75)
-            step_ms = 1000       # Har 1 soniya
-            window_ms = 8000     # 8 soniyalik oyna
-            
-            best_time_ms = 40000 # Sukut bo'yicha 40-soniya
-            max_rms = -1
-            
-            for t in range(start_window, end_window - window_ms, step_ms):
-                chunk = audio[t : t + window_ms]
-                rms = chunk.rms
-                if rms > max_rms:
-                    max_rms = rms
-                    best_time_ms = t
-                    
-            sec = int(best_time_ms / 1000)
-            mins = sec // 60
-            secs = sec % 60
-            return f"{mins:02d}:{secs:02d}"
+                best_time_ms = 40000 # Sukut bo'yicha 40-soniya
+                max_rms = -1
+                
+                for t in range(start_window, max(start_window + 1000, end_window - window_ms), step_ms):
+                    chunk = audio[t : t + window_ms]
+                    rms = chunk.rms
+                    if rms > max_rms:
+                        max_rms = rms
+                        best_time_ms = t
+                        
+                sec = int(best_time_ms / 1000)
+                mins = sec // 60
+                secs = sec % 60
+                if mins > 0 or secs >= 10:
+                    return f"{mins:02d}:{secs:02d}"
         except Exception as e:
             logger.warning(f"Avj vaqtini audio tahlilida aniqlashda xato: {e}")
             
     return "00:45"
+
+
+def get_audio_duration(file_path: str) -> int:
+    """
+    MP3 faylning aniq davomiyligini soniyalarda hisoblaydi.
+    """
+    if not file_path or not os.path.exists(file_path):
+        return 0
+    try:
+        from mutagen.mp3 import MP3
+        audio = MP3(file_path)
+        if audio.info and audio.info.length:
+            dur = int(audio.info.length)
+            if dur > 0:
+                return dur
+    except Exception:
+        pass
+    try:
+        from pydub import AudioSegment
+        audio = AudioSegment.from_file(file_path)
+        dur = int(len(audio) // 1000)
+        if dur > 0:
+            return dur
+    except Exception:
+        pass
+    return 0
 
 
 def choose_best_result_number(text: str, query: str = "") -> str:
