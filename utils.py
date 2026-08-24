@@ -124,23 +124,27 @@ async def get_clean_details_with_ai(raw_artist: str, raw_title: str) -> dict:
             timeout=12.0
         )
 
-        system_prompt = """You are an expert music metadata cleaning AI.
-Your primary task is to extract the perfectly clean 'artist' (singer/performer) and 'title' (song name) from raw messy input strings, removing all promotional and channel clutter.
+        system_prompt = """You are an expert music metadata cleaning AI for the 'Trend Musiqa' music channel.
+Your task is to extract the pure, professional 'artist' (singer/performer) and 'title' (song name) from raw messy input strings.
 
-Cleaning Rules:
-1. Strip all channel usernames (@...), URLs, websites (.uz, .ru, .com, .net, t.me/...), hashtags (#...), and phone numbers.
-2. Strip download and promo keywords: 'skachat', 'yuklash', 'mp3', 'mp3lar', 'uzmuz', 'taronalar', 'premyera', 'premeyra', 'premier', 'xit', 'hit', 'exclusive', 'yangi', 'new', 'official video', 'klip', 'audio', 'clip'.
-3. If the raw artist field contains channel names (e.g., 'Muzikalar | Shohruhxon' or '@Kanal'), extract the actual human singer name ('Shohruhxon').
-4. If the raw title contains 'Artist - Title' structure (e.g., raw_artist='@Muz', raw_title='Lola - Sevgi'), extract artist='Lola' and title='Sevgi'.
-5. PRESERVE legitimate musical version attributes: (Remix), (DJ ... Remix), (Speed Up), (Slowed), (Cover), (Acoustic), (feat. Singer), (ft. Singer).
-6. Capitalize properly in Title Case.
+CRITICAL ARTIST RULES:
+1. Identify genuine human artists or band names (e.g., 'Shohruhxon', 'Billie Eilish', 'Eminem', 'Yulduz Usmonova', 'Doston Ergashev', 'Miyagi', 'Konsta', 'Jaloliddin Ahmadaliyev').
+2. If the raw artist/title contains ANY channel name, media brand, app name, bot name, or promo text (e.g., 'Spotify', 'Spotify Muzikala', 'UzMuz', 'Taronalar', 'Dilnavo', 'Mp3lar', 'Premier', 'Rizanova', 'Kanal', 'Music', 'Media', 'Online', 'TikTok', 'Instagram', 'YouTube', etc.):
+   - If a real singer exists in the text (e.g., 'Spotify - Bu Yurak - Doston Ergashev' or '@Kanal - Lola - Sevgi'), extract that real singer: artist='Doston Ergashev', title='Bu Yurak'.
+   - If NO real singer is mentioned (e.g., 'Bu Yurak' or 'Брату' or 'Spotify - Bu Yurak'), set artist to 'Trend Musiqa'!
+   - NEVER output 'Spotify', 'UzMuz', 'Unknown', or any other competitor channel/brand as the artist. If no real artist is known, ALWAYS use 'Trend Musiqa'.
+
+CRITICAL TITLE & CLUTTER RULES:
+3. Strip all usernames (@...), links (t.me/..., http://..., .uz, .ru, .com), hashtags (#...), and promo words ('skachat', 'yuklash', 'mp3', 'xit', 'hit', 'premyera', 'official', 'klip', 'audio').
+4. PRESERVE legitimate musical tags: (Remix), (DJ ... Remix), (Speed Up), (Slowed), (Cover), (feat. ...), (ft. ...).
+5. Always format in neat Title Case.
 
 Safety Rules:
-- 'is_religious': true ONLY for explicit Quran recitations, nasheeds, salovats, or religious sermons.
-- 'is_political': true ONLY for direct political figure anthems, government propaganda, or military warfare chants.
+- 'is_religious': true ONLY for explicit Quran recitations, nasheeds, salovats, or sermons.
+- 'is_political': true ONLY for political figure anthems, government propaganda, or warfare chants.
 - Otherwise, both must be false.
 
-Return STRICT JSON: {"artist": "Clean Artist", "title": "Clean Title", "is_religious": false, "is_political": false, "reason": "..."}"""
+Return STRICT JSON: {"artist": "Clean Artist or Trend Musiqa", "title": "Clean Title", "is_religious": false, "is_political": false, "reason": "..."}"""
 
         user_prompt = f"""Raw Artist: "{raw_artist}"
 Raw Title: "{raw_title}" """
@@ -174,11 +178,20 @@ Raw Title: "{raw_title}" """
 
         data = json.loads(content)
         
-        # Ensure returned fields are not empty
-        if not data.get("artist"):
-            data["artist"] = fallback_artist or "Trend MUSIC"
-        if not data.get("title"):
-            data["title"] = fallback_title or "Musiqa"
+        # Ensure returned fields are not empty or invalid
+        artist_res = (data.get("artist") or "").strip()
+        title_res = (data.get("title") or "").strip()
+
+        # Check if artist is invalid, generic, or promo
+        invalid_markers = ["spotify", "unknown", "noma'lum", "nomalum", "music", "mp3", "uzmuz", "tarona", "kanal", "media", "baza", "tiktok"]
+        if not artist_res or any(inv == artist_res.lower().strip() for inv in invalid_markers) or "spotify" in artist_res.lower():
+            artist_res = fallback_artist or "Trend Musiqa"
+
+        if not title_res or title_res.lower() in ["musiqa", "unknown", "track", "audio"]:
+            title_res = fallback_title or "Musiqa"
+
+        data["artist"] = artist_res
+        data["title"] = title_res
             
         return data
 
@@ -190,7 +203,7 @@ Raw Title: "{raw_title}" """
              asyncio.create_task(send_alert_to_admin(f"DeepSeek AI API xatolik berdi (Kalit/Balans): {e}. Aqlli fallback rejimida ishlamoqda."))
              
         return {
-            "artist": fallback_artist or "Trend MUSIC",
+            "artist": fallback_artist or "Trend Musiqa",
             "title": fallback_title or "Musiqa",
             "is_religious": False,
             "is_political": False,
