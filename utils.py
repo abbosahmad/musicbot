@@ -657,8 +657,9 @@ def write_clean_metadata(file_path: str, artist: str, title: str):
         tags.delall('USLT')
         tags.delall('WXXX')
         tags.delall('TXXX')
-        tags.add(TPE1(encoding=3, text=[artist]))
         tags.add(TIT2(encoding=3, text=[title]))
+        if artist and str(artist).strip().lower() != str(title).strip().lower() and str(artist).strip().lower() not in ["musiqa", "unknown", "noma'lum", "trend musiqa", "trend music"]:
+            tags.add(TPE1(encoding=3, text=[artist]))
 
         # Agar thumbnail.jpg bo'lsa, APIC sifatida ham yozib qo'yamiz
         if os.path.exists(thumb_path):

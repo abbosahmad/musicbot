@@ -230,23 +230,26 @@ async def post_music(track_info: Dict):
             
             # AI orqali artist va title ni tozalash
             ai_cleaned = await utils.get_clean_details_with_ai(raw_artist, raw_title)
-            final_artist = ai_cleaned.get('artist') or utils._clean_single_string(raw_artist) or channel_name
+            final_artist = ai_cleaned.get('artist') or utils._clean_single_string(raw_artist) or ""
             final_title = ai_cleaned.get('title') or utils._clean_single_string(raw_title) or "Musiqa"
             
-            if final_artist.lower() in ["spotify", "unknown artist", "unknown", "noma'lum"]:
-                final_artist = channel_name
+            if final_artist.lower() in ["spotify", "uzmuz", "dilnavo", "taronalar", "trend musiqa", "trend music", "unknown artist", "unknown", "noma'lum"]:
+                final_artist = ""
+
+            if final_artist.lower().strip() == final_title.lower().strip():
+                final_artist = ""
 
             # Rewrite metadata tags in the file itself (eski logolar va teglarni butunlay tozalab)
             utils.write_clean_metadata(direct_file, final_artist, final_title)
             
             # Add to database to prevent duplicates later
-            await database.add_track_to_db(track_id, final_artist, final_title)
+            await database.add_track_to_db(track_id, final_artist or final_title, final_title)
             
             # Avj vaqtini aniqlash
             highlight_time = utils.detect_music_highlight(direct_file, raw_text=track_info.get('raw_caption', ''))
             
-            # Minimal caption: "00:47 Trend Musiqa | 🎧"
-            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name} | {emoji_tag}</a>"
+            # Caption: "00:47 Trend Musiqa | 🔥"
+            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | 🔥"
             
             full_audio_duration = utils.get_audio_duration(direct_file)
                 
