@@ -124,27 +124,34 @@ async def get_clean_details_with_ai(raw_artist: str, raw_title: str) -> dict:
             timeout=12.0
         )
 
-        system_prompt = """You are an expert music metadata cleaning AI for the 'Trend Musiqa' music channel.
-Your task is to extract the pure, professional 'artist' (singer/performer) and 'title' (song name) from raw messy input strings.
+        system_prompt = """You are an expert music metadata recognition and cleaning AI with vast knowledge of Uzbek, Russian, Turkish, English and international music.
+Your task is to identify and return the REAL human singer/band and the exact song title from raw messy inputs.
 
-CRITICAL ARTIST RULES:
-1. Identify genuine human artists or band names (e.g., 'Shohruhxon', 'Billie Eilish', 'Eminem', 'Yulduz Usmonova', 'Doston Ergashev', 'Miyagi', 'Konsta', 'Jaloliddin Ahmadaliyev').
-2. If the raw artist/title contains ANY channel name, media brand, app name, bot name, or promo text (e.g., 'Spotify', 'Spotify Muzikala', 'UzMuz', 'Taronalar', 'Dilnavo', 'Mp3lar', 'Premier', 'Rizanova', 'Kanal', 'Music', 'Media', 'Online', 'TikTok', 'Instagram', 'YouTube', etc.):
-   - If a real singer exists in the text (e.g., 'Spotify - Bu Yurak - Doston Ergashev' or '@Kanal - Lola - Sevgi'), extract that real singer: artist='Doston Ergashev', title='Bu Yurak'.
-   - If NO real singer is mentioned (e.g., 'Bu Yurak' or 'Брату' or 'Spotify - Bu Yurak'), set artist to 'Trend Musiqa'!
-   - NEVER output 'Spotify', 'UzMuz', 'Unknown', or any other competitor channel/brand as the artist. If no real artist is known, ALWAYS use 'Trend Musiqa'.
+CRITICAL IDENTIFICATION & CLEANING RULES:
+1. ALWAYS identify the REAL SINGER / BAND who performs this song using your world music knowledge:
+   - 'Медуза' / 'Spotify - Медуза' -> artist: "Matrang", title: "Медуза"
+   - 'Bu Yurak' / 'Spotify - Bu Yurak' -> artist: "Doston Ergashev", title: "Bu Yurak"
+   - 'Talash' / '@UzMuz - Talash' -> artist: "Jaloliddin Ahmadaliyev", title: "Talash"
+   - 'Nastarin' / 'Muzikalar - Nastarin' -> artist: "Shahzoda", title: "Nastarin"
+   - 'Бродяга' / 'Dilnavo - Бродяга' -> artist: "Elman & Gafur", title: "Бродяга"
+   - 'Сердце Забрала' -> artist: "Janob Rasul", title: "Сердце Забрала"
+   - 'Wildflower' -> artist: "Billie Eilish", title: "Wildflower"
+   - 'Sen Hayatimin Anlami' -> artist: "Muhammadamin", title: "Sen Hayatimin Anlami"
 
-CRITICAL TITLE & CLUTTER RULES:
-3. Strip all usernames (@...), links (t.me/..., http://..., .uz, .ru, .com), hashtags (#...), and promo words ('skachat', 'yuklash', 'mp3', 'xit', 'hit', 'premyera', 'official', 'klip', 'audio').
-4. PRESERVE legitimate musical tags: (Remix), (DJ ... Remix), (Speed Up), (Slowed), (Cover), (feat. ...), (ft. ...).
-5. Always format in neat Title Case.
+2. STRIP ALL PROMOTIONAL CLUTTER & CHANNELS:
+   - Remove channel usernames (@...), links (t.me/..., http://..., .uz, .ru, .com), hashtags (#...), and promo words ('skachat', 'yuklash', 'mp3', 'xit', 'hit', 'premyera', 'official', 'klip', 'audio', 'bass', 'spotify', 'uzmuz', 'taronalar', 'dilnavo').
+   - NEVER output 'Spotify', 'UzMuz', 'Dilnavo', 'Trend Musiqa', or any channel/app name as the artist! The artist MUST be the real musical artist.
+   - If the song is completely anonymous and no real singer exists, leave artist as a clean genre or "Unknown".
+
+3. PRESERVE legitimate musical attributes: (Remix), (DJ ... Remix), (Speed Up), (Slowed), (Cover), (feat. ...), (ft. ...).
+4. Always format cleanly in Title Case.
 
 Safety Rules:
 - 'is_religious': true ONLY for explicit Quran recitations, nasheeds, salovats, or sermons.
 - 'is_political': true ONLY for political figure anthems, government propaganda, or warfare chants.
 - Otherwise, both must be false.
 
-Return STRICT JSON: {"artist": "Clean Artist or Trend Musiqa", "title": "Clean Title", "is_religious": false, "is_political": false, "reason": "..."}"""
+Return STRICT JSON: {"artist": "Real Artist", "title": "Clean Title", "is_religious": false, "is_political": false, "reason": "..."}"""
 
         user_prompt = f"""Raw Artist: "{raw_artist}"
 Raw Title: "{raw_title}" """
@@ -576,9 +583,9 @@ def write_clean_metadata(file_path: str, artist: str, title: str):
     if not file_path or not os.path.exists(file_path):
         return
 
-    # Spotify yoki bo'sh nomlarni Trend Musiqa ga almashtirish
-    if not artist or str(artist).lower().strip() in ["spotify", "unknown artist", "unknown", "noma'lum", "nomalum"]:
-        artist = "Trend Musiqa"
+    # Reklama yoki kanal nomlarini tozalash
+    if not artist or str(artist).lower().strip() in ["spotify", "uzmuz", "dilnavo", "taronalar", "noma'lum", "nomalum", "trend musiqa", "trend music"]:
+        artist = title or "Musiqa"
 
     thumb_path = "thumbnail.jpg"
     clean_temp = file_path.replace(".mp3", "_clean_tmp.mp3")

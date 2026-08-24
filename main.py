@@ -429,11 +429,11 @@ async def post_music(track_info: Dict):
                 emoji_tag = "🎧"
 
             # Clean final performer and title
-            final_artist = utils._clean_single_string(final_artist) or clean_artist or channel_name
+            final_artist = utils._clean_single_string(final_artist) or clean_artist or ""
             final_title = utils._clean_single_string(final_title) or clean_title or "Musiqa"
 
-            if final_artist.lower() in ["spotify", "unknown artist", "unknown", "noma'lum"]:
-                final_artist = channel_name
+            if final_artist.lower() in ["spotify", "uzmuz", "dilnavo", "taronalar", "trend musiqa", "trend music", "unknown artist", "unknown", "noma'lum"]:
+                final_artist = final_title
 
             # Rewrite ID3 tags in the MP3 file itself
             utils.write_clean_metadata(final_file_path, final_artist, final_title)
