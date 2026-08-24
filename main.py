@@ -174,20 +174,23 @@ async def send_music_to_channel(file_path: str, caption_text: str, artist: str, 
     if userbot.app and userbot.app.is_connected:
         try:
             logger.info(f"Musiqa Userbot orqali kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
-            await userbot.app.send_audio(
-                chat_id=config.MAIN_CHANNEL_ID,
-                audio=file_path,
-                caption=caption_text,
-                parse_mode=enums.ParseMode.HTML,
-                performer=artist,
-                title=title,
-                thumb=thumb_path,
-                duration=duration or 0
+            await asyncio.wait_for(
+                userbot.app.send_audio(
+                    chat_id=config.MAIN_CHANNEL_ID,
+                    audio=file_path,
+                    caption=caption_text,
+                    parse_mode=enums.ParseMode.HTML,
+                    performer=artist,
+                    title=title,
+                    thumb=thumb_path,
+                    duration=duration or 0
+                ),
+                timeout=20.0
             )
             logger.success("✅ Musiqa Userbot orqali kanalga muvaffaqiyatli yuklandi!")
             return True
         except Exception as ub_err:
-            logger.warning(f"Userbot orqali yuborishda xato: {ub_err}. Bot orqali yuborilmoqda...")
+            logger.warning(f"Userbot orqali yuborishda xato/timeout: {ub_err}. Bot orqali yuborilmoqda...")
 
     # 2. Aiogram Bot orqali zaxira yuborish
     logger.info(f"Musiqa Bot orqali kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
