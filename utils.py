@@ -890,10 +890,26 @@ def detect_music_highlight(file_path: str, raw_text: str = "") -> str:
 
 def get_audio_duration(file_path: str) -> int:
     """
-    MP3 faylning aniq davomiyligini soniyalarda hisoblaydi.
+    MP3 faylning aniq davomiyligini soniyalarda hisoblaydi (ffprobe / mutagen / pydub).
     """
     if not file_path or not os.path.exists(file_path):
         return 0
+    # 1. ffprobe bilan aniq olish
+    try:
+        cmd = [
+            "ffprobe", "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1",
+            file_path
+        ]
+        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=5)
+        if res.returncode == 0 and res.stdout.strip():
+            dur = int(float(res.stdout.strip()))
+            if dur > 0:
+                return dur
+    except Exception:
+        pass
+    # 2. mutagen bilan
     try:
         from mutagen.mp3 import MP3
         audio = MP3(file_path)
@@ -903,6 +919,7 @@ def get_audio_duration(file_path: str) -> int:
                 return dur
     except Exception:
         pass
+    # 3. pydub bilan
     try:
         from pydub import AudioSegment
         audio = AudioSegment.from_file(file_path)
