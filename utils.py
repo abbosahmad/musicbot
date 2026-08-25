@@ -603,15 +603,16 @@ def write_clean_metadata(file_path: str, artist: str, title: str):
         artist = title or "Musiqa"
 
     thumb_path = "thumbnail.jpg"
-    clean_temp = file_path.replace(".mp3", "_clean_tmp.mp3")
+    clean_temp = file_path.rsplit(".", 1)[0] + "_clean_tmp.mp3"
 
-    # 1. FFmpeg orqali eski metadata/rasmlarni tozalash va agar thumbnail.jpg bo'lsa uni cover art qilib biriktirish
+    # 1. FFmpeg orqali har qanday formatni haqiqiy MP3 (libmp3lame 192kbps) ga konvertatsiya qilish va muqovani biriktirish
     try:
         if os.path.exists(thumb_path):
             cmd = [
                 "ffmpeg", "-i", file_path, "-i", thumb_path,
                 "-map", "0:a", "-map", "1:v",
-                "-c:a", "copy", "-c:v", "mjpeg",
+                "-c:a", "libmp3lame", "-b:a", "192k", "-ar", "44100", "-ac", "2",
+                "-c:v", "mjpeg",
                 "-id3v2_version", "3",
                 "-metadata:s:v", "title=Album cover",
                 "-metadata:s:v", "comment=Cover (front)",
@@ -623,20 +624,20 @@ def write_clean_metadata(file_path: str, artist: str, title: str):
             cmd = [
                 "ffmpeg", "-i", file_path,
                 "-map_metadata", "-1", "-vn",
-                "-c:a", "copy",
+                "-c:a", "libmp3lame", "-b:a", "192k", "-ar", "44100", "-ac", "2",
                 "-y", clean_temp
             ]
 
-        res = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=15)
-        if res.returncode == 0 and os.path.exists(clean_temp) and os.path.getsize(clean_temp) > 0:
+        res = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30)
+        if res.returncode == 0 and os.path.exists(clean_temp) and os.path.getsize(clean_temp) > 1000:
             os.replace(clean_temp, file_path)
-            logger.info("✅ MP3 faylga yangi cover art FFmpeg orqali biriktirildi.")
+            logger.info("✅ Audio to'liq haqiqiy MP3 (libmp3lame 192k) ga konvertatsiya qilindi va yangi muqova biriktirildi.")
         else:
             if os.path.exists(clean_temp):
                 try: os.remove(clean_temp)
                 except: pass
     except Exception as ffmpeg_err:
-        logger.warning(f"FFmpeg metadata/cover yozishda xato: {ffmpeg_err}")
+        logger.warning(f"FFmpeg MP3 konvertatsiya va muqova yozishda xato: {ffmpeg_err}")
 
     # 2. Mutagen yordamida ID3 teglarni noldan tozalab, faqat toza Artist va Title yozish
     try:
@@ -952,6 +953,39 @@ def get_audio_duration(file_path: str) -> int:
     except Exception:
         pass
     return 0
+
+
+def ensure_mp3_format(file_path: str) -> str:
+    """
+    Har qanday audio faylni (m4a, ogg, aac, opus, flac, wav, corrupt mp3)
+    100% barcha qurilmalarda ochiladigan standart MP3 (libmp3lame, 192k, 44.1kHz stereo) ga aylantiradi.
+    """
+    if not file_path or not os.path.exists(file_path):
+        return file_path
+        
+    temp_mp3 = file_path.rsplit(".", 1)[0] + "_fmt.mp3"
+    try:
+        cmd = [
+            "ffmpeg", "-i", file_path,
+            "-vn",
+            "-c:a", "libmp3lame",
+            "-b:a", "192k",
+            "-ar", "44100",
+            "-ac", "2",
+            "-y", temp_mp3
+        ]
+        res = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30)
+        if res.returncode == 0 and os.path.exists(temp_mp3) and os.path.getsize(temp_mp3) > 1000:
+            os.replace(temp_mp3, file_path)
+            logger.info("✅ Audio to'liq universal MP3 (libmp3lame) formatiga konvertatsiya qilindi.")
+            return file_path
+        else:
+            if os.path.exists(temp_mp3):
+                try: os.remove(temp_mp3)
+                except: pass
+    except Exception as e:
+        logger.warning(f"ensure_mp3_format xatolik: {e}")
+    return file_path
 
 
 def choose_best_result_number(text: str, query: str = "") -> str:
