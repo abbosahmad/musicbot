@@ -748,17 +748,10 @@ async def _plan_daily_posts_internal(force: bool = False):
                     logger.error(f"Failed to move pre-downloaded file to scheduled directory: {rename_err}")
                 
                 track['direct_file_path'] = fpath
-                # AI bilan yana bir bor tozalab, faylning Artist/Title ni yangilab qo'yamiz
-                ai = await utils.get_clean_details_with_ai(
-                    track.get('artist', ''), track.get('title', '')
-                )
-                c_a = utils._clean_single_string(ai.get('artist') or track.get('artist', '')) or "Trend Musiqa"
-                c_t = utils._clean_single_string(ai.get('title') or track.get('title', '')) or "Musiqa"
-                if c_a.lower() in ["spotify", "unknown artist", "unknown", "noma'lum"]:
-                    c_a = "Trend Musiqa"
-                track['artist'] = c_a
+                c_t = utils._clean_single_string(track.get('title', '')) or "Musiqa"
+                track['artist'] = "Trend Music"
                 track['title'] = c_t
-                utils.write_clean_metadata(fpath, c_a, c_t)
+                utils.write_clean_metadata(fpath, "Trend Music", c_t)
 
         pre_ok = sum(1 for t in to_post if t.get('direct_file_path'))
         await log_to_channel(
