@@ -402,20 +402,17 @@ async def post_music(track_info: Dict):
             else:
                 emoji_tag = "🎧"
 
-            # Clean final performer and title
-            final_artist = utils._clean_single_string(final_artist) or clean_artist or ""
+            # Clean final title (Ijrochi har doim Trend Music)
             final_title = utils._clean_single_string(final_title) or clean_title or "Musiqa"
+            final_artist = "Trend Music"
 
-            if final_artist.lower() in ["spotify", "uzmuz", "dilnavo", "taronalar", "trend musiqa", "trend music", "unknown artist", "unknown", "noma'lum"]:
-                final_artist = final_title
-
-            # Rewrite ID3 tags in the MP3 file itself
+            # Rewrite ID3 tags in the MP3 file itself (Ijrochi: Trend Music, Qo'shiq: final_title)
             utils.write_clean_metadata(final_file_path, final_artist, final_title)
 
             # O'xshashlikni tekshirish
             if await database.is_similar_track_posted(final_artist, final_title):
-                logger.warning(f"O'xshash musiqa joylanganligi aniqlandi (Final): {final_artist} - {final_title}. Bekor qilinmoqda.")
-                await log_to_channel(f"⏭️ Joylanmadi (O'xshash): {final_artist} - {final_title}")
+                logger.warning(f"O'xshash musiqa joylanganligi aniqlandi (Final): {final_title}. Bekor qilinmoqda.")
+                await log_to_channel(f"⏭️ Joylanmadi (O'xshash): {final_title}")
                 if final_file_path and os.path.exists(final_file_path):
                     try: os.remove(final_file_path)
                     except: pass
@@ -427,8 +424,8 @@ async def post_music(track_info: Dict):
             # Avj vaqtini aniqlash
             highlight_time = utils.detect_music_highlight(final_file_path, raw_text=track_info.get('raw_caption', ''))
             
-            # Minimal caption: "00:47 Trend Musiqa | 🎧"
-            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name} | {emoji_tag}</a>"
+            # Caption: "01:43 Trend Music | 🎧"
+            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | 🎧"
 
             full_audio_duration = utils.get_audio_duration(final_file_path)
 
@@ -440,7 +437,7 @@ async def post_music(track_info: Dict):
                 duration=full_audio_duration
             )
             await database.mark_schedule_posted(track_id)
-            await log_to_channel(f"✅ Joylandi (Manba: {source_channel}): {final_artist} - {final_title}")
+            await log_to_channel(f"✅ Joylandi (Manba: {source_channel}): {final_title}")
 
         except Exception as e:
             logger.error(f"Post xatolik: {e}")

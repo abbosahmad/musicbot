@@ -29,7 +29,8 @@ async def _safe_download(message, file_name: str, retries: int = 3, delay: int =
                 
             path = await message.download(file_name=file_name)
             if path and os.path.exists(str(path)) and os.path.getsize(str(path)) > 0:
-                return str(path)
+                clean_mp3 = utils.ensure_mp3_format(str(path))
+                return clean_mp3
         except Exception as e:
             logger.warning(f"Download attempt {attempt}/{retries} failed for {file_name}: {e}")
             if attempt < retries:
