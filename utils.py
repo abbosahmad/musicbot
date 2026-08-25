@@ -639,9 +639,9 @@ def write_clean_metadata(file_path: str, artist: str, title: str):
     except Exception as ffmpeg_err:
         logger.warning(f"FFmpeg MP3 konvertatsiya va muqova yozishda xato: {ffmpeg_err}")
 
-    # 2. Mutagen yordamida ID3 teglarni noldan tozalab, faqat toza Artist va Title yozish
+    # 2. Mutagen yordamida ID3 teglarni noldan tozalab, rasmdagidek Trend Music va kanal havolasini yozish
     try:
-        from mutagen.id3 import ID3, APIC, TIT2, TPE1
+        from mutagen.id3 import ID3, APIC, TIT2, TPE1, TCOM
         from mutagen.mp3 import MP3
 
         # ID3 teglarni olish yoki yaratish
@@ -650,7 +650,7 @@ def write_clean_metadata(file_path: str, artist: str, title: str):
         except Exception:
             tags = ID3()
 
-        # Toza Artist va Title yozish
+        # Eski teglarni to'liq tozalash
         tags.delall('TIT2')
         tags.delall('TPE1')
         tags.delall('TALB')
@@ -658,11 +658,16 @@ def write_clean_metadata(file_path: str, artist: str, title: str):
         tags.delall('USLT')
         tags.delall('WXXX')
         tags.delall('TXXX')
-        tags.add(TIT2(encoding=3, text=[title]))
-        if artist and str(artist).strip().lower() != str(title).strip().lower() and str(artist).strip().lower() not in ["musiqa", "unknown", "noma'lum", "trend musiqa", "trend music"]:
-            tags.add(TPE1(encoding=3, text=[artist]))
+        tags.delall('TCOM')
+        
+        # 1. Qo'shiq nomi
+        tags.add(TIT2(encoding=3, text=[title or "Musiqa"]))
+        # 2. Ijrochi: Trend Music
+        tags.add(TPE1(encoding=3, text=["Trend Music"]))
+        # 3. Bastakor: https://t.me/trend_musiqauz
+        tags.add(TCOM(encoding=3, text=["https://t.me/trend_musiqauz"]))
 
-        # Agar thumbnail.jpg bo'lsa, APIC sifatida ham yozib qo'yamiz
+        # Agar thumbnail.jpg bo'lsa, APIC (muqova) sifatida ham yozib qo'yamiz
         if os.path.exists(thumb_path):
             try:
                 tags.delall('APIC')
@@ -680,7 +685,7 @@ def write_clean_metadata(file_path: str, artist: str, title: str):
                 logger.warning(f"Mutagen muqova rasmini yozishda xato: {pic_err}")
 
         tags.save(file_path, v2_version=3)
-        logger.success(f"🎵 MP3 ID3 teglari noldan yangilandi: Artist: '{artist}', Title: '{title}'")
+        logger.success(f"🎵 MP3 ID3 teglari noldan yangilandi: Ijrochi: 'Trend Music', Qo'shiq: '{title}', Bastakor: 'https://t.me/trend_musiqauz'")
 
     except Exception as e:
         logger.error(f"⚠️ Mutagen orqali teglarni yozishda xato: {e}")

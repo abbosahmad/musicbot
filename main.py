@@ -165,30 +165,26 @@ from pyrogram import enums
 async def send_music_to_channel(file_path: str, caption_text: str, artist: str, title: str, duration: Optional[int] = None):
     """
     Musiqani to'g'ridan-to'g'ri Asosiy Bot orqali kanalga yuklaydi.
-    Olov emojisi (🔥) ishlatiladi.
+    Ijrochi: Trend Music, Sarlavha: Qo'shiq nomi.
+    Caption: 01:43 Trend Music | 🎧
     """
     thumb_path = "thumbnail.jpg" if os.path.exists("thumbnail.jpg") else None
-    channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
-    channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
+    channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME) or "Trend Music"
+    channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK) or "https://t.me/trend_musiqauz"
     highlight_time = utils.detect_music_highlight(file_path)
 
-    # 1. Dublikat nomlarni tozalash
-    clean_a = artist.strip() if artist else ""
-    clean_t = title.strip() if title else ""
-    if clean_a.lower() == clean_t.lower() or not clean_a:
-        final_title = clean_t or "Musiqa"
-        final_performer = channel_name
-    else:
-        final_performer = clean_a
-        final_title = clean_t
+    # 1. Pleyerda ko'rinishi: Sarlavha: Qo'shiq nomi (masalan Медуза), Ijrochi: Trend Music
+    clean_t = title.strip() if title else "Musiqa"
+    final_title = clean_t
+    final_performer = channel_name
 
-    # 2. Toza ixcham caption (telefonda ham 1 qatorga sig'adi): "00:59 Trend Musiqa 🎧"
-    final_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> 🎧"
+    # 2. Toza caption (Rasm 2 dagi kabi): "01:43 Trend Music | 🎧"
+    final_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | 🎧"
 
     logger.info(f"Musiqa Bot orqali to'g'ridan-to'g'ri kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
     await bot.send_audio(
         config.MAIN_CHANNEL_ID,
-        audio=FSInputFile(file_path, filename=f"{final_title}.mp3" if not final_performer else f"{final_performer} - {final_title}.mp3"),
+        audio=FSInputFile(file_path, filename=f"{final_performer} - {final_title}.mp3"),
         caption=final_caption,
         performer=final_performer,
         title=final_title,
@@ -248,8 +244,8 @@ async def post_music(track_info: Dict):
             # Avj vaqtini aniqlash
             highlight_time = utils.detect_music_highlight(direct_file, raw_text=track_info.get('raw_caption', ''))
             
-            # Caption: "00:47 Trend Musiqa 🎧"
-            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> 🎧"
+            # Caption: "00:47 Trend Music | 🎧"
+            caption_text = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | 🎧"
             
             full_audio_duration = utils.get_audio_duration(direct_file)
                 

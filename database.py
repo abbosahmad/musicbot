@@ -56,8 +56,8 @@ DEFAULT_SETTINGS = {
     "clean_source_channels": "@Muzikalar_UzMuz", # Bot orqali yangilanadigan manba kanallar
     "direct_source_channels": "@Taronalar_qoshiqlar_mp3lar", # To'g'ridan-to'g'ri olinadigan manba kanallar
     "source_channels": "@Muzikalar_UzMuz, @Taronalar_qoshiqlar_mp3lar", # Eski sozlama bilan moslik
-    "main_channel_name": "Trend Musiqa", # Kanal nomi (post caption va ID3 da)
-    "main_channel_link": "https://t.me/trend_musiqaUZ", # Kanal havolasi (giperhavola uchun)
+    "main_channel_name": "Trend Music", # Kanal nomi (post caption va ID3 da)
+    "main_channel_link": "https://t.me/trend_musiqauz", # Kanal havolasi (giperhavola uchun)
     "custom_emoji_id": "5222472119295684375", # Premium Custom Emoji ID (masalan 🎧)
     "night_mode": "false",      # Tun rejimi (true/false)
     "night_start": "23",        # Tun boshlanishi

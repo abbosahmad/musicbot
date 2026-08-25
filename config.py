@@ -37,8 +37,8 @@ LOG_CHANNEL_ID = _parse_channel_id(os.getenv("LOG_CHANNEL_ID", "0"))
 MAIN_CHANNEL_ID = _parse_channel_id(os.getenv("MAIN_CHANNEL_ID", "0"))
 BACKUP_CHANNEL_ID = _parse_channel_id(os.getenv("BACKUP_CHANNEL_ID", "0"))
 
-MAIN_CHANNEL_LINK = os.getenv("MAIN_CHANNEL_LINK", "https://t.me/trend_musiqaUZ")
-MAIN_CHANNEL_NAME = os.getenv("MAIN_CHANNEL_NAME", "Trend Musiqa")
+MAIN_CHANNEL_LINK = os.getenv("MAIN_CHANNEL_LINK", "https://t.me/trend_musiqauz")
+MAIN_CHANNEL_NAME = os.getenv("MAIN_CHANNEL_NAME", "Trend Music")
 CUSTOM_EMOJI_ID = os.getenv("CUSTOM_EMOJI_ID", "5222472119295684375")
 
 # --- Userbot Sozlamalari ---
