@@ -487,12 +487,18 @@ async def _plan_daily_posts_internal(force: bool = False):
                     job.remove()
                     
             tashkent_tz = pytz.timezone("Asia/Tashkent")
+            now_uz = datetime.now(tashkent_tz)
             for entry in active_db_schedule:
                 run_time = entry['post_time']
                 if run_time.tzinfo is None:
                     run_time = tashkent_tz.localize(run_time)
                 else:
                     run_time = run_time.astimezone(tashkent_tz)
+                
+                # Agar post vaqti o'tib ketgan bo'lsa (restart sababli), darhol rejalashtiramiz!
+                if run_time <= now_uz:
+                    run_time = now_uz + timedelta(seconds=15)
+                    now_uz += timedelta(minutes=1)
                     
                 track_info = {
                     'track_id': entry['track_id'],
@@ -508,7 +514,7 @@ async def _plan_daily_posts_internal(force: bool = False):
                 
                 track_title = f"{entry['artist']} - {entry['title']}"
                 if entry.get('direct_file_path'):
-                    track_title += " (Admin)"
+                    track_title += " (Tayyor)"
                 
                 daily_plan.append({
                     'title': track_title,
@@ -594,199 +600,180 @@ async def _plan_daily_posts_internal(force: bool = False):
 
     logger.info(f"Topilgan unikal musiqalar: Clean={len(valid_clean)} ta (Score bo'yicha), Direct={len(valid_direct)} ta (Random)")
 
-    # --- 2-BOSQICH: 50% Clean (Score) / 50% Direct (Random) Taqsimoti ---
-    to_post = []
-    if valid_clean or valid_direct:
-        if valid_clean and valid_direct:
-            # 50% clean, 50% direct
-            clean_target = max(1, target_count // 2)
-            direct_target = max(1, target_count - clean_target)
-        elif valid_clean:
-            clean_target = target_count
-            direct_target = 0
-        else:
-            clean_target = 0
-            direct_target = target_count
+    # --- 2-BOSQICH: Nomzodlar navbati va Pre-download Zaxira Zanjiri ---
+    async def predownload_track(track: Dict) -> str | None:
+        """Rejalashtirilgan trek uchun fayl yuklab oladi va yo'lini qaytaradi."""
+        raw_a = track.get('artist', '')
+        raw_t = track.get('title', '')
+        try:
+            # AI bilan tozalash
+            ai = await utils.get_clean_details_with_ai(raw_a, raw_t)
+            c_artist = utils._clean_single_string(
+                ai.get('artist') or raw_a
+            ) or "Trend MUSIC"
+            c_title = utils._clean_single_string(
+                ai.get('title') or raw_t
+            ) or "Musiqa"
+            query = f"{c_artist} - {c_title}"
 
-        selected_clean = valid_clean[:clean_target]
-        selected_direct = valid_direct[:direct_target]
-
-        to_post.extend(selected_clean)
-        to_post.extend(selected_direct)
-
-        # Agar kvotaga yetmasa, ikkinchi toifadagi qolganlardan to'ldirish
-        if len(to_post) < target_count:
-            leftover_clean = valid_clean[clean_target:]
-            leftover_direct = valid_direct[direct_target:]
-            remaining_needed = target_count - len(to_post)
-            
-            # Agar direct qolgan bo'lsa, direct dan to'ldiramiz
-            if leftover_direct:
-                to_post.extend(leftover_direct[:remaining_needed])
-            # Agar hali ham yetmasa, clean qolganlaridan to'ldiramiz
-            if len(to_post) < target_count and leftover_clean:
-                still_needed = target_count - len(to_post)
-                to_post.extend(leftover_clean[:still_needed])
-
-        # Kun davomida turli xil ketma-ketlikda chiqishi uchun ro'yxatni aralashtiramiz
-        random.shuffle(to_post)
-        to_post = to_post[:target_count]
-        logger.info(f"Reja uchun tanlandi: {len(to_post)} ta (Clean: {sum(1 for t in to_post if t.get('mode')=='clean')}, Direct: {sum(1 for t in to_post if t.get('mode')=='direct')})")
-
-        tashkent_tz = pytz.timezone("Asia/Tashkent")
-        now = datetime.now(tashkent_tz)
-
-        # Tun rejimi sozlamalari
-        night_mode = (await database.get_setting("night_mode")) == "true"
-        night_start = int(await database.get_setting("night_start", "23"))
-        night_end = int(await database.get_setting("night_end", "7"))
-
-        # Bugungi reja tugash vaqti (23:59 gacha)
-        today_end_time = now.replace(hour=23, minute=59, second=0, microsecond=0)
-        
-        # Agar hozirgi vaqt bugungi night_start dan keyin bo'lsa yoki ungacha 1 soatdan kam qolgan bo'lsa
-        if night_mode and (now >= today_end_time - timedelta(hours=1) or now.hour < night_end):
-            if now.hour < night_end:
-                # Bugun 00:00 - night_end orasida bo'lsak, bugunning o'ziga faqat night_end dan boshlab rejalaymiz
-                start_date = now.date()
-            else:
-                # Kechki night_start dan keyin bo'lsak, ertangi kunga to'liq rejalaymiz
-                start_date = now.date() + timedelta(days=1)
-                
-            start_time = tashkent_tz.localize(datetime.combine(start_date, datetime.min.time())) + timedelta(hours=night_end)
-            end_time = tashkent_tz.localize(datetime.combine(start_date, datetime.min.time())) + timedelta(hours=23, minutes=59)
-        else:
-            # Bugungi kunning qolgan vaqtiga taqsimlaymiz
-            start_time = now + timedelta(minutes=10)
-            end_time = today_end_time
-
-        times = []
-        total_tracks = len(to_post)
-        
-        if total_tracks > 1:
-            total_duration = (end_time - start_time).total_seconds()
-            interval_seconds = total_duration / (total_tracks - 1)
-            interval_seconds = max(900.0, interval_seconds)  # Kamida 15 daqiqa
-            
-            for i in range(total_tracks):
-                post_time = start_time + timedelta(seconds=i * interval_seconds)
-                if post_time > end_time:
-                    post_time = end_time - timedelta(minutes=(total_tracks - 1 - i) * 15)
-                times.append(post_time)
-        elif total_tracks == 1:
-            times.append(start_time)
-
-        db_entries = []
-        # --- PRE-DOWNLOAD: Rejalash paytida musiqa fayllarini yuklab olish ---
-        await log_to_channel(
-            f"⏬ {len(to_post)} ta musiqa faylli yuklanmoqda (oldindan tayyorlanmoqda)..."
-        )
-
-        async def predownload_track(track: Dict) -> str | None:
-            """Rejalashtirilgan trek uchun fayl yuklab oladi va yo'lini qaytaradi."""
-            raw_a = track.get('artist', '')
-            raw_t = track.get('title', '')
-            try:
-                # AI bilan tozalash
-                ai = await utils.get_clean_details_with_ai(raw_a, raw_t)
-                c_artist = utils._clean_single_string(
-                    ai.get('artist') or raw_a
-                ) or "Trend MUSIC"
-                c_title = utils._clean_single_string(
-                    ai.get('title') or raw_t
-                ) or "Musiqa"
-                query = f"{c_artist} - {c_title}"
-
-                # Direct rejim bo'lsa, to'g'ridan-to'g'ri kanaldan yuklab olamiz
-                if track.get('mode') == 'direct':
-                    temp_f = os.path.join("downloads", f"track_{track.get('track_id', 'tmp')}_predl.mp3")
-                    fpath = await userbot.download_music(
-                        track.get('chat_id'), track.get('message_id'), temp_f
-                    )
-                    if fpath and os.path.exists(fpath):
-                        logger.info(f"✅ [Pre-dl Direct] Yuklandi: {query}")
-                        return fpath
-                    return None
-
-                # Clean rejim: 1. Target bot orqali matnli qidiruv
-                fpath = await userbot.search_text_via_target_bot(query)
-                if fpath and os.path.exists(fpath):
-                    logger.info(f"✅ [Pre-dl] Topildi (target bot): {query}")
-                    return fpath
-
-                # 2. Forward orqali zaxira
-                fpath = await userbot.search_via_target_bot(
-                    track.get('chat_id'), track.get('message_id')
+            # Direct rejim bo'lsa, to'g'ridan-to'g'ri kanaldan yuklab olamiz
+            if track.get('mode') == 'direct':
+                temp_f = os.path.join("downloads", f"track_{track.get('track_id', 'tmp')}_predl.mp3")
+                fpath = await userbot.download_music(
+                    track.get('chat_id'), track.get('message_id'), temp_f
                 )
                 if fpath and os.path.exists(fpath):
-                    logger.info(f"✅ [Pre-dl] Topildi (forward): {query}")
+                    logger.info(f"✅ [Pre-dl Direct] Yuklandi: {query}")
                     return fpath
-
-                # 3. YouTube fallback
-                fpath = await utils.get_youtube_with_api(c_artist, c_title)
-                if fpath and os.path.exists(fpath):
-                    logger.info(f"✅ [Pre-dl] Topildi (YouTube): {query}")
-                    return fpath
-
-                logger.warning(f"⚠️ [Pre-dl] Topilmadi: {query}")
-                return None
-            except Exception as e:
-                logger.error(f"❌ [Pre-dl] Xato ({raw_a} - {raw_t}): {e}")
                 return None
 
-        # Har bir trek uchun yuklash (ketma-ket, API limitlarini hisobga olib)
-        os.makedirs("downloads/scheduled", exist_ok=True)
-        for track in to_post:
-            fpath = await predownload_track(track)
-            if fpath:
-                # Move to downloads/scheduled to avoid startup deletions
-                scheduled_path = os.path.join("downloads/scheduled", os.path.basename(fpath))
-                try:
-                    os.rename(fpath, scheduled_path)
-                    fpath = scheduled_path
-                except Exception as rename_err:
-                    logger.error(f"Failed to move pre-downloaded file to scheduled directory: {rename_err}")
-                
-                track['direct_file_path'] = fpath
-                c_t = utils._clean_single_string(track.get('title', '')) or "Musiqa"
-                track['artist'] = "Trend Music"
-                track['title'] = c_t
-                utils.write_clean_metadata(fpath, "Trend Music", c_t)
+            # Clean rejim: 1. Target bot orqali matnli qidiruv
+            fpath = await userbot.search_text_via_target_bot(query)
+            if fpath and os.path.exists(fpath):
+                logger.info(f"✅ [Pre-dl] Topildi (target bot): {query}")
+                return fpath
 
-        pre_ok = sum(1 for t in to_post if t.get('direct_file_path'))
-        await log_to_channel(
-            f"📦 Oldindan yuklash tugadi: {pre_ok}/{len(to_post)} ta musiqa tayyor."
-        )
-        # -----------------------------------------------------------------------
+            # 2. Forward orqali zaxira
+            fpath = await userbot.search_via_target_bot(
+                track.get('chat_id'), track.get('message_id')
+            )
+            if fpath and os.path.exists(fpath):
+                logger.info(f"✅ [Pre-dl] Topildi (forward): {query}")
+                return fpath
 
-        for i, track in enumerate(to_post):
-            run_time = times[i]
-            scheduler.add_job(post_music, 'date', run_date=run_time, args=[track])
+            # 3. YouTube fallback
+            fpath = await utils.get_youtube_with_api(c_artist, c_title)
+            if fpath and os.path.exists(fpath):
+                logger.info(f"✅ [Pre-dl] Topildi (YouTube): {query}")
+                return fpath
 
-            track_title = f"{track.get('artist')} - {track.get('title')}"
-            views_count = track.get('views', 0)
-            reactions_count = track.get('reactions', 0)
-            score = round(utils.calculate_track_score(track), 1)
-            daily_plan.append({
-                'title': f"{track_title} (👁 {views_count}, ❤️ {reactions_count}, 📊 {score})",
-                'time': run_time.strftime('%H:%M')
-            })
+            logger.warning(f"⚠️ [Pre-dl] Topilmadi: {query}")
+            return None
+        except Exception as e:
+            logger.error(f"❌ [Pre-dl] Xato ({raw_a} - {raw_t}): {e}")
+            return None
 
-            db_entries.append({
-                'post_time': run_time,
-                'track_id': track['track_id'],
-                'artist': track.get('artist'),
-                'title': track.get('title'),
-                'chat_id': track.get('chat_id'),
-                'message_id': track.get('message_id'),
-                'direct_file_path': track.get('direct_file_path'),
-                'is_posted': False
-            })
+    # 50/50 mutanosiblikda navbat shakllantirish
+    candidates_queue = []
+    max_c = max(len(valid_clean), len(valid_direct))
+    for idx in range(max_c):
+        if idx < len(valid_clean):
+            candidates_queue.append(valid_clean[idx])
+        if idx < len(valid_direct):
+            candidates_queue.append(valid_direct[idx])
 
-        await database.save_daily_schedule(db_entries)
-        await log_to_channel(f"✅ {len(to_post)} ta eng ommabop musiqa rejalashtirildi.")
-    else:
+    if not candidates_queue:
         await log_to_channel("❌ So'nggi 168 soat ichida yangi musiqa topilmadi.")
+        return
+
+    logger.info(f"Pre-download navbati uchun jami {len(candidates_queue)} ta nomzod tayyorlandi (Maqsad: {target_count} ta).")
+
+    os.makedirs("downloads/scheduled", exist_ok=True)
+    ready_tracks = []
+    await log_to_channel(f"⏬ Musiqalar oldindan yuklanmoqda (Maqsad: {target_count} ta)...")
+
+    for cand in candidates_queue:
+        if len(ready_tracks) >= target_count:
+            break
+
+        fpath = await predownload_track(cand)
+        if fpath and os.path.exists(fpath) and os.path.getsize(fpath) > 1000:
+            scheduled_path = os.path.join("downloads/scheduled", os.path.basename(fpath))
+            try:
+                if os.path.abspath(fpath) != os.path.abspath(scheduled_path):
+                    os.replace(fpath, scheduled_path)
+                fpath = scheduled_path
+            except Exception as rename_err:
+                logger.error(f"Faylni ko'chirishda xatolik: {rename_err}")
+
+            cand['direct_file_path'] = fpath
+            c_t = utils._clean_single_string(cand.get('title', '')) or "Musiqa"
+            cand['artist'] = "Trend Music"
+            cand['title'] = c_t
+            utils.write_clean_metadata(fpath, "Trend Music", c_t)
+            ready_tracks.append(cand)
+            logger.info(f"✅ Rejaga olindi ({len(ready_tracks)}/{target_count}): {c_t}")
+        else:
+            logger.warning(f"⚠️ Pre-dl muvaffaqiyatsiz bo'ldi ({cand.get('title')}), zaxiradagi keyingi musiqa sinab ko'rilmoqda...")
+
+    if not ready_tracks:
+        await log_to_channel("❌ Yangi musiqalarni yuklab bo'lmadi.")
+        return
+
+    to_post = ready_tracks
+    random.shuffle(to_post)
+    logger.info(f"Reja uchun 100% tayyor musiqalar soni: {len(to_post)} ta (Clean: {sum(1 for t in to_post if t.get('mode')=='clean')}, Direct: {sum(1 for t in to_post if t.get('mode')=='direct')})")
+
+    tashkent_tz = pytz.timezone("Asia/Tashkent")
+    now = datetime.now(tashkent_tz)
+
+    # Tun rejimi sozlamalari
+    night_mode = (await database.get_setting("night_mode")) == "true"
+    night_start = int(await database.get_setting("night_start", "23"))
+    night_end = int(await database.get_setting("night_end", "7"))
+
+    # Bugungi reja tugash vaqti (23:59 gacha)
+    today_end_time = now.replace(hour=23, minute=59, second=0, microsecond=0)
+    
+    # Agar hozirgi vaqt bugungi night_start dan keyin bo'lsa yoki ungacha 1 soatdan kam qolgan bo'lsa
+    if night_mode and (now >= today_end_time - timedelta(hours=1) or now.hour < night_end):
+        if now.hour < night_end:
+            # Bugun 00:00 - night_end orasida bo'lsak, bugunning o'ziga faqat night_end dan boshlab rejalaymiz
+            start_date = now.date()
+        else:
+            # Kechki night_start dan keyin bo'lsak, ertangi kunga to'liq rejalaymiz
+            start_date = now.date() + timedelta(days=1)
+            
+        start_time = tashkent_tz.localize(datetime.combine(start_date, datetime.min.time())) + timedelta(hours=night_end)
+        end_time = tashkent_tz.localize(datetime.combine(start_date, datetime.min.time())) + timedelta(hours=23, minutes=59)
+    else:
+        # Bugungi kunning qolgan vaqtiga taqsimlaymiz
+        start_time = now + timedelta(minutes=10)
+        end_time = today_end_time
+
+    times = []
+    total_tracks = len(to_post)
+    
+    if total_tracks > 1:
+        total_duration = (end_time - start_time).total_seconds()
+        interval_seconds = total_duration / (total_tracks - 1)
+        interval_seconds = max(900.0, interval_seconds)  # Kamida 15 daqiqa
+        
+        for i in range(total_tracks):
+            post_time = start_time + timedelta(seconds=i * interval_seconds)
+            if post_time > end_time:
+                post_time = end_time - timedelta(minutes=(total_tracks - 1 - i) * 15)
+            times.append(post_time)
+    elif total_tracks == 1:
+        times.append(start_time)
+
+    db_entries = []
+    for i, track in enumerate(to_post):
+        run_time = times[i]
+        scheduler.add_job(post_music, 'date', run_date=run_time, args=[track])
+
+        track_title = f"{track.get('artist')} - {track.get('title')}"
+        views_count = track.get('views', 0)
+        reactions_count = track.get('reactions', 0)
+        score = round(utils.calculate_track_score(track), 1)
+        daily_plan.append({
+            'title': f"{track_title} (👁 {views_count}, ❤️ {reactions_count}, 📊 {score})",
+            'time': run_time.strftime('%H:%M')
+        })
+
+        db_entries.append({
+            'post_time': run_time,
+            'track_id': track['track_id'],
+            'artist': track.get('artist'),
+            'title': track.get('title'),
+            'chat_id': track.get('chat_id'),
+            'message_id': track.get('message_id'),
+            'direct_file_path': track.get('direct_file_path'),
+            'is_posted': False
+        })
+
+    await database.save_daily_schedule(db_entries)
+    await log_to_channel(f"✅ {len(to_post)}/{target_count} ta musiqa 100% yuklanib, muvaffaqiyatli rejalashtirildi.")
 
 
 async def trigger_manual_post_from_action():

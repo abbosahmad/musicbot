@@ -131,7 +131,10 @@ async def setup_database():
             # Xotiraga posted_tracks ni yuklash
             rows = await conn.fetch("SELECT track_id, artist, title FROM posted_tracks")
             posted_track_ids = {row['track_id'] for row in rows}
-            posted_track_hashes = {normalize_string(f"{row['artist']} {row['title']}") for row in rows if row['artist'] or row['title']}
+            posted_track_hashes = set()
+            for row in rows:
+                for k in get_track_match_keys(row['artist'], row['title']):
+                    posted_track_hashes.add(k)
             
         logger.success(f"Ma'lumotlar bazasi PostgreSQL sozlandi. {len(posted_track_ids)} ta trek xotirada, {len(posted_track_hashes)} ta unikal nomlar keshda.")
         
@@ -139,32 +142,52 @@ async def setup_database():
         logger.error(f"PostgreSQL bazasini sozlashda xatolik: {e}")
         raise e
 
+def get_track_match_keys(artist: str, title: str) -> list[str]:
+    """Qo'shiqni unikal solishtirish uchun toza kalitlar (Trend Music prefiksisiz)."""
+    keys = []
+    clean_a = (artist or "").strip().lower()
+    clean_t = (title or "").strip()
+    norm_t = normalize_string(clean_t)
+    if norm_t:
+        keys.append(norm_t)
+    
+    # Agar haqiqiy ijrochi bo'lsa (kanal nomi emas), ijrochi + sarlavhani ham qo'shamiz
+    if clean_a and clean_a not in ["trend music", "trend musiqa", "spotify", "uzmuz", "dilnavo", "musiqa", "unknown", "noma'lum"]:
+        norm_at = normalize_string(f"{clean_a} {clean_t}")
+        if norm_at and norm_at != norm_t:
+            keys.append(norm_at)
+    return keys
+
+
 async def is_track_posted(track_id: str) -> bool:
     return str(track_id) in posted_track_ids
 
+
 async def is_similar_track_posted(artist: str, title: str) -> bool:
-    norm_candidate = normalize_string(f"{artist} {title}")
-    if not norm_candidate:
+    candidates = get_track_match_keys(artist, title)
+    if not candidates:
         return False
     
     # 1. Tezkor aniq moslikni tekshirish
-    if norm_candidate in posted_track_hashes:
-        return True
-        
-    # 2. Noaniq (Fuzzy) qidiruv - imlo xatolari va kichik farqlarni aniqlash (85% o'xshashlik)
-    from difflib import SequenceMatcher
-    for posted_norm in posted_track_hashes:
-        # Matematik filtr: agar uzunliklar farqi 15% dan ko'p bo'lsa, o'xshashlik 85% dan past bo'ladi
-        max_len = max(len(norm_candidate), len(posted_norm))
-        if max_len > 0 and abs(len(norm_candidate) - len(posted_norm)) > max_len * 0.15:
-            continue
-            
-        ratio = SequenceMatcher(None, norm_candidate, posted_norm).ratio()
-        if ratio >= 0.85:
-            logger.info(f"⚠️ O'xshash musiqa aniqlandi (O'xshashlik: {ratio*100:.1f}%): '{artist} - {title}'")
+    for cand in candidates:
+        if cand in posted_track_hashes:
             return True
+        
+    # 2. Noaniq (Fuzzy) qidiruv - imlo xatolarini aniqlash (88% o'xshashlik)
+    from difflib import SequenceMatcher
+    for cand in candidates:
+        for posted_norm in posted_track_hashes:
+            max_len = max(len(cand), len(posted_norm))
+            if max_len > 0 and abs(len(cand) - len(posted_norm)) > max_len * 0.15:
+                continue
+                
+            ratio = SequenceMatcher(None, cand, posted_norm).ratio()
+            if ratio >= 0.88:
+                logger.info(f"⚠️ O'xshash musiqa aniqlandi (O'xshashlik: {ratio*100:.1f}%): '{title}' vs '{posted_norm}'")
+                return True
             
     return False
+
 
 async def add_track_to_db(track_id: str, artist: str, title: str):
     global db_pool, posted_track_ids, posted_track_hashes
@@ -178,9 +201,8 @@ async def add_track_to_db(track_id: str, artist: str, title: str):
                 str(track_id), artist, title
             )
         posted_track_ids.add(str(track_id))
-        norm = normalize_string(f"{artist} {title}")
-        if norm:
-            posted_track_hashes.add(norm)
+        for k in get_track_match_keys(artist, title):
+            posted_track_hashes.add(k)
         logger.info(f"Yangi trek bazaga qo'shildi: {track_id} | {artist} - {title}")
     except Exception as e:
         logger.error(f"Trekni bazaga qo'shishda xatolik: {e}")
@@ -251,7 +273,7 @@ async def get_active_schedule() -> List[Dict[str, Any]]:
             rows = await conn.fetch("""
                 SELECT post_time, track_id, artist, title, chat_id, message_id, direct_file_path, is_posted
                 FROM daily_schedule 
-                WHERE post_time >= NOW() - INTERVAL '15 minutes' AND is_posted = FALSE
+                WHERE post_time >= NOW() - INTERVAL '4 hours' AND is_posted = FALSE
                 ORDER BY post_time ASC
             """)
             return [dict(row) for row in rows]
@@ -313,17 +335,18 @@ async def is_similar_track_scheduled(artist: str, title: str) -> bool:
     global db_pool
     if not db_pool:
         return False
-    norm_candidate = normalize_string(f"{artist} {title}")
-    if not norm_candidate:
+    candidates = get_track_match_keys(artist, title)
+    if not candidates:
         return False
     try:
         async with db_pool.acquire() as conn:
             # Faqat faol navbatda turgan musiqalar bilan solishtiramiz
             rows = await conn.fetch("SELECT artist, title FROM daily_schedule WHERE is_posted = FALSE")
             for row in rows:
-                norm_scheduled = normalize_string(f"{row['artist']} {row['title']}")
-                if norm_scheduled == norm_candidate:
-                    return True
+                row_keys = get_track_match_keys(row['artist'], row['title'])
+                for cand in candidates:
+                    if cand in row_keys:
+                        return True
             return False
     except Exception as e:
         logger.error(f"Error checking similar active scheduled track: {e}")
