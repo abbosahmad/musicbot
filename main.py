@@ -66,13 +66,14 @@ def get_admin_keyboard() -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(text="📋 Bugungi Reja (Jadval)", callback_data="admin_view_plan"),
-            InlineKeyboardButton(text="📡 Manba Kanallar", callback_data="admin_channels")
+            InlineKeyboardButton(text="📦 Zaxirani Yangilash", callback_data="admin_sync_backup")
         ],
         [
-            InlineKeyboardButton(text="⚙️ Sozlamalar", callback_data="admin_settings"),
-            InlineKeyboardButton(text="🌐 Web Panel", url="https://abboscoder.uz/music")
+            InlineKeyboardButton(text="📡 Manba Kanallar", callback_data="admin_channels"),
+            InlineKeyboardButton(text="⚙️ Sozlamalar", callback_data="admin_settings")
         ],
         [
+            InlineKeyboardButton(text="🌐 Web Panel", url="https://abboscoder.uz/music"),
             InlineKeyboardButton(text="❌ Yopish", callback_data="admin_close")
         ]
     ])
@@ -131,6 +132,8 @@ def get_settings_keyboard(settings: Dict) -> InlineKeyboardMarkup:
 async def get_admin_panel_text() -> str:
     settings = await database.get_all_settings()
     total_tracks = len(database.posted_track_ids)
+    backup_archived_count = len(database.backup_archived_track_ids)
+    backup_ch = settings.get('backup_channel_id', '0')
     
     clean_ch = settings.get('clean_source_channels', '') or '(Kiritilmagan)'
     direct_ch = settings.get('direct_source_channels', '') or '(Kiritilmagan)'
@@ -146,7 +149,8 @@ async def get_admin_panel_text() -> str:
         "🎛 <b>MusiqaBot Boshqaruv Markazi</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n\n"
         f"📊 <b>Statistika:</b>\n"
-        f"├ 🎵 Bazadagi jami musiqalar: <b>{total_tracks} ta</b>\n"
+        f"├ 🎵 Asosiy kanaldagi musiqalar: <b>{total_tracks} ta</b>\n"
+        f"├ 📦 Zaxira kanaldagi musiqalar: <b>{backup_archived_count} ta</b> (ID: <code>{backup_ch}</code>)\n"
         f"├ 📋 Navbatdagi musiqalar: <b>{len(active_sched)} ta</b>\n"
         f"├ 🤖 Qidiruv boti: <b>{settings.get('target_search_bot', '@Zoryuklabot')}</b>\n"
         f"└ 🌙 Tun rejimi: <b>{night_status}</b>\n\n"
@@ -743,7 +747,7 @@ async def _plan_daily_posts_internal(force: bool = False):
 
     # Rejalashtirilgan yangi musiqalarni qo'shishdan oldin eski music joblarni tozalaymiz
     for job in scheduler.get_jobs():
-        if job.id not in ['daily_planning', 'settings_checker']:
+        if job.id not in ['daily_planning', 'settings_checker', 'disk_cleanup', 'daily_backup_sync']:
             job.remove()
 
     db_entries = []
@@ -798,6 +802,43 @@ async def trigger_manual_post_from_action():
         logger.error(f"Tezkor joylashda xatolik: {e}")
 
 
+async def run_backup_sync_task(chat_id: Optional[int] = None):
+    """
+    Barcha manba kanallardagi yangi musiqalarni yopiq baza zaxira kanaliga nusxalaydi.
+    Asosiy kanalga joylangan musiqalar va diniy/siyosiy treklarni qat'iy chetlab o'tadi.
+    """
+    try:
+        backup_channel = await database.get_setting("backup_channel_id", "0")
+        if not backup_channel or str(backup_channel).strip() in ["0", ""]:
+            msg = "⚠️ Zaxira kanal ID sozlanmagan (backup_channel_id). Sinxronizatsiya o'tkazib yuborildi."
+            logger.warning(msg)
+            if chat_id:
+                await bot.send_message(chat_id, msg)
+            return
+
+        await log_to_channel("📦 Zaxira kanalga yangi musiqalarni saqlash boshlandi...")
+        if chat_id:
+            await bot.send_message(chat_id, "⏳ Zaxira kanalga musiqalarni sinxronlash boshlandi...")
+
+        res = await userbot.sync_source_music_to_backup(hours=72)
+        
+        report = (
+            f"📦 <b>Zaxira kanal yangilandi!</b>\n"
+            f"├ Saqlangan yangi musiqalar: <b>{res.get('archived', 0)}</b> ta\n"
+            f"├ Asosiy kanaldagisi tashlab ketildi: <b>{res.get('skipped_main', 0)}</b> ta\n"
+            f"├ Allaqachon zaxirada bor: <b>{res.get('skipped_duplicate', 0)}</b> ta\n"
+            f"└ Taqiqlangan (diniy/siyosiy/axlat): <b>{res.get('skipped_forbidden', 0)}</b> ta"
+        )
+        logger.info(report.replace("<b>", "").replace("</b>", ""))
+        await log_to_channel(report)
+        if chat_id:
+            await bot.send_message(chat_id, report)
+    except Exception as e:
+        logger.error(f"Zaxira kanal sinxronlashda xatolik: {e}")
+        if chat_id:
+            await bot.send_message(chat_id, f"❌ Xatolik yuz berdi: {e}")
+
+
 async def check_schedule_update():
     global LAST_SETTINGS
     try:
@@ -814,6 +855,8 @@ async def check_schedule_update():
                 asyncio.create_task(plan_daily_posts(force=True))
             elif action == "sync_schedule":
                 asyncio.create_task(plan_daily_posts(force=False))
+            elif action == "sync_backup":
+                asyncio.create_task(run_backup_sync_task())
         
         # 2. Sozlamalar o'zgarganligini tekshirish
         changed = False
@@ -821,7 +864,7 @@ async def check_schedule_update():
             "planning_hour", "daily_post_count", "night_mode", "night_start",
             "night_end", "source_channels", "clean_source_channels",
             "direct_source_channels", "target_search_bot", "blacklist_keywords",
-            "force_sub_enabled"
+            "force_sub_enabled", "backup_channel_id"
         ]
         for key in keys_to_check:
             if settings.get(key) != LAST_SETTINGS.get(key):
@@ -858,7 +901,7 @@ async def check_schedule_update():
             
             # Clear all current post_music jobs
             for job in scheduler.get_jobs():
-                if job.id not in ['daily_planning', 'settings_checker']:
+                if job.id not in ['daily_planning', 'settings_checker', 'disk_cleanup', 'daily_backup_sync']:
                     job.remove()
             
             # Instantly replan with the new settings
@@ -1018,6 +1061,10 @@ async def admin_callback_handler(query: CallbackQuery, state: FSMContext):
             await query.message.edit_text(text, reply_markup=get_admin_keyboard())
         except Exception:
             pass
+
+    elif data == "admin_sync_backup":
+        await query.answer("📦 Zaxira kanalga sinxronlash boshlandi!", show_alert=True)
+        asyncio.create_task(run_backup_sync_task(chat_id=query.message.chat.id))
             
     elif data == "admin_view_plan":
         active_sched = await database.get_active_schedule()
@@ -1371,6 +1418,15 @@ async def force_replan_command(message: types.Message):
     except Exception as e:
         logger.error(f"Majburiy rejalashtirishda xato: {e}")
         await message.answer("❌ Xatolik yuz berdi. Tafsilotlar tizim loglarida.")
+
+
+@dp.message(Command("sync_backup", "zaxira"))
+async def sync_backup_command(message: types.Message):
+    logger.info(f"Incoming /sync_backup command from User ID: {message.from_user.id} | Username: @{message.from_user.username}")
+    if not is_admin(message.from_user.id):
+        return
+    await message.answer("⏳ Manba kanallardagi barcha musiqalar zaxira kanalga sinxronlanmoqda...")
+    asyncio.create_task(run_backup_sync_task(chat_id=message.chat.id))
 
 
 # --- Musiqa Qidirish (VKM / Shazam Bot mantiqi) ---
@@ -2171,6 +2227,14 @@ async def setup_scheduler():
         hour=4,
         minute=30,
         id='disk_cleanup'
+    )
+
+    scheduler.add_job(
+        run_backup_sync_task,
+        'cron',
+        hour=4,
+        minute=0,
+        id='daily_backup_sync'
     )
 
     if not scheduler.running:

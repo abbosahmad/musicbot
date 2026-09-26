@@ -458,3 +458,126 @@ class UserBot:
         except Exception as e:
             logger.error(f"Matn bo'yicha qidiruvda xatolik: {e}")
             return None
+
+    async def sync_source_music_to_backup(self, hours: int = 48) -> dict:
+        """
+        Barcha manba kanallardagi yangi musiqalarni yopiq zaxira (baza) kanalga nusxalaydi.
+        Qat'iy qoidalar:
+        1. Diniy va siyosiy so'zlar bo'lmasligi kerak (utils.check_forbidden_keywords va BLACKLIST_KEYWORDS).
+        2. Asosiy Trend Music kanaliga chiqarilgan musiqalar tashlanmaydi (database.is_track_posted / is_similar_track_posted).
+        3. Zaxira kanalga allaqachon tashlangan musiqalar qayta tashlanmaydi (database.is_track_in_backup_archive).
+        """
+        if not self.app or not self.app.is_connected:
+            logger.warning("Userbot ulanmagan, zaxiraga nusxalash bekor qilindi.")
+            return {"archived": 0, "status": "userbot_not_connected"}
+
+        backup_channel_setting = await database.get_setting("backup_channel_id", str(getattr(config, "BACKUP_CHANNEL_ID", "0")))
+        if not backup_channel_setting or str(backup_channel_setting).strip() in ["0", ""]:
+            logger.info("ℹ️ Zaxira kanal ID (backup_channel_id) sozlanmagan, sinxronizatsiya o'tkazib yuborildi.")
+            return {"archived": 0, "status": "no_backup_channel"}
+
+        try:
+            backup_channel_id = int(backup_channel_setting)
+        except ValueError:
+            backup_channel_id = str(backup_channel_setting).strip()
+
+        try:
+            await self.app.get_chat(backup_channel_id)
+        except Exception as e:
+            logger.error(f"Zaxira kanalga kirishda xatolik ({backup_channel_id}): {e}")
+            return {"archived": 0, "status": f"channel_error: {e}"}
+
+        source_channels = getattr(config, "SOURCE_CHANNELS", [])
+        if not source_channels:
+            return {"archived": 0, "status": "no_source_channels"}
+
+        time_limit = datetime.utcnow() - timedelta(hours=hours)
+        archived_count = 0
+        skipped_main_posted = 0
+        skipped_forbidden = 0
+        skipped_already_archived = 0
+
+        logger.info(f"🔄 Zaxira kanaliga sinxronizatsiya boshlandi (So'nggi {hours} soat, Kanallar: {len(source_channels)})...")
+
+        for channel in source_channels:
+            try:
+                chat = await self.app.get_chat(channel)
+                async for message in self.app.get_chat_history(chat.id, limit=60):
+                    if not message.date or message.date < time_limit:
+                        break
+
+                    if not message.audio:
+                        continue
+
+                    audio = message.audio
+                    track_id = audio.file_unique_id
+                    raw_artist = audio.performer or ""
+                    raw_title = audio.title or audio.file_name or ""
+                    raw_caption = message.caption or ""
+
+                    # 1. Axlat sarlavha tekshiruvi
+                    if not utils.is_valid_music_title(raw_title):
+                        continue
+
+                    # 2. Qora ro'yxat va diniy/siyosiy qat'iy tekshiruv
+                    text_to_check = f"{raw_caption} {raw_artist} {raw_title}".lower()
+                    if any(bw.lower() in text_to_check for bw in getattr(config, "BLACKLIST_KEYWORDS", [])):
+                        skipped_forbidden += 1
+                        continue
+
+                    if utils.check_forbidden_keywords(raw_artist, raw_title):
+                        skipped_forbidden += 1
+                        continue
+
+                    # Sarlavhani tozalash
+                    clean_artist, clean_title = utils.extract_clean_artist_and_title(raw_artist, raw_title, raw_caption)
+                    if utils.check_forbidden_keywords(clean_artist, clean_title):
+                        skipped_forbidden += 1
+                        continue
+
+                    pure_title = utils.clean_music_title_only(clean_title or raw_title, clean_artist or raw_artist)
+                    if not utils.is_valid_music_title(pure_title):
+                        continue
+
+                    # 3. Asosiy kanalga allaqachon tashlangan bo'lsa, O'TKAZIB YUBORAMIZ
+                    if await database.is_track_posted(track_id) or await database.is_similar_track_posted(clean_artist or raw_artist, pure_title):
+                        skipped_main_posted += 1
+                        continue
+
+                    # 4. Zaxira kanalning o'ziga allaqachon tashlangan bo'lsa, O'TKAZIB YUBORAMIZ
+                    if await database.is_track_in_backup_archive(track_id) or await database.is_similar_track_in_backup_archive(clean_artist or raw_artist, pure_title):
+                        skipped_already_archived += 1
+                        continue
+
+                    # 5. Zaxira kanalga xavfsiz nusxalash (copy_message)
+                    try:
+                        copied_msg = await self.app.copy_message(
+                            chat_id=backup_channel_id,
+                            from_chat_id=chat.id,
+                            message_id=message.id
+                        )
+                        if copied_msg:
+                            await database.add_track_to_backup_archive(
+                                track_id=track_id,
+                                artist=clean_artist or raw_artist or "Trend Music",
+                                title=pure_title,
+                                source_channel=channel,
+                                message_id=copied_msg.id
+                            )
+                            archived_count += 1
+                            logger.info(f"💾 Zaxiraga olindi: {clean_artist or raw_artist} - {pure_title} (Manba: {channel})")
+                            await asyncio.sleep(1.5)  # Telegram flood limit prevention
+                    except Exception as copy_err:
+                        logger.warning(f"Zaxiraga nusxalashda xatolik ({raw_title}): {copy_err}")
+
+            except Exception as ch_err:
+                logger.warning(f"Kanalni zaxiralashda xatolik ({channel}): {ch_err}")
+
+        logger.info(f"✅ Zaxiralash yakunlandi: +{archived_count} ta yangi musiqa arxivlandi (Asosiy kanaldagilar: {skipped_main_posted}, Taqiqlangan: {skipped_forbidden}, Avvaldan bor: {skipped_already_archived}).")
+        return {
+            "archived": archived_count,
+            "skipped_main": skipped_main_posted,
+            "skipped_forbidden": skipped_forbidden,
+            "skipped_existing": skipped_already_archived,
+            "status": "success"
+        }

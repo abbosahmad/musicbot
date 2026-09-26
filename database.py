@@ -17,6 +17,8 @@ if not DATABASE_URL:
 db_pool = None
 posted_track_ids: Set[str] = set()
 posted_track_hashes: Set[str] = set()
+backup_archived_track_ids: Set[str] = set()
+backup_archived_track_hashes: Set[str] = set()
 
 # Kirill-Lotin transliteratsiya xaritasi va maxsus belgilarni almashtirish
 CYRILLIC_TO_LATIN = {
@@ -64,11 +66,12 @@ DEFAULT_SETTINGS = {
     "night_end": "7",            # Tun tugashi (tong)
     "target_search_bot": "@Zoryuklabot", # Qidiruv boti nomi
     "blacklist_keywords": "youtube video, #, жиганская, блатняк, шансон, тюремн, qamoq, zona, video clip, lyric video", # Bloklangan so'zlar
-    "force_sub_enabled": "true" # Foydalanuvchilar uchun kanalga majburiy a'zolik tekshiruvi
+    "force_sub_enabled": "true", # Foydalanuvchilar uchun kanalga majburiy a'zolik tekshiruvi
+    "backup_channel_id": "0" # Yopiq zaxira musiqa kanali ID si
 }
 
 async def setup_database():
-    global db_pool, posted_track_ids, posted_track_hashes
+    global db_pool, posted_track_ids, posted_track_hashes, backup_archived_track_ids, backup_archived_track_hashes
     try:
         # Mask the password in DATABASE_URL for security logging
         masked_url = DATABASE_URL
@@ -121,6 +124,19 @@ async def setup_database():
                     is_posted BOOLEAN DEFAULT FALSE
                 )
             """)
+
+            # 4. Backup Channel Tracks Jadvali (Yopiq zaxira kanal arxivi)
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS backup_channel_tracks (
+                    id SERIAL PRIMARY KEY,
+                    track_id VARCHAR(255) UNIQUE,
+                    artist VARCHAR(255),
+                    title VARCHAR(255),
+                    source_channel VARCHAR(255),
+                    message_id BIGINT,
+                    archived_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
             
             # Standart sozlamalarni tekshirish va qo'shish
             for key, value in DEFAULT_SETTINGS.items():
@@ -137,8 +153,16 @@ async def setup_database():
             for row in rows:
                 for k in get_track_match_keys(row['artist'], row['title']):
                     posted_track_hashes.add(k)
+
+            # Xotiraga backup_channel_tracks ni yuklash
+            b_rows = await conn.fetch("SELECT track_id, artist, title FROM backup_channel_tracks")
+            backup_archived_track_ids = {row['track_id'] for row in b_rows}
+            backup_archived_track_hashes = set()
+            for row in b_rows:
+                for k in get_track_match_keys(row['artist'], row['title']):
+                    backup_archived_track_hashes.add(k)
             
-        logger.success(f"Ma'lumotlar bazasi PostgreSQL sozlandi. {len(posted_track_ids)} ta trek xotirada, {len(posted_track_hashes)} ta unikal nomlar keshda.")
+        logger.success(f"Ma'lumotlar bazasi PostgreSQL sozlandi. {len(posted_track_ids)} ta asosiy trek, {len(backup_archived_track_ids)} ta zaxira trek xotirada.")
         
     except Exception as e:
         logger.error(f"PostgreSQL bazasini sozlashda xatolik: {e}")
@@ -391,3 +415,67 @@ async def get_recent_posted_tracks(limit: int = 10) -> List[Dict[str, Any]]:
     except Exception as e:
         logger.error(f"Error getting recent posted tracks: {e}")
         return []
+
+
+# --- Yopiq Zaxira Kanal (Backup Archive) Funksiyalari ---
+
+async def is_track_in_backup_archive(track_id: str) -> bool:
+    global backup_archived_track_ids, db_pool
+    if track_id in backup_archived_track_ids:
+        return True
+    if not db_pool:
+        return False
+    try:
+        async with db_pool.acquire() as conn:
+            row = await conn.fetchrow("SELECT 1 FROM backup_channel_tracks WHERE track_id = $1", str(track_id))
+            if row:
+                backup_archived_track_ids.add(track_id)
+                return True
+            return False
+    except Exception as e:
+        logger.error(f"Error checking is_track_in_backup_archive: {e}")
+        return False
+
+
+async def is_similar_track_in_backup_archive(artist: str, title: str) -> bool:
+    global backup_archived_track_hashes
+    candidates = get_track_match_keys(artist, title)
+    if not candidates:
+        return False
+    for cand in candidates:
+        if cand in backup_archived_track_hashes:
+            return True
+    return False
+
+
+async def add_track_to_backup_archive(track_id: str, artist: str, title: str, source_channel: str = "", message_id: int = 0):
+    global backup_archived_track_ids, backup_archived_track_hashes, db_pool
+    backup_archived_track_ids.add(track_id)
+    for k in get_track_match_keys(artist, title):
+        backup_archived_track_hashes.add(k)
+
+    if not db_pool:
+        return
+    try:
+        async with db_pool.acquire() as conn:
+            await conn.execute("""
+                INSERT INTO backup_channel_tracks (track_id, artist, title, source_channel, message_id)
+                VALUES ($1, $2, $3, $4, $5)
+                ON CONFLICT (track_id) DO NOTHING
+            """, str(track_id), artist, title, str(source_channel), message_id)
+    except Exception as e:
+        logger.error(f"Error adding track to backup_channel_tracks: {e}")
+
+
+async def get_backup_archive_stats() -> dict:
+    global db_pool, backup_archived_track_ids
+    if not db_pool:
+        return {"total_archived": len(backup_archived_track_ids)}
+    try:
+        async with db_pool.acquire() as conn:
+            row = await conn.fetchrow("SELECT COUNT(*) as cnt FROM backup_channel_tracks")
+            return {"total_archived": row['cnt'] if row else len(backup_archived_track_ids)}
+    except Exception as e:
+        logger.error(f"Error getting backup archive stats: {e}")
+        return {"total_archived": len(backup_archived_track_ids)}
+

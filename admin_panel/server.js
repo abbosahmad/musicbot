@@ -302,6 +302,19 @@ app.post('/api/bot/replan', async (req, res) => {
   }
 });
 
+app.post('/api/bot/sync-backup', async (req, res) => {
+  try {
+    await pool.query(
+      "INSERT INTO bot_settings (key, value) VALUES ('action_trigger', 'sync_backup') ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value"
+    );
+    console.log('📦 Sync backup action triggered via Web Panel');
+    res.json({ success: true, message: 'Zaxira kanalni yangilash buyrug\'i yuborildi!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Zaxira kanal buyrug\'ini yuborishda xato' });
+  }
+});
+
 // Settings & Stats APIs
 app.get('/api/settings', async (req, res) => {
   try {
@@ -327,6 +340,7 @@ app.post('/api/settings', async (req, res) => {
       source_channels,
       main_channel_name,
       main_channel_link,
+      backup_channel_id,
       demo_duration,
       night_mode,
       night_start,
@@ -395,6 +409,7 @@ app.post('/api/settings', async (req, res) => {
     if (source_channels !== undefined)         updates.source_channels         = String(source_channels);
     if (main_channel_name !== undefined)       updates.main_channel_name       = String(main_channel_name);
     if (main_channel_link !== undefined)       updates.main_channel_link       = String(main_channel_link);
+    if (backup_channel_id !== undefined)       updates.backup_channel_id       = String(backup_channel_id);
     if (demo_duration !== undefined)           updates.demo_duration           = String(demo_duration);
     if (target_search_bot !== undefined)       updates.target_search_bot       = String(target_search_bot);
     if (blacklist_keywords !== undefined)      updates.blacklist_keywords      = String(blacklist_keywords);
@@ -421,12 +436,20 @@ app.post('/api/settings', async (req, res) => {
 app.get('/api/stats', async (req, res) => {
   try {
     const countResult = await pool.query('SELECT COUNT(*) FROM posted_tracks');
+    let totalBackupArchived = 0;
+    try {
+      const backupResult = await pool.query('SELECT COUNT(*) FROM backup_channel_tracks');
+      totalBackupArchived = parseInt(backupResult.rows[0].count) || 0;
+    } catch (e) {
+      // table might be empty or fresh
+    }
     const recentResult = await pool.query(
       'SELECT artist, title, post_date FROM posted_tracks ORDER BY post_date DESC LIMIT 5'
     );
 
     res.json({
       total_posted: countResult.rows[0].count,
+      total_backup_archived: totalBackupArchived,
       recent_tracks: recentResult.rows
     });
   } catch (err) {

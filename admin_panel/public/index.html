@@ -71,6 +71,15 @@
                         </div>
                     </div>
                     <div class="stat-card">
+                        <div class="stat-icon green-gradient" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="fa-solid fa-box-archive"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Zaxiradagi Musiqalar</h3>
+                            <p class="stat-value" id="statTotalBackup">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
                         <div class="stat-icon blue-gradient">
                             <i class="fa-solid fa-bullhorn"></i>
                         </div>
@@ -119,12 +128,15 @@
                             </div>
                             
                             <label style="font-size: 12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; display:block; margin-bottom: 8px;">Tezkor harakatlar</label>
-                            <div class="bot-controls-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                            <div class="bot-controls-grid" style="grid-template-columns: repeat(3, 1fr); gap: 10px;">
                                 <button type="button" class="btn-control btn-control-action" id="btnBotPostNow">
                                     <i class="fa-solid fa-paper-plane"></i> Hozir Joylash
                                 </button>
                                 <button type="button" class="btn-control btn-control-action" id="btnBotReplan">
                                     <i class="fa-solid fa-calendar-days"></i> Rejani yangilash
+                                </button>
+                                <button type="button" class="btn-control btn-control-action" id="btnBotSyncBackup">
+                                    <i class="fa-solid fa-box-archive"></i> Zaxirani yangilash
                                 </button>
                             </div>
                         </div>
@@ -179,6 +191,11 @@
                                 <label for="target_search_bot"><i class="fa-solid fa-magnifying-glass"></i> Maqsadli Qidiruv Boti</label>
                                 <input type="text" id="target_search_bot" name="target_search_bot" required>
                                 <span class="form-hint">Musiqalarni toza yuklovchi bot nomi (masalan: @Zoryuklabot)</span>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="backup_channel_id"><i class="fa-solid fa-box-archive"></i> Baza Zaxira Kanal ID (Yopiq Kanal)</label>
+                                <input type="text" id="backup_channel_id" name="backup_channel_id" placeholder="-1001234567890">
+                                <span class="form-hint">Barcha manbalardagi barcha yangi qo'shiqlar saqlab boriladigan yopiq arxiv kanal ID raqami</span>
                             </div>
                             <div class="form-group checkbox-group full-width" style="margin-top: 10px;">
                                 <label class="switch">

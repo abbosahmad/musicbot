@@ -90,6 +90,9 @@ async function fetchSettings() {
         document.getElementById('target_search_bot').value      = data.target_search_bot ?? '@Zoryuklabot';
         document.getElementById('clean_source_channels').value  = data.clean_source_channels ?? (data.source_channels ?? '');
         document.getElementById('direct_source_channels').value = data.direct_source_channels ?? '';
+        if (document.getElementById('backup_channel_id')) {
+            document.getElementById('backup_channel_id').value = data.backup_channel_id ?? '';
+        }
         if (document.getElementById('blacklist_keywords')) {
             document.getElementById('blacklist_keywords').value = data.blacklist_keywords ?? '';
         }
@@ -127,6 +130,7 @@ settingsForm.addEventListener('submit', async e => {
         daily_post_count:       fd.get('daily_post_count'),
         main_channel_name:      fd.get('main_channel_name'),
         main_channel_link:      fd.get('main_channel_link'),
+        backup_channel_id:      document.getElementById('backup_channel_id')?.value || '',
         target_search_bot:      fd.get('target_search_bot'),
         clean_source_channels:  fd.get('clean_source_channels'),
         direct_source_channels: fd.get('direct_source_channels'),
@@ -183,6 +187,9 @@ async function fetchStats() {
         const data = await res.json();
 
         document.getElementById('statTotalPosted').textContent = data.total_posted ?? '0';
+        if (document.getElementById('statTotalBackup')) {
+            document.getElementById('statTotalBackup').textContent = data.total_backup_archived ?? '0';
+        }
 
         const list = document.getElementById('recentTracksList');
         list.innerHTML = '';
@@ -404,6 +411,10 @@ function showSuccessBanner(message) {
 // Bind Button Listeners
 btnBotPostNow.addEventListener('click', () => sendBotAction('post-now', 'Musiqa joylash buyrug\'i yuborildi (10s ichida bajariladi)!'));
 btnBotReplan.addEventListener('click', () => sendBotAction('replan', 'Jadvalni yangilash buyrug\'i yuborildi (10s ichida bajariladi)!'));
+const btnBotSyncBackup = document.getElementById('btnBotSyncBackup');
+if (btnBotSyncBackup) {
+    btnBotSyncBackup.addEventListener('click', () => sendBotAction('sync-backup', 'Zaxira kanalni yangilash buyrug\'i yuborildi (10s ichida bajariladi)!'));
+}
 
 // --- Init ---
 fetchSettings();
