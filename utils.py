@@ -582,6 +582,9 @@ def _clean_single_string(text: str) -> str:
     if len(cleaned) < 2 and not cleaned.isalnum():
         return ""
 
+    return cleaned
+
+
 def is_valid_music_title(text: str) -> bool:
     """
     Sarlavha haqiqiy qo'shiq nomi ekanligini yoki spam/axlat ekanligini tekshiradi.
@@ -895,11 +898,11 @@ def clean_search_query(query: str) -> str:
             query = tit
 
     # Clean promo patterns and usernames
-    cleaned = _clean_single_string(query)
+    cleaned = _clean_single_string(query) or ""
     cleaned = re.sub(r'\s*-\s*', ' - ', cleaned)
     cleaned = ' '.join(cleaned.split()).strip()
 
-    return cleaned or query.strip()
+    return cleaned or (query or "").strip()
 
 
 def extract_clean_artist_and_title(raw_artist: str, raw_title: str, caption: str = "", filename: str = "") -> tuple:

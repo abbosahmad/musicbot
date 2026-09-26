@@ -464,15 +464,7 @@ async def _plan_daily_posts_internal(force: bool = False):
     # Bazadan sozlamalarni o'qish
     target_count = int(await database.get_setting("daily_post_count", "5"))
 
-    if force:
-        # Clear existing scheduled music jobs
-        for job in scheduler.get_jobs():
-            if job.id not in ['daily_planning', 'settings_checker']:
-                job.remove()
-        # Clear database schedule
-        await database.clear_active_schedule()
-
-    # 1. Avval ma'lumotlar bazasidan faol rejalarni yuklashga urinib ko'ramiz
+    # 1. Avval ma'lumotlar bazasidan faol rejalarni yuklashga urinib ko'ramiz (agar force bo'lmasa)
     if not force:
         active_db_schedule = await database.get_active_schedule()
         if active_db_schedule:
@@ -744,6 +736,11 @@ async def _plan_daily_posts_internal(force: bool = False):
             times.append(post_time)
     elif total_tracks == 1:
         times.append(start_time)
+
+    # Rejalashtirilgan yangi musiqalarni qo'shishdan oldin eski music joblarni tozalaymiz
+    for job in scheduler.get_jobs():
+        if job.id not in ['daily_planning', 'settings_checker']:
+            job.remove()
 
     db_entries = []
     for i, track in enumerate(to_post):
@@ -1317,8 +1314,13 @@ async def force_replan_command(message: types.Message):
 
 @dp.message(lambda msg: msg.text and not msg.text.startswith("/"))
 async def text_search_handler(message: types.Message):
+    if not message.text:
+        return
     raw_query = message.text.strip()
     query = utils.clean_search_query(raw_query)
+    if not query:
+        await message.answer("❌ Qidiruv uchun yaroqli matn kiritilmadi.")
+        return
     status_msg = await message.answer(f"🔍 Musiqa qidirilmoqda: <b>{query}</b>...")
     
     try:
