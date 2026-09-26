@@ -332,6 +332,8 @@ app.post('/api/settings', async (req, res) => {
       night_start,
       night_end,
       target_search_bot,
+      blacklist_keywords,
+      force_sub_enabled,
       new_password
     } = req.body;
 
@@ -395,8 +397,10 @@ app.post('/api/settings', async (req, res) => {
     if (main_channel_link !== undefined)       updates.main_channel_link       = String(main_channel_link);
     if (demo_duration !== undefined)           updates.demo_duration           = String(demo_duration);
     if (target_search_bot !== undefined)       updates.target_search_bot       = String(target_search_bot);
+    if (blacklist_keywords !== undefined)      updates.blacklist_keywords      = String(blacklist_keywords);
     if (night_start !== undefined)             updates.night_start             = String(night_start);
     if (night_end !== undefined)               updates.night_end               = String(night_end);
+    if (force_sub_enabled !== undefined)       updates.force_sub_enabled       = (force_sub_enabled === 'true' || force_sub_enabled === true) ? 'true' : 'false';
     updates.night_mode = (night_mode === 'true' || night_mode === true) ? 'true' : 'false';
 
     for (const [key, value] of Object.entries(updates)) {
@@ -454,6 +458,40 @@ app.get('/api/schedule/today', async (req, res) => {
   } catch (err) {
     console.error('Schedule fetch error:', err);
     res.status(500).json({ error: 'Database error fetching schedule' });
+  }
+});
+
+// Delete unposted schedule item
+app.delete('/api/schedule/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const rowRes = await pool.query('SELECT direct_file_path, artist, title, is_posted FROM daily_schedule WHERE id = $1', [id]);
+    if (rowRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Jadval yozuvi topilmadi' });
+    }
+    const item = rowRes.rows[0];
+    if (item.is_posted) {
+      return res.status(400).json({ error: 'Bu musiqa allaqachon kanalga joylangan!' });
+    }
+
+    if (item.direct_file_path && fs.existsSync(item.direct_file_path)) {
+      try {
+        fs.unlinkSync(item.direct_file_path);
+      } catch (e) {
+        console.error('File delete error:', e);
+      }
+    }
+
+    await pool.query('DELETE FROM daily_schedule WHERE id = $1', [id]);
+
+    // Botga jadvalni qayta sinxronizatsiya qilish buyrug'ini yuboramiz
+    await pool.query("INSERT INTO bot_settings (key, value) VALUES ('action_trigger', 'sync_schedule') ON CONFLICT (key) DO UPDATE SET value = 'sync_schedule'");
+
+    console.log(`🗑 Rejadagi musiqa o'chirildi (ID: ${id}): ${item.artist} - ${item.title}`);
+    res.json({ success: true, message: `"${item.title}" musiqasi rejadan o'chirildi!` });
+  } catch (err) {
+    console.error('Schedule delete error:', err);
+    res.status(500).json({ error: 'Database error deleting schedule item' });
   }
 });
 

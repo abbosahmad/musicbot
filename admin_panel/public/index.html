@@ -180,6 +180,20 @@
                                 <input type="text" id="target_search_bot" name="target_search_bot" required>
                                 <span class="form-hint">Musiqalarni toza yuklovchi bot nomi (masalan: @Zoryuklabot)</span>
                             </div>
+                            <div class="form-group checkbox-group full-width" style="margin-top: 10px;">
+                                <label class="switch">
+                                    <input type="checkbox" id="force_sub_enabled" name="force_sub_enabled" value="true">
+                                    <span class="slider round"></span>
+                                </label>
+                                <span class="checkbox-label">Foydalanuvchilar Uchun Kanalga Majburiy A'zolik Tekshiruvi</span>
+                            </div>
+                        </div>
+
+                        <h2 class="form-section-title">Kontent Filtrlari (Qora Ro'yxat)</h2>
+                        <div class="form-group full-width" style="margin-bottom: 18px;">
+                            <label for="blacklist_keywords"><i class="fa-solid fa-ban"></i> Taqiqlangan So'zlar (Vergul bilan ajratilgan)</label>
+                            <textarea id="blacklist_keywords" name="blacklist_keywords" rows="3" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border-color);border-radius:8px;color:#fff;padding:10px;font-size:14px;resize:vertical;" placeholder="youtube video, #, жиганская, блатняк, шансон, тюремн, qamoq, zona"></textarea>
+                            <span class="form-hint">Sarlavhasida yoki ijrochida shu so'zlar uchrasa, musiqa kanalga olinmaydi</span>
                         </div>
 
                         <h2 class="form-section-title">Manba Kanallar (2 xil Bo'lim)</h2>

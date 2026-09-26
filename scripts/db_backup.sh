@@ -28,3 +28,16 @@ gzip "$FILENAME"
 find "$BACKUP_DIR" -type f -name "db_backup_*.sql.gz" -mtime +7 -delete
 
 echo "✅ Database backup completed: ${FILENAME}.gz"
+
+# Telegram log kanaliga bildirishnoma yuborish
+BOT_TOKEN=$(grep "^ADMIN_BOT_TOKEN=" /var/www/musicbot/.env | cut -d'=' -f2-)
+LOG_CHAT=$(grep "^LOG_CHANNEL_ID=" /var/www/musicbot/.env | cut -d'=' -f2-)
+if [ -n "$BOT_TOKEN" ] && [ -n "$LOG_CHAT" ] && [ "$LOG_CHAT" != "0" ]; then
+    FILE_SIZE=$(du -h "${FILENAME}.gz" | cut -f1)
+    DISK_FREE=$(df -h / | awk 'NR==2 {print $4}')
+    MSG="💾 <b>PostgreSQL Avtomatik Zaxira (Backup)</b>%0A%0A✅ Fayl: <code>$(basename "${FILENAME}.gz")</code>%0A📦 Hajm: <b>${FILE_SIZE}</b>%0A💽 Diskda bo'sh joy: <b>${DISK_FREE}</b>"
+    curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+         -d "chat_id=${LOG_CHAT}" \
+         -d "text=${MSG}" \
+         -d "parse_mode=HTML" > /dev/null
+fi

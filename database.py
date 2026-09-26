@@ -62,7 +62,9 @@ DEFAULT_SETTINGS = {
     "night_mode": "false",      # Tun rejimi (true/false)
     "night_start": "23",        # Tun boshlanishi
     "night_end": "7",            # Tun tugashi (tong)
-    "target_search_bot": "@Zoryuklabot" # Qidiruv boti nomi
+    "target_search_bot": "@Zoryuklabot", # Qidiruv boti nomi
+    "blacklist_keywords": "youtube video, #, жиганская, блатняк, шансон, тюремн, qamoq, zona, video clip, lyric video", # Bloklangan so'zlar
+    "force_sub_enabled": "true" # Foydalanuvchilar uchun kanalga majburiy a'zolik tekshiruvi
 }
 
 async def setup_database():
@@ -351,3 +353,41 @@ async def is_similar_track_scheduled(artist: str, title: str) -> bool:
     except Exception as e:
         logger.error(f"Error checking similar active scheduled track: {e}")
         return False
+
+
+async def search_posted_tracks(query: str, limit: int = 15) -> List[Dict[str, Any]]:
+    global db_pool
+    if not db_pool or not query:
+        return []
+    try:
+        async with db_pool.acquire() as conn:
+            search_param = f"%{query.strip()}%"
+            rows = await conn.fetch("""
+                SELECT id, track_id, artist, title, post_date
+                FROM posted_tracks
+                WHERE title ILIKE $1 OR artist ILIKE $1
+                ORDER BY post_date DESC
+                LIMIT $2
+            """, search_param, limit)
+            return [dict(row) for row in rows]
+    except Exception as e:
+        logger.error(f"Error searching posted tracks: {e}")
+        return []
+
+
+async def get_recent_posted_tracks(limit: int = 10) -> List[Dict[str, Any]]:
+    global db_pool
+    if not db_pool:
+        return []
+    try:
+        async with db_pool.acquire() as conn:
+            rows = await conn.fetch("""
+                SELECT id, track_id, artist, title, post_date
+                FROM posted_tracks
+                ORDER BY post_date DESC
+                LIMIT $1
+            """, limit)
+            return [dict(row) for row in rows]
+    except Exception as e:
+        logger.error(f"Error getting recent posted tracks: {e}")
+        return []

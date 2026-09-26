@@ -90,6 +90,12 @@ async function fetchSettings() {
         document.getElementById('target_search_bot').value      = data.target_search_bot ?? '@Zoryuklabot';
         document.getElementById('clean_source_channels').value  = data.clean_source_channels ?? (data.source_channels ?? '');
         document.getElementById('direct_source_channels').value = data.direct_source_channels ?? '';
+        if (document.getElementById('blacklist_keywords')) {
+            document.getElementById('blacklist_keywords').value = data.blacklist_keywords ?? '';
+        }
+        if (document.getElementById('force_sub_enabled')) {
+            document.getElementById('force_sub_enabled').checked = (data.force_sub_enabled ?? 'true') === 'true';
+        }
 
         const isNight = data.night_mode === 'true';
         nightModeChk.checked          = isNight;
@@ -124,6 +130,8 @@ settingsForm.addEventListener('submit', async e => {
         target_search_bot:      fd.get('target_search_bot'),
         clean_source_channels:  fd.get('clean_source_channels'),
         direct_source_channels: fd.get('direct_source_channels'),
+        blacklist_keywords:     document.getElementById('blacklist_keywords')?.value || '',
+        force_sub_enabled:      document.getElementById('force_sub_enabled')?.checked ? 'true' : 'false',
         night_mode:             nightModeChk.checked ? 'true' : 'false',
         night_start:            document.getElementById('night_start').value || '23',
         night_end:              document.getElementById('night_end').value   || '7',
@@ -225,12 +233,18 @@ async function fetchTodaySchedule() {
                 const statusIcon = entry.is_posted
                     ? '<i class="fa-solid fa-check-double" style="color:var(--success)"></i> Joylandi'
                     : '<i class="fa-solid fa-clock" style="color:var(--warning)"></i> Kutmoqda';
+                const deleteBtn = !entry.is_posted
+                    ? `<button class="btn-delete-item" onclick="deleteScheduleItem(${entry.id}, '${escapeHTML(entry.title || '').replace(/'/g, "\\'")}')" title="Rejadan o'chirish" style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:4px 8px;border-radius:6px;cursor:pointer;margin-left:8px;font-size:11px;transition:0.2s;"><i class="fa-solid fa-trash-can"></i></button>`
+                    : '';
                 li.innerHTML = `
                     <div class="recent-track-info">
                         <h4><span style="color:var(--text-secondary);font-weight:400;font-size:12px;margin-right:6px;">${idx + 1}.</span>${escapeHTML(entry.artist || '—')} – ${escapeHTML(entry.title || '—')}</h4>
                         <p>${statusIcon}</p>
                     </div>
-                    <span class="recent-date">${timeStr}</span>
+                    <div style="display:flex;align-items:center;">
+                        <span class="recent-date">${timeStr}</span>
+                        ${deleteBtn}
+                    </div>
                 `;
                 list.appendChild(li);
             });
@@ -251,6 +265,22 @@ async function fetchTodaySchedule() {
         list.innerHTML = '<li class="empty-state">Rejalanish jadvalini yuklab bo\'lmadi.</li>';
     }
 }
+
+window.deleteScheduleItem = async function(id, title) {
+    if (!confirm(`Haqiqatan ham "${title}" musiqasini bugungi rejadan olib tashlamoqchimisiz?`)) return;
+    try {
+        const res = await fetch(`api/schedule/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (res.ok) {
+            alert(data.message || "Musiqa rejadan o'chirildi!");
+            fetchTodaySchedule();
+        } else {
+            alert(data.error || "O'chirishda xatolik");
+        }
+    } catch (e) {
+        alert("Server bilan aloqa xatosi: " + e.message);
+    }
+};
 
 document.getElementById('refreshScheduleBtn').addEventListener('click', fetchTodaySchedule);
 

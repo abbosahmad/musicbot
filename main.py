@@ -7,16 +7,20 @@ except RuntimeError:
 
 import os
 import re
+import time
 import random
 from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 
 import pytz
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher, types, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
-from aiogram.types import BotCommand, FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from aiogram.types import (
+    BotCommand, FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton,
+    CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
+)
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -808,10 +812,17 @@ async def check_schedule_update():
                 asyncio.create_task(trigger_manual_post_from_action())
             elif action == "replan":
                 asyncio.create_task(plan_daily_posts(force=True))
+            elif action == "sync_schedule":
+                asyncio.create_task(plan_daily_posts(force=False))
         
         # 2. Sozlamalar o'zgarganligini tekshirish
         changed = False
-        keys_to_check = ["planning_hour", "daily_post_count", "night_mode", "night_start", "night_end", "source_channels", "clean_source_channels", "direct_source_channels", "target_search_bot"]
+        keys_to_check = [
+            "planning_hour", "daily_post_count", "night_mode", "night_start",
+            "night_end", "source_channels", "clean_source_channels",
+            "direct_source_channels", "target_search_bot", "blacklist_keywords",
+            "force_sub_enabled"
+        ]
         for key in keys_to_check:
             if settings.get(key) != LAST_SETTINGS.get(key):
                 changed = True
@@ -831,6 +842,8 @@ async def check_schedule_update():
                 asyncio.create_task(userbot._join_source_channels())
             if 'target_search_bot' in settings:
                 config.TARGET_SEARCH_BOT = settings['target_search_bot']
+            if 'blacklist_keywords' in settings and settings['blacklist_keywords']:
+                config.BLACKLIST_KEYWORDS = [w.strip() for w in re.split(r'[\s,]+', settings['blacklist_keywords']) if w.strip()]
                 
             LAST_SETTINGS = settings
             
@@ -857,10 +870,60 @@ async def check_schedule_update():
 
 # --- Telegram Bot Handlerlari ---
 
+async def check_subscription(user_id: int) -> bool:
+    """
+    Foydalanuvchining asosiy kanalga obuna bo'lganligini tekshiradi.
+    Adminlar uchun har doim True qaytaradi.
+    """
+    if is_admin(user_id):
+        return True
+    try:
+        sub_enabled = (await database.get_setting("force_sub_enabled", "true")) == "true"
+        if not sub_enabled:
+            return True
+        channel_id = config.MAIN_CHANNEL_ID
+        if not channel_id or str(channel_id).strip() in ["0", ""]:
+            return True
+        member = await bot.get_chat_member(chat_id=channel_id, user_id=user_id)
+        if member.status in ['member', 'administrator', 'creator']:
+            return True
+        return False
+    except Exception as e:
+        logger.warning(f"Obunani tekshirishda xatolik (o'tkazib yuboriladi): {e}")
+        return True
+
+
+async def send_subscription_prompt(message: types.Message):
+    channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
+    channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"📢 {channel_name} kanaliga a'zo bo'lish", url=channel_link)],
+        [InlineKeyboardButton(text="✅ A'zo bo'ldim / Tekshirish", callback_data="check_sub_again")]
+    ])
+    await message.answer(
+        f"⚠️ <b>Botdan to'liq foydalanish uchun rasmiy kanalimizga a'zo bo'ling:</b>\n\n"
+        f"Kanalimiz: <a href='{channel_link}'>{channel_name}</a>\n\n"
+        f"A'zo bo'lgach, «✅ A'zo bo'ldim / Tekshirish» tugmasini bosing.",
+        reply_markup=kb,
+        disable_web_page_preview=True
+    )
+
+
+@dp.callback_query(F.data == "check_sub_again")
+async def check_sub_again_handler(query: CallbackQuery):
+    if await check_subscription(query.from_user.id):
+        await query.message.edit_text("✅ <b>Obuna tasdiqlandi!</b>\n\nEndi istalgan qo'shiq nomini yozib qidirishingiz mumkin. 🔎")
+    else:
+        await query.answer("❌ Siz hali kanalga a'zo bo'lmadingiz. Iltimos, avval kanalga obuna bo'ling!", show_alert=True)
+
+
 @dp.message(Command("start", "holat", "admin"))
 async def start_command(message: types.Message):
     if not is_admin(message.from_user.id):
-        # Oddiy foydalanuvchilar uchun start
+        # Oddiy foydalanuvchilar uchun obunani tekshirish
+        if not await check_subscription(message.from_user.id):
+            await send_subscription_prompt(message)
+            return
         await message.answer("👋 <b>Musiqa topuvchi botga xush kelibsiz!</b>\n\nMusiqa topish uchun uning <b>nomini</b> yozing yoki menga <b>ovozli xabar (voice)</b> yuboring. 🔎")
         return
 
@@ -1315,6 +1378,10 @@ async def force_replan_command(message: types.Message):
 @dp.message(lambda msg: msg.text and not msg.text.startswith("/"))
 async def text_search_handler(message: types.Message):
     if not message.text:
+        return
+    # Kanalga majburiy a'zolik tekshiruvi
+    if not await check_subscription(message.from_user.id):
+        await send_subscription_prompt(message)
         return
     raw_query = message.text.strip()
     query = utils.clean_search_query(raw_query)
@@ -1817,6 +1884,12 @@ async def process_direct_metadata_input(message: types.Message, state: FSMContex
 
 @dp.message(lambda msg: msg.voice or msg.audio)
 async def audio_search_handler(message: types.Message, state: FSMContext):
+    # Oddiy foydalanuvchilar uchun kanal a'zoligi tekshiruvi
+    if not is_admin(message.from_user.id):
+        if not await check_subscription(message.from_user.id):
+            await send_subscription_prompt(message)
+            return
+
     # Intercept admin direct audio upload
     if is_admin(message.from_user.id):
         await state.clear()
@@ -1932,6 +2005,47 @@ async def audio_search_handler(message: types.Message, state: FSMContext):
             os.remove(temp_path)
 
 
+# --- Inline Rejim (Telegram chatlarida @bot_username orqali qidirish) ---
+
+@dp.inline_query()
+async def inline_search_handler(inline_query: InlineQuery):
+    query = (inline_query.query or "").strip()
+    channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
+    channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
+    try:
+        bot_user = await bot.get_me()
+        bot_username = bot_user.username or "trend_musiqabot"
+    except Exception:
+        bot_username = "trend_musiqabot"
+
+    if not query:
+        rows = await database.get_recent_posted_tracks(limit=15)
+    else:
+        rows = await database.search_posted_tracks(query, limit=20)
+
+    results = []
+    for r in rows:
+        track_id_str = str(r['id'])
+        artist = r.get('artist') or channel_name
+        title = r.get('title') or "Musiqa"
+        results.append(
+            InlineQueryResultArticle(
+                id=track_id_str,
+                title=f"{artist} – {title}",
+                description=f"🎧 {channel_name} | Tinglash",
+                input_message_content=InputTextMessageContent(
+                    message_text=(
+                        f"🎵 <b>{artist} – {title}</b>\n\n"
+                        f"🎧 Rasmiy kanal: <a href='{channel_link}'>{channel_name}</a>\n"
+                        f"🔎 Qidiruv boti: @{bot_username}"
+                    ),
+                    parse_mode="HTML"
+                )
+            )
+        )
+    await inline_query.answer(results, cache_time=10, is_personal=False)
+
+
 async def set_main_menu(bot: Bot):
     await bot.set_my_commands([
         BotCommand(command="/start", description="🚀 Holat va Sozlamalar"),
@@ -1941,22 +2055,71 @@ async def set_main_menu(bot: Bot):
     ])
 
 
+async def cleanup_old_downloads():
+    """
+    Server xotirasini tejash uchun eski yoki allaqachon joylangan audio fayllarni xavfsiz tozalaydi.
+    Hozir faol rejadagi unikal fayllarga aslo tegmaydi.
+    """
+    try:
+        active_entries = await database.get_active_schedule()
+        active_paths = set()
+        for e in active_entries:
+            p = e.get('direct_file_path')
+            if p:
+                active_paths.add(os.path.abspath(p))
+
+        scheduled_dir = os.path.join("downloads", "scheduled")
+        now_ts = time.time()
+        deleted_count = 0
+        freed_bytes = 0
+
+        if os.path.exists(scheduled_dir):
+            for fname in os.listdir(scheduled_dir):
+                fpath = os.path.join(scheduled_dir, fname)
+                if not os.path.isfile(fpath):
+                    continue
+                abs_p = os.path.abspath(fpath)
+                if abs_p in active_paths:
+                    continue
+                # Agar 24 soatdan eski bo'lsa yoki faol reja ro'yxatida bo'lmasa
+                file_age_hours = (now_ts - os.path.getmtime(fpath)) / 3600
+                if file_age_hours > 24:
+                    try:
+                        sz = os.path.getsize(fpath)
+                        os.remove(fpath)
+                        deleted_count += 1
+                        freed_bytes += sz
+                    except Exception as err:
+                        logger.warning(f"Eski faylni o'chirishda xatolik: {fpath} - {err}")
+
+        # Root downloads/ papkasidagi vaqtinchalik qoldiqlarni tozalash
+        if os.path.exists("downloads"):
+            for fname in os.listdir("downloads"):
+                if fname == "scheduled":
+                    continue
+                fpath = os.path.join("downloads", fname)
+                if os.path.isfile(fpath):
+                    try:
+                        sz = os.path.getsize(fpath)
+                        os.remove(fpath)
+                        deleted_count += 1
+                        freed_bytes += sz
+                    except Exception:
+                        pass
+
+        if deleted_count > 0:
+            freed_mb = round(freed_bytes / (1024 * 1024), 1)
+            logger.info(f"🧹 Disk tozalash: {deleted_count} ta eski audio fayl o'chirildi ({freed_mb} MB bo'shatildi).")
+    except Exception as e:
+        logger.error(f"cleanup_old_downloads xatosi: {e}")
+
+
 async def on_startup(bot: Bot):
-    # Serverni tozalash
-    logger.info("♻️ Server tozalanmoqda: downloads papkasi tozalanmoqda (scheduled papkasi saqlanadi)...")
-    if os.path.exists("downloads"):
-        for file in os.listdir("downloads"):
-            if file == "scheduled":
-                continue
-            file_path = os.path.join("downloads", file)
-            try:
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
-            except Exception as e:
-                logger.warning(f"Fayl o'chirishda xatolik: {file_path} - {e}")
-                
     # Ma'lumotlar bazasini sozlash (PostgreSQL)
     await database.setup_database()
+    
+    # Server xotirasini tozalash (Garbage Collector)
+    await cleanup_old_downloads()
     
     # Load database settings into config
     settings = await database.get_all_settings()
@@ -1968,6 +2131,8 @@ async def on_startup(bot: Bot):
         config.SOURCE_CHANNELS = list(set(all_channels))
     if 'target_search_bot' in settings:
         config.TARGET_SEARCH_BOT = settings['target_search_bot']
+    if 'blacklist_keywords' in settings and settings['blacklist_keywords']:
+        config.BLACKLIST_KEYWORDS = [w.strip() for w in re.split(r'[\s,]+', settings['blacklist_keywords']) if w.strip()]
         
     global LAST_SETTINGS
     LAST_SETTINGS = settings
@@ -1998,6 +2163,14 @@ async def setup_scheduler():
         'interval',
         seconds=5,
         id='settings_checker'
+    )
+
+    scheduler.add_job(
+        cleanup_old_downloads,
+        'cron',
+        hour=4,
+        minute=30,
+        id='disk_cleanup'
     )
 
     if not scheduler.running:
