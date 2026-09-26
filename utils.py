@@ -49,16 +49,22 @@ def check_forbidden_keywords(artist: str, title: str) -> bool:
     religious_keywords = {
         "nashida", "nasheed", "anashid", "salovat", "solovat", "salovatlar", "salawat", 
         "islom", "islamic", "quron", "quran", "surasi", "sura", "oyat", "hadis", "hadislar", 
-        "rasululloh", "payg'ambar", "mavlid", "ilohiy", "munojot", "allah", "alloh", 
-        "taqvo", "ixlos", "namoz", "masjid", "makka", "duolar", "duo",
-        "нашид", "ислам", "коран", "сура", "алах", "аллах", "намаз", "салават"
+        "rasululloh", "payg'ambar", "mavlid", "mavlud", "ilohiy", "munojot", "allah", "alloh", 
+        "taqvo", "ixlos", "namoz", "masjid", "makka", "madina", "duolar", "duo", "maruza", "ma'ruza",
+        "maviza", "shayx", "qori", "domla", "amrima'ruf", "zikr", "azon", "janoza", "roza", "ro'za",
+        "ramazon", "iftor", "saharlik", "haj", "umra", "tavba", "qiyomat", "sunnat",
+        "нашид", "ислам", "коран", "сура", "суры", "аят", "хадис", "алах", "аллах", "намаз", 
+        "салават", "мечеть", "пророк", "шейх", "зикр", "азан", "рамадан"
     }
     
     political_keywords = {
         "siyosiy", "siyosat", "prezident", "mirziyoyev", "deputat", "saylov", 
         "hukumat", "vazir", "hokim", "namoyish", "protest", "miting", "urush", 
-        "harbiylar", "konstitutsiya", "saylovi", "президент", "выборы", "политика", 
-        "война", "митинг", "протест", "правительство"
+        "harbiylar", "konstitutsiya", "saylovi", "armiya", "putin", "zelensky", 
+        "tramp", "trump", "bayden", "biden", "rossiya", "ukraina", "isroil", "falastin", "gaza",
+        "palestine", "israel", "propaganda", "senat", "parlament",
+        "президент", "выборы", "политика", "война", "митинг", "протест", "правительство",
+        "россия", "украина", "израиль", "палестина", "сенат", "путин", "зеленский", "трамп", "байден"
     }
     
     # Extract clean words for exact checking
@@ -151,9 +157,9 @@ CRITICAL IDENTIFICATION & CLEANING RULES:
 4. PRESERVE legitimate musical attributes: (Remix), (DJ ... Remix), (Speed Up), (Slowed), (Cover), (feat. ...), (ft. ...).
 5. Always format cleanly in Title Case.
 
-Safety Rules:
-- 'is_religious': true ONLY for explicit Quran recitations, nasheeds, salovats, or sermons.
-- 'is_political': true ONLY for political figure anthems, government propaganda, or warfare chants.
+Safety Rules (STRICT FILTERING):
+- 'is_religious': set to true for ANY religious content: Quran recitations, surahs, ayahs, nasheeds, salovats, azan, zikr, mavlid/mavlud, sermons/maruza, naat, ilohiy qo'shiqlar, Islamic prayers or spiritual chants.
+- 'is_political': set to true for ANY political content: government/state propaganda, president/politician dedications or anthems, war/military glorification, political election songs, protest chants, or songs about current political leaders.
 - Otherwise, both must be false.
 
 Return STRICT JSON: {"artist": "Real Artist", "title": "Clean Title", "is_religious": false, "is_political": false, "reason": "..."}"""
