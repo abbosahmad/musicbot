@@ -415,6 +415,14 @@ const btnBotSyncBackup = document.getElementById('btnBotSyncBackup');
 if (btnBotSyncBackup) {
     btnBotSyncBackup.addEventListener('click', () => sendBotAction('sync-backup', 'Zaxira kanalni yangilash buyrug\'i yuborildi (10s ichida bajariladi)!'));
 }
+const btnCreateBackupChannel = document.getElementById('btnCreateBackupChannel');
+if (btnCreateBackupChannel) {
+    btnCreateBackupChannel.addEventListener('click', () => {
+        if (confirm("Userbot orqali yangi yopiq zaxira kanal ochilsinmi?")) {
+            sendBotAction('create-backup-channel', 'Yangi yopiq kanal ochish buyrug\'i yuborildi! Bir necha soniyada kanal ochilib sozlanadi.');
+        }
+    });
+}
 
 // --- Init ---
 fetchSettings();

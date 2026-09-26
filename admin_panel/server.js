@@ -315,6 +315,19 @@ app.post('/api/bot/sync-backup', async (req, res) => {
   }
 });
 
+app.post('/api/bot/create-backup-channel', async (req, res) => {
+  try {
+    await pool.query(
+      "INSERT INTO bot_settings (key, value) VALUES ('action_trigger', 'create_backup_channel') ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value"
+    );
+    console.log('📦 Create backup channel action triggered via Web Panel');
+    res.json({ success: true, message: 'Yangi yopiq kanal ochish buyrug\'i yuborildi!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Kanal ochish buyrug\'ini yuborishda xato' });
+  }
+});
+
 // Settings & Stats APIs
 app.get('/api/settings', async (req, res) => {
   try {

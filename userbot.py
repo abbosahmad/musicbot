@@ -581,3 +581,39 @@ class UserBot:
             "skipped_existing": skipped_already_archived,
             "status": "success"
         }
+
+    async def create_backup_channel(self, title: str = "Trend Musiqa | Arxiv Baza", description: str = "Trend Musiqa zaxira musiqa bazasi") -> Dict:
+        """
+        Userbot orqali yangi yopiq (private) zaxira kanal ochadi,
+        kanal ID sini oladi va avtomatik ravishda database sozlamalariga saqlaydi.
+        """
+        try:
+            if not self.app.is_connected:
+                await self.start()
+            logger.info(f"Userbot yangi kanal yaratmoqda: '{title}'...")
+            new_chat = await self.app.create_channel(title=title, description=description)
+            channel_id = str(new_chat.id)
+            logger.success(f"✅ Yangi kanal ochildi! ID: {channel_id}, Title: {new_chat.title}")
+            
+            invite_link = None
+            try:
+                invite_link = await self.app.export_chat_invite_link(new_chat.id)
+            except Exception as e:
+                logger.warning(f"Invite link olishda xato: {e}")
+                
+            # Bazaga avtomatik saqlash
+            await database.set_setting("backup_channel_id", channel_id)
+            logger.success(f"✅ backup_channel_id bazaga saqlandi: {channel_id}")
+            
+            return {
+                "success": True,
+                "channel_id": channel_id,
+                "title": new_chat.title,
+                "invite_link": invite_link
+            }
+        except Exception as e:
+            logger.error(f"Kanal ochishda xatolik: {e}")
+            return {
+                "success": False,
+                "error": str(e)
+            }

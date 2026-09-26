@@ -839,6 +839,44 @@ async def run_backup_sync_task(chat_id: Optional[int] = None):
             await bot.send_message(chat_id, f"❌ Xatolik yuz berdi: {e}")
 
 
+async def run_create_backup_channel_task(chat_id: Optional[int] = None):
+    """
+    Userbot orqali yangi yopiq (private) zaxira kanal ochadi,
+    kanal ID sini oladi va bazaga avtomatik ulaydi.
+    """
+    try:
+        await log_to_channel("📦 Userbot orqali yangi yopiq zaxira kanal ochilmoqda...")
+        if chat_id:
+            await bot.send_message(chat_id, "⏳ Userbot yangi yopiq zaxira kanal ochmoqda...")
+        res = await userbot.create_backup_channel()
+        if res.get("success"):
+            cid = res.get("channel_id")
+            title = res.get("title")
+            link = res.get("invite_link") or "Havola olinmadi"
+            msg = (
+                f"✅ <b>Yangi yopiq kanal ochildi!</b>\n\n"
+                f"📌 Nomi: <b>{title}</b>\n"
+                f"🆔 Kanal ID: <code>{cid}</code>\n"
+                f"🔗 Havola: {link}\n\n"
+                f"<i>Kanal sozlamalari yangilandi. Zaxiralash avtomatik boshlanmoqda...</i>"
+            )
+            await log_to_channel(msg)
+            if chat_id:
+                await bot.send_message(chat_id, msg)
+            # Birinchi zaxiralashni avtomatik boshlash
+            asyncio.create_task(run_backup_sync_task(chat_id=chat_id))
+        else:
+            err = f"❌ Kanal ochishda xatolik: {res.get('error')}"
+            logger.error(err)
+            await log_to_channel(err)
+            if chat_id:
+                await bot.send_message(chat_id, err)
+    except Exception as e:
+        logger.error(f"run_create_backup_channel_task error: {e}")
+        if chat_id:
+            await bot.send_message(chat_id, f"❌ Xatolik yuz berdi: {e}")
+
+
 async def check_schedule_update():
     global LAST_SETTINGS
     try:
@@ -857,6 +895,8 @@ async def check_schedule_update():
                 asyncio.create_task(plan_daily_posts(force=False))
             elif action == "sync_backup":
                 asyncio.create_task(run_backup_sync_task())
+            elif action == "create_backup_channel":
+                asyncio.create_task(run_create_backup_channel_task())
         
         # 2. Sozlamalar o'zgarganligini tekshirish
         changed = False
@@ -963,11 +1003,15 @@ async def check_sub_again_handler(query: CallbackQuery):
 @dp.message(Command("start", "holat", "admin"))
 async def start_command(message: types.Message):
     if not is_admin(message.from_user.id):
-        # Oddiy foydalanuvchilar uchun obunani tekshirish
-        if not await check_subscription(message.from_user.id):
-            await send_subscription_prompt(message)
-            return
-        await message.answer("👋 <b>Musiqa topuvchi botga xush kelibsiz!</b>\n\nMusiqa topish uchun uning <b>nomini</b> yozing yoki menga <b>ovozli xabar (voice)</b> yuboring. 🔎")
+        channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
+        channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
+        await message.answer(
+            f"👋 <b>{channel_name} Boti</b>\n\n"
+            f"Ushbu bot faqat rasmiy <b><a href='{channel_link}'>{channel_name}</a></b> kanaliga "
+            f"avtomatik musiqalar joylash va boshqarish tizimidir. Bot ommaviy musiqa yuklash uchun mo'ljallanmagan.\n\n"
+            f"🎧 Barcha sara musiqalarni kanalimiz orqali tinglashingiz mumkin: <a href='{channel_link}'>{channel_name}</a>",
+            disable_web_page_preview=True
+        )
         return
 
     text = await get_admin_panel_text()
@@ -1429,51 +1473,30 @@ async def sync_backup_command(message: types.Message):
     asyncio.create_task(run_backup_sync_task(chat_id=message.chat.id))
 
 
-# --- Musiqa Qidirish (VKM / Shazam Bot mantiqi) ---
+@dp.message(Command("yangi_kanal", "create_backup_channel"))
+async def create_backup_channel_command(message: types.Message):
+    logger.info(f"Incoming /yangi_kanal command from User ID: {message.from_user.id} | Username: @{message.from_user.username}")
+    if not is_admin(message.from_user.id):
+        return
+    await message.answer("⏳ Userbot orqali yangi yopiq zaxira kanal ochilmoqda...")
+    asyncio.create_task(run_create_backup_channel_task(chat_id=message.chat.id))
+
+
+# --- Oddiy foydalanuvchilar xabarlari (Bot ommaviy musiqa yuklovchi emas, faqat kanal boti) ---
 
 @dp.message(lambda msg: msg.text and not msg.text.startswith("/"))
-async def text_search_handler(message: types.Message):
-    if not message.text:
+async def non_admin_text_handler(message: types.Message):
+    if is_admin(message.from_user.id):
         return
-    # Kanalga majburiy a'zolik tekshiruvi
-    if not await check_subscription(message.from_user.id):
-        await send_subscription_prompt(message)
-        return
-    raw_query = message.text.strip()
-    query = utils.clean_search_query(raw_query)
-    if not query:
-        await message.answer("❌ Qidiruv uchun yaroqli matn kiritilmadi.")
-        return
-    status_msg = await message.answer(f"🔍 Musiqa qidirilmoqda: <b>{query}</b>...")
-    
-    try:
-        # 1. Target Bot orqali qidirish
-        file_path = await userbot.search_text_via_target_bot(query)
-        
-        # 2. Agar topilmasa, YouTube Fallback
-        if not file_path:
-            logger.info("Target botdan topilmadi, YouTube ishlatilmoqda...")
-            file_path = await utils.get_youtube_with_api("", query)
-            
-        if file_path and os.path.exists(file_path):
-            await status_msg.delete()
-            # Shazam orqali toza nomini aniqlash (Audio yuborishda muqova uchun)
-            shazam_res = await utils.identify_track_with_shazam(file_path)
-            performer = shazam_res['artist'] if shazam_res else ""
-            title = shazam_res['title'] if shazam_res else query
-            
-            await message.reply_audio(
-                audio=FSInputFile(file_path),
-                performer=performer,
-                title=title,
-                caption=f"👉 @{(await bot.get_me()).username} orqali topildi!"
-            )
-            os.remove(file_path)
-        else:
-            await status_msg.edit_text("❌ Afsuski, hech qanday musiqa topilmadi. Boshqa so'zlar bilan qidirib ko'ring.")
-    except Exception as e:
-        logger.error(f"Matnli qidiruvda xatolik: {e}")
-        await status_msg.edit_text("❌ Musiqa qidirishda kutilmagan xatolik yuz berdi.")
+    channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
+    channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
+    await message.answer(
+        f"👋 <b>{channel_name} Boti</b>\n\n"
+        f"Ushbu bot faqat rasmiy <b><a href='{channel_link}'>{channel_name}</a></b> kanaliga "
+        f"avtomatik musiqalar joylash va boshqarish tizimidir. Bot ommaviy musiqa yuklash uchun mo'ljallanmagan.\n\n"
+        f"🎧 Barcha sara musiqalarni kanalimiz orqali tinglashingiz mumkin: <a href='{channel_link}'>{channel_name}</a>",
+        disable_web_page_preview=True
+    )
 
 
 async def process_and_post_direct_orig(status_msg: types.Message, file_id: str, artist: str, title: str):
@@ -1940,125 +1963,50 @@ async def process_direct_metadata_input(message: types.Message, state: FSMContex
 
 @dp.message(lambda msg: msg.voice or msg.audio)
 async def audio_search_handler(message: types.Message, state: FSMContext):
-    # Oddiy foydalanuvchilar uchun kanal a'zoligi tekshiruvi
+    # Oddiy foydalanuvchilar uchun xabar (ommaviy yuklash o'chirilgan)
     if not is_admin(message.from_user.id):
-        if not await check_subscription(message.from_user.id):
-            await send_subscription_prompt(message)
-            return
-
-    # Intercept admin direct audio upload
-    if is_admin(message.from_user.id):
-        await state.clear()
-        
-        file_id = message.audio.file_id if message.audio else message.voice.file_id
-        duration = message.audio.duration if message.audio else (message.voice.duration if message.voice else 0)
-        performer = (message.audio.performer or "").strip() if message.audio else ""
-        title = (message.audio.title or "").strip() if message.audio else ""
-        
-        await state.update_data(
-            pending_file_id=file_id,
-            pending_duration=duration,
-            pending_artist=performer,
-            pending_title=title
-        )
-        
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [
-                InlineKeyboardButton(text="📤 Originalini tozalash", callback_data="direct_select_orig")
-            ],
-            [
-                InlineKeyboardButton(text="🔎 Bot orqali tozalash", callback_data="direct_select_bot")
-            ],
-            [
-                InlineKeyboardButton(text="❌ Bekor qilish", callback_data="direct_cancel")
-            ]
-        ])
-        
-        await message.reply(
-            "📥 <b>Musiqa qabul qilindi.</b> Faylni qanday qayta ishlashni xohlaysiz?",
-            reply_markup=keyboard
+        channel_name = await database.get_setting("main_channel_name", config.MAIN_CHANNEL_NAME)
+        channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK)
+        await message.answer(
+            f"👋 <b>{channel_name} Boti</b>\n\n"
+            f"Ushbu bot faqat rasmiy <b><a href='{channel_link}'>{channel_name}</a></b> kanaliga "
+            f"avtomatik musiqalar joylash va boshqarish tizimidir. Bot ommaviy musiqa yuklash uchun mo'ljallanmagan.\n\n"
+            f"🎧 Barcha sara musiqalarni kanalimiz orqali tinglashingiz mumkin: <a href='{channel_link}'>{channel_name}</a>",
+            disable_web_page_preview=True
         )
         return
 
-    # 1. Agar foydalanuvchi tayyor audio fayl yuborgan bo'lsa va uning metama'lumotlari bo'lsa
-    if message.audio:
-        artist = (message.audio.performer or "").strip()
-        title = (message.audio.title or "").strip()
-        
-        if artist or title:
-            raw_query = f"{artist} - {title}".strip() if artist and title else (artist or title)
-            query = utils.clean_search_query(raw_query)
-            status_msg = await message.answer(f"🔍 Fayl ma'lumotlaridan qidirilmoqda: <b>{query}</b>...")
-            try:
-                # Target Bot orqali qidirish
-                file_path = await userbot.search_text_via_target_bot(query)
-                if not file_path:
-                    file_path = await utils.get_youtube_with_api("", query)
-                    
-                if file_path and os.path.exists(file_path):
-                    await status_msg.delete()
-                    await message.reply_audio(
-                        audio=FSInputFile(file_path),
-                        performer=artist or "Noma'lum",
-                        title=title or "Musiqa",
-                        caption=f"👉 @{(await bot.get_me()).username} orqali topildi!"
-                    )
-                    os.remove(file_path)
-                    return
-                else:
-                    await status_msg.edit_text(f"❌ Afsuski, <b>{query}</b> nomi bo'yicha musiqa topilmadi. Iltimos, boshqa so'zlar bilan yozib ko'ring.")
-                    return
-            except Exception as e:
-                logger.error(f"Audio metadata orqali qidiruvda xatolik: {e}")
-                await status_msg.edit_text("❌ Musiqa qidirishda kutilmagan xatolik yuz berdi.")
-                return
-
-    # 2. Ovozli xabar yoki metama'lumotlari yo'q audio bo'lsa (Shazam orqali qidirish)
-    if not utils.HAS_SHAZAM:
-        await message.answer("❌ Tizimda ovoz orqali aniqlash vaqtincha faol emas.\n\nIltimos, musiqani topish uchun uning <b>nomini matn ko'rinishida</b> yozib yuboring! 🔎")
-        return
-
-    status_msg = await message.answer("🎙️ Ovoz tahlil qilinmoqda, iltimos kuting...")
-    temp_path = f"downloads/search_{random.randint(1000, 9999)}.mp3"
+    # Admin to'g'ridan-to'g'ri kanalga musiqa yuklashi
+    await state.clear()
     
-    try:
-        os.makedirs("downloads", exist_ok=True)
-        file_id = message.voice.file_id if message.voice else message.audio.file_id
-        file = await bot.get_file(file_id)
-        await bot.download_file(file.file_path, temp_path)
-        
-        shazam_result = await utils.identify_track_with_shazam(temp_path)
-        
-        if shazam_result:
-            artist = shazam_result['artist']
-            title = shazam_result['title']
-            await status_msg.edit_text(f"✅ Aniqlandi: <b>{artist} - {title}</b>\nOriginal fayl yuklanmoqda...")
-            
-            query = utils.clean_search_query(f"{artist} - {title}")
-            file_path = await userbot.search_text_via_target_bot(query)
-            if not file_path:
-                file_path = await utils.get_youtube_with_api(artist, title)
-                
-            if file_path and os.path.exists(file_path):
-                await status_msg.delete()
-                await message.reply_audio(
-                    audio=FSInputFile(file_path),
-                    performer=artist,
-                    title=title,
-                    caption=f"👉 @{(await bot.get_me()).username} orqali topildi!"
-                )
-                os.remove(file_path)
-            else:
-                await status_msg.edit_text("❌ Qo'shiq aniqlandi, lekin original faylini yuklab bo'lmadi.")
-        else:
-            await status_msg.edit_text("❌ Afsuski, ushbu ovozdan musiqani aniqlab bo'lmadi. Iltimos, uning nomini matn ko'rinishida yuboring! 🔎")
-            
-    except Exception as e:
-        logger.error(f"Ovozli qidiruvda xatolik: {e}")
-        await status_msg.edit_text("❌ Ovoz orqali qidirishda kutilmagan xatolik yuz berdi.")
-    finally:
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+    file_id = message.audio.file_id if message.audio else message.voice.file_id
+    duration = message.audio.duration if message.audio else (message.voice.duration if message.voice else 0)
+    performer = (message.audio.performer or "").strip() if message.audio else ""
+    title = (message.audio.title or "").strip() if message.audio else ""
+    
+    await state.update_data(
+        pending_file_id=file_id,
+        pending_duration=duration,
+        pending_artist=performer,
+        pending_title=title
+    )
+    
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="📤 Originalini tozalash", callback_data="direct_select_orig")
+        ],
+        [
+            InlineKeyboardButton(text="🔎 Bot orqali tozalash", callback_data="direct_select_bot")
+        ],
+        [
+            InlineKeyboardButton(text="❌ Bekor qilish", callback_data="direct_cancel")
+        ]
+    ])
+    
+    await message.reply(
+        "📥 <b>Musiqa qabul qilindi.</b> Faylni qanday qayta ishlashni xohlaysiz?",
+        reply_markup=keyboard
+    )
 
 
 # --- Inline Rejim (Telegram chatlarida @bot_username orqali qidirish) ---
