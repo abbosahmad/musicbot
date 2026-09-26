@@ -65,7 +65,7 @@ BLACKLIST_CHANNELS = [
     # 'AliMuzTv', 'Surxon_Muz', 'Uzmuz'
 ]
 BLACKLIST_KEYWORDS = [
-    # '@AliMuzTv', '@Surxon_Muz', 'AliMuz', 'Surxon Muz'
+    'youtube video', '#', 'жиганская', 'блатняк', 'шансон', 'тюремн', 'qamoq', 'zona', 'video clip', 'lyric video'
 ]
 
 # --- Botning Ishlash Mantig'i ---

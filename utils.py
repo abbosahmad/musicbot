@@ -582,11 +582,145 @@ def _clean_single_string(text: str) -> str:
     if len(cleaned) < 2 and not cleaned.isalnum():
         return ""
 
-    return cleaned
+def is_valid_music_title(text: str) -> bool:
+    """
+    Sarlavha haqiqiy qo'shiq nomi ekanligini yoki spam/axlat ekanligini tekshiradi.
+    Agar axlat (youtube video, #hash, faqat sonlar, juda qisqa) bo'lsa False qaytaradi.
+    """
+    if not text:
+        return False
+    t = str(text).strip().lower()
+    
+    # 1. YouTube xom video nomlari va xash-teglari
+    trash_patterns = [
+        r'youtube\s*video',
+        r'#\w{7,}',        # #wPwOjChN3Nc kabi YouTube video IDlari
+        r'video\s*#',
+        r'^video\b',
+        r'^\d+$',          # Faqat raqamlardan iborat bo'lsa
+        r'^[\W_]+$',       # Faqat belgilardan iborat bo'lsa
+        r'\.mp[34]$',
+        r'\b(?:track|audio|sound|voice|fayl|audio_)\b\s*\d*$',
+        r'https?://',
+        r't\.me/'
+    ]
+    for p in trash_patterns:
+        if re.search(p, t):
+            return False
+            
+    # Harf yoki so'zlar borligini tekshirish (kamida 2 ta harf bo'lishi kerak)
+    letters = re.findall(r'[a-zA-Zа-яА-ЯёЁўқғҳЎҚҒҲ]', t)
+    if len(letters) < 2:
+        return False
+
+    return True
+
+
+def clean_music_title_only(raw_title: str, raw_artist: str = "") -> str:
+    """
+    Musiqa sarlavhasidan barcha axlatlarni (ijrochi nomi, emojilar, YouTube teglari, 
+    lyric video, official video va h.k.) tozalab, FAQAT sof qo'shiq nomini qaytaradi.
+    """
+    if not raw_title:
+        return "Musiqa"
+
+    t = str(raw_title).strip()
+
+    # 1. Emojilarni to'liq olib tashlash (barcha Unicode emoji diapazonlari)
+    emoji_pattern = re.compile(
+        r'[\U00010000-\U0010FFFF\u2600-\u27BF\u2300-\u23FF\u2B50-\u2B55\u200D\u200C\uFE0F\uFE0E\u20E3]+'
+    )
+    t = emoji_pattern.sub('', t)
+
+    # Yopilmagan (VIDEO yoki (LYRIC kabi oxirida qolib ketgan qavslarni tozalash
+    t = re.sub(r'[\(\[\{]\s*(?:video|audio|clip|klip|lyric|official)[^\)\]\}]*$', '', t, flags=re.IGNORECASE)
+    t = re.sub(r'[\(\[\{][^\)\]\}]*$', '', t)
+
+    # 2. YouTube va video axlatlarini tozalash
+    junk_patterns = [
+        r'\(?\s*lyric(?:s)?\s*video\s*\)?',
+        r'\(?\s*official\s*(?:music|audio|video|clip|klip)?\s*\)?',
+        r'\(?\s*(?:video|audio|klip|clip|premyera|premiere)\s*\)?',
+        r'\[?\s*(?:lyric|lyrics|official|video|audio|klip|clip|hd|4k)\s*\]?',
+        r'#\w+',
+        r'youtube\s*video',
+        r'\b(?:mp3|skachat|yuklash|xit|hit)\b',
+        r'@[a-zA-Z0-9_]+',
+        r'https?://\S+',
+        r't\.me/\S+'
+    ]
+    for pat in junk_patterns:
+        t = re.sub(pat, '', t, flags=re.IGNORECASE)
+
+    # 3. Agar raw_artist berilgan bo'lsa yoki sarlavhada "Artist - Title" bo'lsa
+    if " - " in t:
+        parts = t.split(" - ")
+        if len(parts) >= 2:
+            t = parts[-1].strip()
+    elif " – " in t:
+        parts = t.split(" – ")
+        if len(parts) >= 2:
+            t = parts[-1].strip()
+
+    # Agar ma'lum artist nomi sarlavha boshida qolib ketgan bo'lsa
+    if raw_artist and raw_artist.strip():
+        a_clean = raw_artist.strip().lower()
+        if a_clean not in ["trend music", "trend musiqa", "unknown", "noma'lum", "musiqa"]:
+            pattern = r'^\s*' + re.escape(raw_artist.strip()) + r'[\s\-:_]*'
+            t = re.sub(pattern, '', t, flags=re.IGNORECASE)
+
+    # Mashhur ijrochi prefikslarini sarlavha boshidan tozalash
+    singer_prefixes = [
+        r'^\s*asl\s*wayne\s*',
+        r'^\s*jaloliddin\s*ahmadaliyev\s*',
+        r'^\s*doston\s*ergashev\s*',
+        r'^\s*alisher\s*zokirov\s*',
+        r'^\s*shohruhxon\s*',
+        r'^\s*yulduz\s*usmonova\s*',
+        r'^\s*ozoda\s*nursaidova\s*',
+        r'^\s*hamdam\s*sobirov\s*',
+        r'^\s*sherali\s*joraev\s*',
+        r'^\s*ozodbek\s*nazarbekov\s*',
+        r'^\s*konsta\s*',
+        r'^\s*rauf\s*&\s*faik\s*',
+        r'^\s*morgenshtern\s*',
+        r'^\s*macan\s*',
+        r'^\s*jony\s*',
+        r'^\s*miya\s*gi\s*',
+        r'^\s*navai\s*'
+    ]
+    for sp in singer_prefixes:
+        t = re.sub(sp, '', t, flags=re.IGNORECASE)
+
+    # 4. Qavslarni tekshirish (faqat Remix, Speed Up kabi musiqiy teglarni saqlash)
+    def _bracket_keep(match):
+        inner = match.group(1).strip()
+        inner_l = inner.lower()
+        if any(m in inner_l for m in ['remix', 'speed up', 'slowed', 'cover', 'acoustic', 'feat', 'ft.']):
+            return f"({inner})"
+        return ""
+    t = re.sub(r'[\(\[\{](.*?)[\)\]\}]', _bracket_keep, t)
+
+    # Qolib ketgan ochilgan/yopilgan qavslar
+    t = re.sub(r'[\(\[\{]\s*$', '', t)
+    t = re.sub(r'^\s*[\)\]\}]', '', t)
+    t = re.sub(r'[\(\[\{]\s*[\)\]\}]', '', t)
+
+    # 5. Belgilar va bo'shliqlarni tozalash
+    t = re.sub(r'\s+', ' ', t).strip(' -_•:.,~|')
+
+    if len(t) < 2:
+        return "Musiqa"
+
+    # 6. Agar butunlay kichik harf bo'lsa, bosh harf qilish
+    if t.islower():
+        t = t.capitalize()
+
+    return t
 
 
 def clean_title(title: str, artist: str) -> str:
-    return f"{artist} - {title}"
+    return clean_music_title_only(title, artist)
 
 
 def write_clean_metadata(file_path: str, artist: str, title: str):
@@ -660,8 +794,9 @@ def write_clean_metadata(file_path: str, artist: str, title: str):
         tags.delall('TXXX')
         tags.delall('TCOM')
         
-        # 1. Qo'shiq nomi
-        tags.add(TIT2(encoding=3, text=[title or "Musiqa"]))
+        # 1. Qo'shiq nomi (faqat sof qo'shiq nomi)
+        pure_title = clean_music_title_only(title, artist) or "Musiqa"
+        tags.add(TIT2(encoding=3, text=[pure_title]))
         # 2. Ijrochi: Trend Music
         tags.add(TPE1(encoding=3, text=["Trend Music"]))
         # 3. Bastakor: https://t.me/trend_musiqauz

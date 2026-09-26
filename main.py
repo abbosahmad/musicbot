@@ -173,12 +173,12 @@ async def send_music_to_channel(file_path: str, caption_text: str, artist: str, 
     channel_link = await database.get_setting("main_channel_link", config.MAIN_CHANNEL_LINK) or "https://t.me/trend_musiqauz"
     highlight_time = utils.detect_music_highlight(file_path)
 
-    # 1. Pleyerda ko'rinishi: Sarlavha: Qo'shiq nomi (masalan Медуза), Ijrochi: Trend Music
-    clean_t = title.strip() if title else "Musiqa"
-    final_title = clean_t
+    # 1. Pleyerda ko'rinishi: Sarlavha: Faqat sof qo'shiq nomi, Ijrochi: Trend Music
+    clean_t = utils.clean_music_title_only(title, artist)
+    final_title = clean_t or "Musiqa"
     final_performer = channel_name
 
-    # 2. Toza caption (Rasm 2 dagi kabi): "01:43 Trend Music | 🎧"
+    # 2. Toza caption: "01:43 Trend Music | 🎧"
     final_caption = f"{highlight_time} <a href='{channel_link}'>{channel_name}</a> | 🎧"
 
     logger.info(f"Musiqa Bot orqali to'g'ridan-to'g'ri kanalga yuklanmoqda ({config.MAIN_CHANNEL_ID})...")
@@ -224,22 +224,19 @@ async def post_music(track_info: Dict):
             else:
                 emoji_tag = "🎧"
             
-            # AI orqali artist va title ni tozalash
+            # AI orqali artist va title ni tozalash, lekin sarlavha FAQAT sof qo'shiq nomi bo'ladi
             ai_cleaned = await utils.get_clean_details_with_ai(raw_artist, raw_title)
-            final_artist = ai_cleaned.get('artist') or utils._clean_single_string(raw_artist) or ""
-            final_title = ai_cleaned.get('title') or utils._clean_single_string(raw_title) or "Musiqa"
-            
-            if final_artist.lower() in ["spotify", "uzmuz", "dilnavo", "taronalar", "trend musiqa", "trend music", "unknown artist", "unknown", "noma'lum"]:
-                final_artist = ""
-
-            if final_artist.lower().strip() == final_title.lower().strip():
-                final_artist = ""
+            final_title = utils.clean_music_title_only(
+                ai_cleaned.get('title') or raw_title, 
+                ai_cleaned.get('artist') or raw_artist
+            ) or "Musiqa"
+            final_artist = "Trend Music"
 
             # Rewrite metadata tags in the file itself (eski logolar va teglarni butunlay tozalab)
             utils.write_clean_metadata(direct_file, final_artist, final_title)
             
             # Add to database to prevent duplicates later
-            await database.add_track_to_db(track_id, final_artist or final_title, final_title)
+            await database.add_track_to_db(track_id, final_artist, final_title)
             
             # Avj vaqtini aniqlash
             highlight_time = utils.detect_music_highlight(direct_file, raw_text=track_info.get('raw_caption', ''))
@@ -402,8 +399,8 @@ async def post_music(track_info: Dict):
             else:
                 emoji_tag = "🎧"
 
-            # Clean final title (Ijrochi har doim Trend Music)
-            final_title = utils._clean_single_string(final_title) or clean_title or "Musiqa"
+            # Clean final title (Faqat sof qo'shiq nomi, Ijrochi har doim Trend Music)
+            final_title = utils.clean_music_title_only(final_title or clean_title) or "Musiqa"
             final_artist = "Trend Music"
 
             # Rewrite ID3 tags in the MP3 file itself (Ijrochi: Trend Music, Qo'shiq: final_title)
@@ -611,8 +608,8 @@ async def _plan_daily_posts_internal(force: bool = False):
             c_artist = utils._clean_single_string(
                 ai.get('artist') or raw_a
             ) or "Trend MUSIC"
-            c_title = utils._clean_single_string(
-                ai.get('title') or raw_t
+            c_title = utils.clean_music_title_only(
+                ai.get('title') or raw_t, c_artist
             ) or "Musiqa"
             query = f"{c_artist} - {c_title}"
 
@@ -687,12 +684,13 @@ async def _plan_daily_posts_internal(force: bool = False):
                 logger.error(f"Faylni ko'chirishda xatolik: {rename_err}")
 
             cand['direct_file_path'] = fpath
-            c_t = utils._clean_single_string(cand.get('title', '')) or "Musiqa"
+            # FAQAT sof qo'shiq nomi, barcha axlatlar tozalangan!
+            pure_title = utils.clean_music_title_only(cand.get('title', ''), cand.get('artist', ''))
             cand['artist'] = "Trend Music"
-            cand['title'] = c_t
-            utils.write_clean_metadata(fpath, "Trend Music", c_t)
+            cand['title'] = pure_title
+            utils.write_clean_metadata(fpath, "Trend Music", pure_title)
             ready_tracks.append(cand)
-            logger.info(f"✅ Rejaga olindi ({len(ready_tracks)}/{target_count}): {c_t}")
+            logger.info(f"✅ Rejaga olindi ({len(ready_tracks)}/{target_count}): {pure_title}")
         else:
             logger.warning(f"⚠️ Pre-dl muvaffaqiyatsiz bo'ldi ({cand.get('title')}), zaxiradagi keyingi musiqa sinab ko'rilmoqda...")
 

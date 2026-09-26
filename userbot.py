@@ -135,12 +135,21 @@ class UserBot:
             raw_title = audio.title or audio.file_name or ""
             filename = audio.file_name or ""
 
+            # Axlat yoki yaroqsiz sarlavhalarni boshidanoq rad etish
+            if not utils.is_valid_music_title(raw_title):
+                return None
+
             clean_artist, clean_title = utils.extract_clean_artist_and_title(
                 raw_artist, raw_title, raw_caption, filename
             )
 
+            # Faqat sof qo'shiq nomini qoldirish
+            pure_title = utils.clean_music_title_only(clean_title or raw_title, clean_artist or raw_artist)
+            if not utils.is_valid_music_title(pure_title):
+                return None
+
             artist = clean_artist
-            title = clean_title if clean_title else raw_title
+            title = pure_title
             duration_ms = (audio.duration or 0) * 1000
             file_id = audio.file_id
             is_voice = False
