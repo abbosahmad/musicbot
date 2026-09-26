@@ -87,7 +87,8 @@ async def get_clean_details_with_ai(raw_artist: str, raw_title: str) -> dict:
     if not fallback_title:
         fallback_title = _clean_single_string(raw_title)
 
-    if not hasattr(config, 'DEEPSEEK_API_KEY') or not config.DEEPSEEK_API_KEY:
+    api_key = getattr(config, 'OPENAI_API_KEY', None) or getattr(config, 'DEEPSEEK_API_KEY', None) or getattr(config, 'AI_API_KEY', None)
+    if not api_key:
         return {
             "artist": fallback_artist or "Trend MUSIC",
             "title": fallback_title or "Musiqa",
@@ -97,31 +98,33 @@ async def get_clean_details_with_ai(raw_artist: str, raw_title: str) -> dict:
         }
 
     try:
-        raw_model_name = getattr(config, 'DEEPSEEK_MODEL', 'deepseek-v4-flash-vision-exp')
-        base_url = getattr(config, 'DEEPSEEK_BASE_URL', None)
+        raw_model_name = getattr(config, 'AI_MODEL', getattr(config, 'DEEPSEEK_MODEL', 'gpt-6-luna'))
+        base_url = getattr(config, 'AI_BASE_URL', getattr(config, 'DEEPSEEK_BASE_URL', None))
         
         if not base_url:
             if "openrouter" in raw_model_name.lower():
                 base_url = "https://openrouter.ai/api/v1"
-            else:
+            elif "deepseek" in raw_model_name.lower() and not raw_model_name.startswith("gpt"):
                 base_url = "https://api.deepseek.com"
+            else:
+                base_url = None  # Defaults to official OpenAI API https://api.openai.com/v1
 
         model_name = raw_model_name
-        if "api.deepseek.com" in base_url and model_name.startswith("deepseek/"):
+        if base_url and "api.deepseek.com" in base_url and model_name.startswith("deepseek/"):
             model_name = model_name.replace("deepseek/", "")
 
         default_headers = {}
-        if "openrouter.ai" in base_url:
+        if base_url and "openrouter.ai" in base_url:
             default_headers = {
                 "HTTP-Referer": "https://abboscoder.uz/music",
                 "X-Title": "Trend Music Telegram Bot"
             }
 
         client = AsyncOpenAI(
-            api_key=config.DEEPSEEK_API_KEY,
+            api_key=api_key,
             base_url=base_url,
             default_headers=default_headers if default_headers else None,
-            timeout=12.0
+            timeout=15.0
         )
 
         system_prompt = """You are an expert music metadata recognition and cleaning AI with vast knowledge of Uzbek, Russian, Turkish, English and international music.
@@ -164,17 +167,22 @@ Raw Title: "{raw_title}" """
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            "temperature": 0.1
+            "response_format": {"type": "json_object"}
         }
+
+        # GPT-6 (luna, sol, astra) and o1/o3 reasoning models only support default temperature=1 (or omitted), and support reasoning_effort
+        if "gpt-6" in model_name.lower() or model_name.startswith("o1") or model_name.startswith("o3"):
+            create_kwargs["reasoning_effort"] = "none"
+        else:
+            create_kwargs["temperature"] = 0.1
         
         # Add response_format if standard supported
         try:
-            response = await client.chat.completions.create(
-                **create_kwargs,
-                response_format={"type": "json_object"}
-            )
+            response = await client.chat.completions.create(**create_kwargs)
         except Exception:
             # Fallback without json_object constraint for models that don't support it directly
+            if "response_format" in create_kwargs:
+                del create_kwargs["response_format"]
             response = await client.chat.completions.create(**create_kwargs)
 
         content = response.choices[0].message.content.strip()

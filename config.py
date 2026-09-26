@@ -15,10 +15,17 @@ if not _admin_user_id:
     raise ValueError("ADMIN_USER_ID is required. Please set it in .env file.")
 ADMIN_USER_ID = int(_admin_user_id)
 
-# --- AI Sozlamalari (DeepSeek / OpenRouter) ---
+# --- AI Sozlamalari (OpenAI / DeepSeek / OpenRouter) ---
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek/deepseek-v4-flash-vision-exp")
-DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL")
+AI_API_KEY = OPENAI_API_KEY or DEEPSEEK_API_KEY or os.getenv("AI_API_KEY")
+AI_MODEL = os.getenv("AI_MODEL", os.getenv("DEEPSEEK_MODEL", "gpt-6-luna"))
+AI_BASE_URL = os.getenv("AI_BASE_URL", os.getenv("DEEPSEEK_BASE_URL"))
+
+# Backward compatibility
+DEEPSEEK_API_KEY = AI_API_KEY
+DEEPSEEK_MODEL = AI_MODEL
+DEEPSEEK_BASE_URL = AI_BASE_URL
 
 # --- YouTube API ---
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
