@@ -63,10 +63,16 @@ Kanalga kun davomida **aralash** postlar joylab boruvchi alohida agent:
 
 | Tur | Manba |
 |-----|-------|
-| 💡 Aqlli gap | AI yozadi (takrorlanmasligi uchun oxirgi postlar hisobga olinadi), AI bo'lmasa — zaxira hikmatlar |
-| 🎬 Kino parcha | Admin botga yuborgan / forward qilgan video, GIF, dumaloq video + AI izoh |
+| 🎬 Kino parcha / qisqa video | Admin botga yuborgan / forward qilgan video, GIF, dumaloq video |
 | 🎙 Ovozli xabar | Admin yozgan voice yoki AI ovozi (OpenAI TTS) |
-| 🎵 Musiqa | Admin yuborgan audio + AI kayfiyat izohi |
+| 🎵 Musiqa | Admin yuborgan audio |
+| 💡 Aqlli gap | Faqat matnli post (AI yozadi) |
+
+**Post uslubi:** media + ostida bitta qisqa, ta'sirli jumla `blockquote` ichida
+(masalan: *«Агар ҳаётимда нимадир абадий бўлса, бу сенинг борлигинг бўлсин!»*).
+- Media bilan caption yuborsangiz — post aynan shu caption bilan chiqadi.
+- Boshqa kanaldan forward qilinsa — caption'dagi @username, havola va hashtag'lar tozalanadi.
+- Caption bo'lmasa — jumlani AI yozadi (oxirgi postlar takrorlanmaydi), AI bo'lmasa zaxira jumlalar.
 
 Agent turlarni og'irlik (ulush) bo'yicha tanlaydi va bir xil turni ketma-ket qo'ymaydi.
 Kutubxonadagi eng kam ishlatilgan media birinchi joylanadi.
@@ -77,7 +83,7 @@ pip install -r requirements.txt
 python -m post_agent
 ```
 Botga `/start` yozing — boshqaruv tugmalari chiqadi. Media yuborsangiz kutubxonaga qo'shiladi
-(caption'ga kino nomi yoki izoh yozsangiz, AI undan foydalanadi).
+(caption yozsangiz, post shu caption bilan chiqadi).
 
 Buyruqlar: `/post [quote|clip|voice|music]`, `/preview [tur]`, `/stats`.
 
@@ -86,11 +92,12 @@ Buyruqlar: `/post [quote|clip|voice|music]`, `/preview [tur]`, `/stats`.
 AGENT_BOT_TOKEN=...            # alohida bot tavsiya etiladi (bo'lmasa ADMIN_BOT_TOKEN)
 AGENT_ADMIN_ID=123456789       # bo'lmasa ADMIN_USER_ID
 AGENT_CHANNEL_ID=-100...       # bot kanalda admin bo'lishi shart
-AGENT_SIGNATURE=🌙 @kanalim
+AGENT_SIGNATURE=               # bo'sh qoldirsangiz imzo qo'shilmaydi
+AGENT_SCRIPT=cyrillic          # yoki latin
 AGENT_POST_TIMES=08:00,11:00,14:00,17:00,20:00,22:30
 AGENT_JITTER_SECONDS=300       # vaqtga +/- tasodifiy siljish
-AGENT_MIX=quote:3,clip:2,voice:2,music:3
-AGENT_TOPICS=hayot, sabr, sevgi, motivatsiya
+AGENT_MIX=clip:5,voice:2,music:2,quote:1
+AGENT_TOPICS=sevgi, sadoqat, oila, nasib, sog'inch, juftlik baxti
 OPENAI_API_KEY=...             # matn va TTS uchun (AI_MODEL / AI_BASE_URL ham ishlaydi)
 AGENT_TTS_ENABLED=true
 AGENT_TTS_MODEL=gpt-4o-mini-tts

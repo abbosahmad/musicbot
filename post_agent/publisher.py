@@ -41,17 +41,15 @@ def _with_signature(text: str) -> str:
     return text
 
 
-def _fit(text: str, limit: int = CAPTION_LIMIT) -> str:
-    return text if len(text) <= limit else text[:limit - 1] + "…"
+def format_line(text: str) -> str:
+    """Kanal uslubi: bitta qisqa jumla blockquote ichida."""
+    text = text if len(text) <= CAPTION_LIMIT - 50 else text[:CAPTION_LIMIT - 51] + "…"
+    return _with_signature(f"<blockquote>{html.escape(text)}</blockquote>")
 
 
-def format_quote(data: Dict[str, str]) -> str:
-    body = f"<blockquote>{html.escape(data['quote'])}</blockquote>"
-    if data.get("author"):
-        body += f"\n— <i>{html.escape(data['author'])}</i>"
-    if data.get("comment"):
-        body += f"\n\n{html.escape(data['comment'])}"
-    return _with_signature(body)
+def media_caption(media: Dict) -> Optional[str]:
+    """Admin media bilan caption yuborgan bo'lsa - o'shani o'zgarishsiz (formatlash bilan) qo'yamiz."""
+    return _with_signature(media["note"]) if media.get("note") else None
 
 
 class Publisher:
@@ -104,22 +102,29 @@ class Publisher:
         return True, category
 
     async def _send_quote(self, target, recent):
-        data = await writer.write_quote(recent)
-        msg = await self.bot.send_message(target, format_quote(data))
-        return msg, data["quote"], None
+        text = await writer.write_line("quote", recent)
+        msg = await self.bot.send_message(target, format_line(text))
+        return msg, text, None
+
+    async def _caption_for(self, media: Dict, category: str, recent, hint: str = "") -> Tuple[str, str]:
+        """(caption_html, tarix uchun matn)"""
+        caption = media_caption(media)
+        if caption:
+            return caption, media["note"]
+        text = await writer.write_line(category, recent, hint)
+        return format_line(text), text
 
     async def _send_clip(self, target, recent, media=None):
         media = media or await self.storage.pick_media("clip")
         if not media:
             return None, "Kutubxonada kino parcha yo'q", None
-        text = await writer.write_clip_caption(media["note"], recent)
-        caption = _fit(_with_signature(html.escape(text)))
+        caption, text = await self._caption_for(media, "clip", recent)
         if media["kind"] == "video":
             msg = await self.bot.send_video(target, media["file_id"], caption=caption)
         elif media["kind"] == "animation":
             msg = await self.bot.send_animation(target, media["file_id"], caption=caption)
         else:
-            # Dumaloq videoda caption bo'lmaydi - izohni alohida xabar qilib yuboramiz
+            # Dumaloq videoda caption bo'lmaydi - matnni alohida xabar qilib yuboramiz
             msg = await self.bot.send_video_note(target, media["file_id"])
             await self.bot.send_message(target, caption)
         return msg, text, media
@@ -132,22 +137,22 @@ class Publisher:
             data = await writer.write_voice_script(recent)
             audio = await tts.synthesize(data["script"])
             if audio:
-                caption = _fit(_with_signature(f"🎙 {html.escape(data['caption'])}" if data["caption"] else ""))
+                caption = format_line(data["caption"]) if data["caption"] else (_with_signature("") or None)
                 msg = await self.bot.send_voice(
-                    target, BufferedInputFile(audio, filename="voice.ogg"), caption=caption or None
+                    target, BufferedInputFile(audio, filename="voice.ogg"), caption=caption
                 )
-                return msg, data["script"], None
+                return msg, data["caption"] or data["script"], None
         if not media:
             return None, "Ovozli xabar yo'q va TTS ishlamadi", None
-        caption = _fit(_with_signature(html.escape(media["note"])))
-        msg = await self.bot.send_voice(target, media["file_id"], caption=caption or None)
-        return msg, media["note"], media
+        caption, text = await self._caption_for(media, "voice", recent)
+        msg = await self.bot.send_voice(target, media["file_id"], caption=caption)
+        return msg, text, media
 
     async def _send_music(self, target, recent, media=None):
         media = media or await self.storage.pick_media("music")
         if not media:
             return None, "Kutubxonada musiqa yo'q", None
-        text = await writer.write_music_caption(media["title"], media["note"], recent)
-        caption = _fit(_with_signature(html.escape(text)))
+        hint = f"Qo'shiq: {media['title']}" if media["title"] else ""
+        caption, text = await self._caption_for(media, "music", recent, hint)
         msg = await self.bot.send_audio(target, media["file_id"], caption=caption)
         return msg, text, media

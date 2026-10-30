@@ -1,5 +1,7 @@
 """Ishga tushirish: python -m post_agent"""
 import asyncio
+import html
+import re
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.default import DefaultBotProperties
@@ -62,13 +64,14 @@ async def stats_text() -> str:
 HELP_TEXT = (
     "🤖 <b>Kanal post agenti</b>\n\n"
     "Men kanalga navbat bilan aralash postlar joylayman:\n"
+    "🎬 kino parchalar / qisqa videolar\n"
     "💡 aqlli gaplar (AI yozadi)\n"
-    "🎬 kino parchalar\n"
     "🎙 ovozli xabarlar (siz yozgan yoki AI ovozi)\n"
     "🎵 musiqalar\n\n"
     "<b>Kutubxonaga qo'shish:</b> menga video, GIF, dumaloq video, ovozli xabar yoki audio "
-    "yuboring (yoki boshqa kanaldan forward qiling). Caption yozsangiz (masalan, kino nomi) — "
-    "AI izoh yozishda undan foydalanadi.\n\n"
+    "yuboring (yoki boshqa kanaldan forward qiling).\n"
+    "• Caption yozsangiz — post aynan shu caption bilan chiqadi (formatlash ham saqlanadi).\n"
+    "• Caption bo'lmasa — AI qisqa jumla yozib, blockquote ichida qo'yadi.\n\n"
     "<b>Buyruqlar:</b>\n"
     "/post [quote|clip|voice|music] — hozir kanalga joylash\n"
     "/preview [tur] — kanalga emas, o'zingizga namuna\n"
@@ -145,6 +148,27 @@ async def cb_media(call: CallbackQuery):
         await call.message.answer(f"✅ Joylandi: {CATEGORY_LABELS.get(info, info)}" if success else f"❌ {info}")
 
 
+def clean_forwarded_caption(text: str) -> str:
+    """Boshqa kanaldan forward qilingan caption'dan havola, @username va reklama qatorlarini olib tashlaydi."""
+    lines = []
+    for line in (text or "").splitlines():
+        if re.search(r"(@\w+|t\.me/|https?://|www\.)", line, re.IGNORECASE):
+            continue
+        line = re.sub(r"#\w+", "", line).strip()
+        if line:
+            lines.append(line)
+    return "\n".join(lines)
+
+
+def caption_note(message: Message) -> str:
+    if not message.caption:
+        return ""
+    if message.forward_origin:
+        cleaned = clean_forwarded_caption(message.caption)
+        return f"<blockquote>{html.escape(cleaned)}</blockquote>" if cleaned else ""
+    return message.html_text
+
+
 @dp.message(F.video | F.animation | F.video_note | F.voice | F.audio)
 async def on_media(message: Message):
     if not is_admin(message.from_user.id):
@@ -158,7 +182,7 @@ async def on_media(message: Message):
     if kind == "audio":
         title = " - ".join(p for p in (obj.performer, obj.title) if p) or (obj.file_name or "")
     media_id = await storage.add_media(kind, obj.file_id, obj.file_unique_id,
-                                       title=title, note=message.caption or "")
+                                       title=title, note=caption_note(message))
     if media_id is None:
         await message.reply("ℹ️ Bu fayl kutubxonada allaqachon bor.")
         return

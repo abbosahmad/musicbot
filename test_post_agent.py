@@ -7,7 +7,8 @@ import pytest
 
 from post_agent import publisher as pub_module
 from post_agent import settings
-from post_agent.publisher import Publisher, available_categories, choose_category, format_quote
+from post_agent.publisher import Publisher, available_categories, choose_category, format_line
+from post_agent.writer import to_cyrillic
 from post_agent.storage import Storage
 
 
@@ -79,10 +80,27 @@ def test_available_categories():
     assert available_categories(counts, False) == ["quote", "clip", "music"]
 
 
-def test_format_quote_escapes_html(monkeypatch):
+def test_format_line_blockquote(monkeypatch):
     monkeypatch.setattr(settings, "SIGNATURE", "")
-    text = format_quote({"quote": "a < b", "author": "X & Y", "comment": ""})
-    assert "a &lt; b" in text and "X &amp; Y" in text and "<blockquote>" in text
+    assert format_line("a < b & c") == "<blockquote>a &lt; b &amp; c</blockquote>"
+
+
+def test_to_cyrillic():
+    assert to_cyrillic("Haqiqiy sevgi bu") == "Ҳақиқий севги бу"
+    assert to_cyrillic("Har qanday holatda sodiq qolmoqlik") == "Ҳар қандай ҳолатда содиқ қолмоқлик"
+    assert to_cyrillic("O'zbek g'ururi, shirin choy, yoshlik, ertak") == "Ўзбек ғурури, ширин чой, ёшлик, эртак"
+
+
+def test_admin_caption_used_verbatim(env):
+    async def scenario():
+        storage, bot = await env()
+        mid = await storage.add_media("video", "vid", "u1", note="<b>Mr&amp;Mrs</b>")
+        ok, _ = await Publisher(bot, storage).publish(media_id=mid)
+        assert ok
+        assert bot.sent[0][3]["caption"] == "<b>Mr&amp;Mrs</b>\n\n@test_kanal"
+        await storage.close()
+
+    run(scenario())
 
 
 def test_media_dedup_and_rotation(env):
@@ -104,9 +122,9 @@ def test_media_dedup_and_rotation(env):
 def test_publish_mix_without_ai(env):
     async def scenario():
         storage, bot = await env()
-        await storage.add_media("video", "vid", "u1", note="Kino")
+        await storage.add_media("video", "vid", "u1")
         await storage.add_media("audio", "aud", "u2", title="Artist - Song")
-        await storage.add_media("voice", "voi", "u3", note="Ovozli fikr")
+        await storage.add_media("voice", "voi", "u3", note="haqiqiy sevgi bu")
         p = Publisher(bot, storage)
 
         for cat in ("quote", "clip", "voice", "music"):
@@ -116,7 +134,9 @@ def test_publish_mix_without_ai(env):
         methods = [s[0] for s in bot.sent]
         assert methods == ["message", "video", "voice", "audio"]
         assert all(s[1] == -100123 for s in bot.sent)
-        assert "@test_kanal" in bot.sent[0][2]
+        assert bot.sent[0][2].startswith("<blockquote>") and "@test_kanal" in bot.sent[0][2]
+        assert bot.sent[1][3]["caption"].startswith("<blockquote>")  # AI/zaxira jumla
+        assert bot.sent[2][3]["caption"].startswith("haqiqiy sevgi bu")  # admin caption
         assert await storage.post_count() == 4
         assert (await storage.count_by_category())["clip"]["unused"] == 0
         await storage.close()

@@ -1,4 +1,7 @@
-"""AI orqali post matnlarini yozuvchi qism. AI ishlamasa zaxira matnlardan foydalanadi."""
+"""AI orqali post matnlarini yozuvchi qism. AI ishlamasa zaxira matnlardan foydalanadi.
+
+Uslub: bitta qisqa, ta'sirli jumla (sevgi, sadoqat, oila) - kanal postlari ostidagi blockquote uchun.
+"""
 import json
 import random
 import re
@@ -9,56 +12,87 @@ from openai import AsyncOpenAI
 
 from . import settings
 
-FALLBACK_QUOTES = [
-    {"quote": "Sabr achchiq, lekin uning mevasi shirin.", "author": "Xalq maqoli",
-     "comment": "Bugun qiyin bo'lsa ham, ertangi kun uchun chidab turing."},
-    {"quote": "Vaqt — qaytarib bo'lmaydigan yagona boylik.", "author": "",
-     "comment": "Uni kimga va nimaga sarflayotganingizga e'tibor bering."},
-    {"quote": "Do'st kulfatda bilinadi.", "author": "Xalq maqoli",
-     "comment": "Yoningizda qolganlarni qadrlang."},
-    {"quote": "Ming eshitgandan bir ko'rgan yaxshi.", "author": "Xalq maqoli",
-     "comment": "Bugun bir narsani o'z ko'zingiz bilan sinab ko'ring."},
-    {"quote": "Kichik qadam ham — oldinga qadam.", "author": "",
-     "comment": "Mukammal paytni kutmang, hozir boshlang."},
-    {"quote": "Ota-onaning duosi — eng katta boylik.", "author": "",
-     "comment": "Bugun ularga qo'ng'iroq qilishni unutmang."},
-    {"quote": "Yaxshi so'z — jon ozig'i.", "author": "Xalq maqoli",
-     "comment": "Bir iliq so'z kimningdir kunini yorug' qilishi mumkin."},
-    {"quote": "Yiqilish — mag'lubiyat emas, turmaslik — mag'lubiyat.", "author": "",
-     "comment": "Har bir xato sizni tajribali qiladi."},
-    {"quote": "O'zgalarga qanday munosabatda bo'lsang, shunday munosabat ko'rasan.", "author": "",
-     "comment": "Hayot — aks-sado kabi."},
-    {"quote": "Ilm — tuganmas xazina.", "author": "Xalq maqoli",
-     "comment": "Bugun yangi bir narsani o'rganing."},
-    {"quote": "Sokinlik ham javob bo'la oladi.", "author": "",
-     "comment": "Har bir gapga javob berish shart emas."},
-    {"quote": "Baxt — kichik narsalarni payqay olishda.", "author": "",
-     "comment": "Bir piyola choy, yaqin inson suhbati... yetarli emasmi?"},
+# Zaxira matnlar lotinda yoziladi, kerak bo'lsa kirillga o'giriladi
+FALLBACK_LINES = [
+    "Agar hayotimda nimadir abadiy bo'lsa, bu sening borliging bo'lsin!",
+    "Har qanday holatda ham bir insonga sodiq qolmoqlikdir sevgi!",
+    "Haqiqiy sevgi bu...",
+    "Seni topganim — taqdirning eng chiroyli sovg'asi.",
+    "Qo'limni tutgan qo'ling hech qachon qo'yib yubormasin.",
+    "Baxt — sen bilan birga qarigan kunlarim bo'ladi.",
+    "Sevgi so'zda emas, har kungi g'amxo'rlikda.",
+    "Dunyo qanchalik katta bo'lmasin, mening dunyom — sensan.",
+    "Nasib qilgan inson hech qachon begona bo'lmaydi.",
+    "Yuragim faqat sening isming bilan tinchlanadi.",
+    "Sabr qilgan sevgi albatta o'z egasini topadi.",
+    "Bir umrlik hamroh — hayotning eng katta ne'mati.",
 ]
 
-FALLBACK_CLIP_CAPTIONS = [
-    "Ba'zi sahnalar so'zsiz ham ko'p narsani aytadi...",
-    "Shu lavhani ko'rib, o'ylanib qoldim.",
-    "Kinodagi bu daqiqa — hayotning o'zi.",
-    "Ayrim gaplarni faqat kino shunday chiroyli ayta oladi.",
+FALLBACK_VOICE_SCRIPTS = [
+    "Bilasanmi, sevgi bu katta so'zlar emas. Sevgi bu charchaganingda choy damlab bergan, "
+    "xafa bo'lganingda jim o'tirib quloq solgan inson. Shunday insoningiz bo'lsa, uni asrang.",
+    "Har kim ham sizni sevishi shart emas. Lekin sizni chin yurakdan sevgan bitta inson "
+    "butun dunyoga arziydi. Uni hech qachon yo'qotmang.",
 ]
 
-FALLBACK_MUSIC_CAPTIONS = [
-    "Bugungi kayfiyat uchun 🎧",
-    "Shu qo'shiq bilan dam oling.",
-    "Quloqqa ham, yurakka ham yoqimli.",
-    "Kechki choy va shu musiqa ☕️",
+_LAT2CYR_MULTI = [
+    ("o'", "ў"), ("g'", "ғ"), ("O'", "Ў"), ("G'", "Ғ"),
+    ("o‘", "ў"), ("g‘", "ғ"), ("O‘", "Ў"), ("G‘", "Ғ"),
+    ("sh", "ш"), ("ch", "ч"), ("Sh", "Ш"), ("Ch", "Ч"), ("SH", "Ш"), ("CH", "Ч"),
+    ("yo", "ё"), ("yu", "ю"), ("ya", "я"), ("Yo", "Ё"), ("Yu", "Ю"), ("Ya", "Я"),
+    ("ye", "е"), ("Ye", "Е"),
 ]
+_LAT2CYR_SINGLE = dict(zip(
+    "abdefghijklmnopqrstuvxyzABDEFGHIJKLMNOPQRSTUVXYZ'’",
+    "абдэфгҳижклмнопқрстувхйзАБДЭФГҲИЖКЛМНОПҚРСТУВХЙЗъъ",
+))
 
-_SYSTEM_PROMPT = f"""Siz Telegram kanal uchun kontent yozuvchi muallifsiz.
-Til: {settings.LANGUAGE}. Uslub: samimiy, qisqa, chuqur ma'noli, o'quvchini o'ylantiradigan.
-Mavzular: {settings.TOPICS}.
+
+def to_cyrillic(text: str) -> str:
+    """O'zbek lotin -> kirill (zaxira matnlar uchun yetarli soddalashtirilgan o'giruvchi)."""
+    out = []
+    i = 0
+    while i < len(text):
+        pair = text[i:i + 2]
+        for lat, cyr in _LAT2CYR_MULTI:
+            if pair == lat:
+                out.append(cyr)
+                i += 2
+                break
+        else:
+            ch = text[i]
+            prev = text[i - 1] if i else " "
+            # "e" so'z boshida "э", ichida "е"
+            if ch in "eE":
+                out.append(("э" if ch == "e" else "Э") if not prev.isalpha() else ("е" if ch == "e" else "Е"))
+            else:
+                out.append(_LAT2CYR_SINGLE.get(ch, ch))
+            i += 1
+    return "".join(out)
+
+
+def _localize(text: str) -> str:
+    return to_cyrillic(text) if settings.SCRIPT == "cyrillic" else text
+
+
+def _script_name() -> str:
+    return "o'zbek tili, KIRILL yozuvida" if settings.SCRIPT == "cyrillic" else "o'zbek tili, lotin yozuvida"
+
+
+def _system_prompt() -> str:
+    return f"""Siz Telegramdagi sevgi va oila mavzusidagi mashhur kanal uchun matn yozasiz.
+Til: {_script_name()}. Mavzular: {settings.TOPICS}.
+
+USLUB (juda muhim):
+- Bitta qisqa, ta'sirli, yurakka tegadigan jumla (30-120 belgi). Ba'zan undov belgisi bilan tugaydi.
+- Oddiy, samimiy, xalqona til - xuddi oddiy obunachi yozgandek. Kitobiy, rasmiy gaplar emas.
+- Emoji, hashtag, havola, @username ishlatmang.
+- Namuna: "Agar hayotimda nimadir abadiy bo'lsa, bu sening borliging bo'lsin!",
+  "Har qanday holatda ham bir insonga sodiq qolmoqlikdir sevgi!", "Haqiqiy sevgi bu".
 
 QAT'IY QOIDALAR:
-- Diniy va siyosiy mavzularga tegmang.
-- Haqorat, nafrat, 18+ kontent yo'q.
-- Iqtibos muallifini faqat 100% ishonchingiz komil bo'lsa yozing, aks holda muallif bo'sh qolsin. Hech qachon muallifni to'qib chiqarmang.
-- Hashtag, havola, @username ishlatmang.
+- Diniy va siyosiy mavzular, haqorat, 18+ kontent yo'q.
+- Mashhur shaxslarga iqtibos to'qib chiqarmang.
 - Faqat so'ralgan JSON formatida javob qaytaring, boshqa hech narsa yozmang."""
 
 
@@ -91,7 +125,7 @@ async def _ask_json(task: str, recent: List[str]) -> Optional[Dict]:
         resp = await client.chat.completions.create(
             model=settings.AI_MODEL,
             messages=[
-                {"role": "system", "content": _SYSTEM_PROMPT},
+                {"role": "system", "content": _system_prompt()},
                 {"role": "user", "content": task + avoid},
             ],
             temperature=0.9,
@@ -102,55 +136,35 @@ async def _ask_json(task: str, recent: List[str]) -> Optional[Dict]:
         return None
 
 
-async def write_quote(recent: List[str]) -> Dict[str, str]:
-    """{'quote', 'author', 'comment'}"""
-    data = await _ask_json(
-        "Kanal uchun bitta aqlli gap (iqtibos yoki hikmatli so'z) va unga 1-2 gapdan iborat "
-        "qisqa izoh yozing. Iqtibos 200 belgidan oshmasin.\n"
-        'Format: {"quote": "...", "author": "...", "comment": "..."}',
-        recent,
-    )
-    if data and data.get("quote"):
-        return {k: str(data.get(k) or "").strip() for k in ("quote", "author", "comment")}
-    return dict(random.choice(FALLBACK_QUOTES))
+_LINE_TASKS = {
+    "quote": "Kanal uchun alohida matnli post: bitta aqlli, hikmatli gap yozing.",
+    "clip": "Kanalga qisqa video (kino parcha, juftliklar, to'y lavhasi) joylanyapti. Uning ostiga bitta jumla yozing.",
+    "voice": "Kanalga ovozli xabar joylanyapti. Uning ostiga bitta qisqa sarlavha-jumla yozing.",
+    "music": "Kanalga qo'shiq joylanyapti. Uning ostiga kayfiyat beruvchi bitta jumla yozing (qo'shiq so'zlarini keltirmang).",
+}
 
 
-async def write_clip_caption(note: str, recent: List[str]) -> str:
-    data = await _ask_json(
-        "Kanalga kinodan parcha (video) joylanyapti. Unga 1-3 gapdan iborat ta'sirli, "
-        "o'ylantiruvchi izoh yozing (300 belgigacha). Kino nomini bilmasangiz, uni to'qimang.\n"
-        f"Admin izohi / kino haqida ma'lumot: {note or 'yoq'}\n"
-        'Format: {"caption": "..."}',
-        recent,
-    )
-    if data and data.get("caption"):
-        return str(data["caption"]).strip()
-    return random.choice(FALLBACK_CLIP_CAPTIONS)
-
-
-async def write_music_caption(title: str, note: str, recent: List[str]) -> str:
-    data = await _ask_json(
-        "Kanalga musiqa joylanyapti. Unga kayfiyat beruvchi 1-2 gapli qisqa izoh yozing (200 belgigacha). "
-        "Qo'shiq so'zlarini keltirmang.\n"
-        f"Qo'shiq: {title or 'nomalum'}. Admin izohi: {note or 'yoq'}\n"
-        'Format: {"caption": "..."}',
-        recent,
-    )
-    if data and data.get("caption"):
-        return str(data["caption"]).strip()
-    return random.choice(FALLBACK_MUSIC_CAPTIONS)
+async def write_line(category: str, recent: List[str], hint: str = "") -> str:
+    """Post ostidagi bitta qisqa jumla."""
+    task = _LINE_TASKS[category]
+    if hint:
+        task += f"\nQo'shimcha ma'lumot: {hint}"
+    data = await _ask_json(task + '\nFormat: {"text": "..."}', recent)
+    if data and data.get("text"):
+        return str(data["text"]).strip().strip('"«»')
+    return _localize(random.choice(FALLBACK_LINES))
 
 
 async def write_voice_script(recent: List[str]) -> Dict[str, str]:
-    """Ovozli xabar uchun: {'script': o'qiladigan matn, 'caption': ostidagi qisqa yozuv}"""
+    """AI ovozli xabar uchun: {'script': o'qiladigan matn, 'caption': ostidagi qisqa jumla}"""
     data = await _ask_json(
-        "Kanal uchun ovozli xabar matnini yozing: tinglovchiga murojaat qilingan, 3-5 gapdan iborat "
-        "(400 belgigacha) samimiy, motivatsion yoki hayotiy fikr. Ovoz chiqarib o'qishga qulay bo'lsin, "
-        "emoji va maxsus belgilarsiz. Shuningdek, xabar ostiga qo'yish uchun bitta qisqa sarlavha yozing.\n"
+        "AI ovozi o'qib beradigan ovozli xabar matnini yozing: tinglovchiga murojaat qilingan, 3-5 gapdan "
+        "iborat (400 belgigacha), sevgi, sadoqat yoki oila haqida samimiy fikr. Ovoz chiqarib o'qishga qulay "
+        "bo'lsin, emoji va maxsus belgilarsiz. Shuningdek, xabar ostiga qo'yish uchun bitta qisqa jumla yozing.\n"
         'Format: {"script": "...", "caption": "..."}',
         recent,
     )
     if data and data.get("script"):
         return {"script": str(data["script"]).strip(), "caption": str(data.get("caption") or "").strip()}
-    q = random.choice(FALLBACK_QUOTES)
-    return {"script": f"{q['quote']} {q['comment']}", "caption": "Bugungi fikr"}
+    return {"script": _localize(random.choice(FALLBACK_VOICE_SCRIPTS)),
+            "caption": _localize(random.choice(FALLBACK_LINES))}

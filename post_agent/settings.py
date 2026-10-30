@@ -44,11 +44,12 @@ POST_TIMES = [t.strip() for t in os.getenv("AGENT_POST_TIMES", "08:00,11:00,14:0
 # Post vaqtiga +/- tasodifiy siljish (soniya), kanal "jonli" ko'rinishi uchun
 JITTER_SECONDS = int(os.getenv("AGENT_JITTER_SECONDS", "300"))
 # Post turlarining ulushi (og'irligi)
-MIX = _parse_mix(os.getenv("AGENT_MIX", "quote:3,clip:2,voice:2,music:3"))
+MIX = _parse_mix(os.getenv("AGENT_MIX", "clip:5,voice:2,music:2,quote:1"))
 
 # --- Mavzu / uslub ---
-TOPICS = os.getenv("AGENT_TOPICS", "hayot, sabr, sevgi, do'stlik, motivatsiya, vaqt qadri, ota-ona")
-LANGUAGE = os.getenv("AGENT_LANGUAGE", "o'zbek tili (lotin yozuvi)")
+TOPICS = os.getenv("AGENT_TOPICS", "sevgi, sadoqat, oila, nasib, sog'inch, juftlik baxti")
+# Post matnlari yozuvi: "cyrillic" yoki "latin"
+SCRIPT = os.getenv("AGENT_SCRIPT", "cyrillic").strip().lower()
 
 # --- AI (OpenAI-ga mos API: OpenAI / DeepSeek / OpenRouter) ---
 AI_API_KEY = os.getenv("OPENAI_API_KEY") or os.getenv("DEEPSEEK_API_KEY") or os.getenv("AI_API_KEY")
